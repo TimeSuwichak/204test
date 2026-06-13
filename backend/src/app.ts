@@ -1,37 +1,22 @@
-import express from "express";
-import helmet from "helmet";
-import cors from "cors";
-import compression from "compression";
-import http from "http";
+import env          from "#core/env.ts";
+import log          from "#core/log.ts";
+import logConsole   from "#core/logConsole.ts";
+import http         from "#core/http.ts";
+import sql          from "#core/sql.ts";
 
-const processor = express ();
-const server = http.createServer (processor);
+env ();
+log ();
+logConsole ();
+http ();
+sql ();
+
 const start = Date.now ();
 
-processor.use (helmet ({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false,
-    crossOriginOpenerPolicy: false,
-    crossOriginResourcePolicy: false,
-    originAgentCluster: false,
-    referrerPolicy: false,
-    xContentTypeOptions: false,
-    xDnsPrefetchControl: false,
-    xDownloadOptions: false,
-    xFrameOptions: false,
-    xPermittedCrossDomainPolicies: false,
-    xXssProtection: false,
-
-    hidePoweredBy: true,
-}))
-processor.use (cors ());
-processor.use (compression ());
-processor.use (express.json ());
-
-processor.get ("/uptime", (request, response) =>
+http.get ("/uptime", (request, response) =>
 {
     return response.json ({
         value: Date.now () - start
     });
 });
-server.listen (51000, "0.0.0.0");
+
+await http.finalize ();

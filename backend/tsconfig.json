@@ -18,6 +18,7 @@
         "paths": 
         {
             "#controller/*": ["./src/controller/*"],
+            "#core/*": ["./src/core/*"],
             "#model/*": ["./src/model/*"],
             "#router/*": ["./src/router/*"],
             "#type/*": ["./src/type/*"],
