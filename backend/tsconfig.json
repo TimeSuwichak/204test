@@ -17,11 +17,10 @@
 
         "paths": 
         {
-            "#Controller/*": ["./src/Controller"],
-            "#Core/*": ["./src/Core/*"],
-            "#Model/*": ["./src/Model/*"],
-            "#Type/*": ["./src/Type/*"],
-            "#Router/*": ["./src/Router/*"],
+            "#controller/*": ["./src/controller/*"],
+            "#model/*": ["./src/model/*"],
+            "#router/*": ["./src/router/*"],
+            "#type/*": ["./src/type/*"],
         },
 
         //
@@ -61,7 +60,6 @@
     "include": [
         "src", 
         "src/**/*",
-        "prettier.config.ts",
         "eslint.config.ts"
     ],
     "exclude": [

@@ -1,21 +1,19 @@
 import react from "@vitejs/plugin-react";
-import tsConfigPath from "vite-tsconfig-paths";
 
 export default
 {
     plugins: 
     [
         react (),
-        tsConfigPath ()
     ],
     resolve:
     {
-        tsconfigPaths: false,
+        tsconfigPaths: true,
     },
     server: 
     {
         host: "0.0.0.0",
-        port: 44000,
+        port: 50000,
         strictPort: true,
         hmr: true,
         cors:

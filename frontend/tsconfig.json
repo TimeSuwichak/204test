@@ -19,13 +19,13 @@
         "allowJs": false,
         "paths": 
         {
-            "#Component/*": ["src/Component/*"],
-            "#Context/*": ["src/Context/*"],
-            "#Hook/*": ["src/Hook/*"],
-            "#Icon/*": ["src/Icon/*"],
-            "#Page/*": ["src/Page/*"],
-            "#Type/*": ["src/Type/*"],
-            "#Util/*": ["src/Util/*"],
+            "#asset/*": ["./src/asset/*"],
+            "#component/*": ["./src/component/*"],
+            "#context/*": ["./src/context/*"],
+            "#hook/*": ["./src/hook/*"],
+            "#page/*": ["./src/page/*"],
+            "#type/*": ["./src/type/*"],
+            "#util/*": ["./src/util/*"],
         },
 
         /* Bundler mode */
