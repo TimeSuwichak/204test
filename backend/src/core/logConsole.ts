@@ -67,4 +67,5 @@ function formatMessage (data: unknown)
     return JSON.stringify (data, null, 4);
 }
 
+Object.freeze (content);
 export default content;

@@ -451,4 +451,5 @@ export type RequestHandler = ExpReqHandler;
 export type Response = ExpRes;
 export type NextFunction = ExpNext;
 
+Object.freeze (content);
 export default content;

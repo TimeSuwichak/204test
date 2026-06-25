@@ -201,4 +201,5 @@ content.clearListener = function ()
     listener.splice (0, listener.length);
 }
 
+Object.freeze (content);
 export default content;

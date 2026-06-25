@@ -10,6 +10,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 const Init = react.lazy (() => import ("./init.tsx"));
 const Auth = react.lazy (() => import ("./auth.tsx"));
 const Home = react.lazy (() => import ("./home.tsx"));
+const Product = react.lazy (() => import ("./product.tsx"));
 const Settings = react.lazy (() => import ("./settings.tsx"));
 
 
@@ -26,6 +27,7 @@ function Main ()
           <Routes>
             <Route Component={() => <Init/>}>
               <Route path="/" index element={<Home/>}/>
+              <Route path="/product" index element={<Product/>}/>
               <Route path="/auth" element={<Auth/>}/>
               <Route path="/settings" element={<Settings/>}/>
             </Route>

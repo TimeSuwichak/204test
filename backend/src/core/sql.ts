@@ -349,4 +349,5 @@ function catchError (error: ErrorInterface)
     return new content.ErrorUnknown ("Unknown error has occurred during SQL query command", { cause: error });
 }
 
+Object.freeze (content);
 export default content;
