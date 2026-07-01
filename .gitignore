@@ -1,8 +1,10 @@
 backend/build/**
+backend/dist/**
 backend/data/**
 
 frontend/build/**
-frontend/build/**
+frontend/dist/**
+frontend/data/**
 
 backend/node_modules
 frontend/node_modules
