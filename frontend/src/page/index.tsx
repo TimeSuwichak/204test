@@ -3,7 +3,7 @@
 //
 import react from "react";
 import reactDom from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route, HashRouter } from "react-router-dom";
 //
 // โหลดหน้าต่างเมื่อจำเป็นเท่านั้น
 //
@@ -24,7 +24,7 @@ function Main ()
   root.render (<>
     <react.StrictMode>
       <react.Suspense fallback={<Splash/>}>
-        <BrowserRouter>
+        <HashRouter>
           <Routes>
             <Route Component={() => <Init/>}>
               <Route path="/" index element={<Home/>}/>
@@ -34,7 +34,7 @@ function Main ()
               <Route path="/settings" element={<Settings/>}/>
             </Route>
           </Routes>
-        </BrowserRouter>
+        </HashRouter>
       </react.Suspense>
     </react.StrictMode>
   </>);
