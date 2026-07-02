@@ -3,6 +3,7 @@ body, *, *::before, *::after
     margin: 0px;
     padding: 0px;
     box-sizing: border-box;
+    user-select: none;
 }
 h1, h2, h3, h4, h5, h6, p, label
 {
@@ -37,4 +38,35 @@ h6
 {
     font-weight: bold;
     font-size: 0.75rem;
+}
+
+#app-splash
+{
+    pointer-events: all;
+    position: fixed;
+    inset: 0px;
+    width: 100%;
+    height: 100%;
+}
+#app-splash-logo
+{
+    position: fixed;
+    inset: 0px;
+    margin: auto;
+
+    width: 128px;
+    height: 128px;
+}
+#app-splash-text
+{
+    position: fixed;
+    inset: auto 32px 25% 32px;
+    text-align: center;
+    font-size: 1.5rem;
+}
+#app-splash-text-sub
+{
+    position: fixed;
+    inset: auto 32px 64px 32px;
+    text-align: center;
 }

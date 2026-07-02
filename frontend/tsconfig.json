@@ -16,7 +16,6 @@
         "jsx": "react-jsxdev",
         "useDefineForClassFields": true,
         "skipLibCheck": true,
-        "allowJs": false,
         "paths": 
         {
             "#asset/*": ["./src/asset/*"],
@@ -37,6 +36,7 @@
 
         /* Linting */
         "strict": true,
+        "alwaysStrict": true,
         "noUnusedLocals": true,
         "noUnusedParameters": false,
         "erasableSyntaxOnly": true,
