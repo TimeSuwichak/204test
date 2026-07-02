@@ -15,18 +15,16 @@ let collection: dotenv.DotenvParseOutput | undefined = undefined;
 */
 const content = function ()
 {
-    const info = dotenv.configDotenv ({
+    const info = dotenv.configDotenv (
+    {
         debug: true,
         encoding: "utf8",
     });
-    if (info.error !== undefined)
-    {
-        return;
-    }
-    collection = info.parsed;
+    collection = info.parsed ?? {};
 }
 /**
- * ดึงค่าข้อมูลจากรหัสที่กำหนดไว้ ถ้าไม่พบข้อมูลระบบจะใช้ค่าเริ่มต้นจาก `initial` แทน
+ * ดึงค่าข้อมูลจากรหัสที่กำหนดไว้
+ * ถ้าไม่พบข้อมูลระบบจะใช้ค่าเริ่มต้นจาก `initial` แทน
  * 
  * @param key รหัสสำหรับข้อมูลที่ต้องการ
  * @param initial ค่าเริ่มต้นในกรณีที่ไม่พบข้อมูล
@@ -41,7 +39,8 @@ content.getString = function (key: string, initial: string)
     return collection [key];
 }
 /**
- * ดึงค่าข้อมูลจากรหัสที่กำหนดไว้ ถ้าไม่พบข้อมูลระบบจะใช้ค่าเริ่มต้นจาก `initial` แทน
+ * ดึงค่าข้อมูลจากรหัสที่กำหนดไว้
+ * ถ้าไม่พบข้อมูลระบบจะใช้ค่าเริ่มต้นจาก `initial` แทน
  * 
  * @param key รหัสสำหรับข้อมูลที่ต้องการ
  * @param initial ค่าเริ่มต้นในกรณีที่ไม่พบข้อมูล
@@ -61,7 +60,8 @@ content.getInteger = function (key: string, initial: number)
     return result;
 }
 /**
- * ดึงค่าข้อมูลจากรหัสที่กำหนดไว้ ถ้าไม่พบข้อมูลระบบจะใช้ค่าเริ่มต้นจาก `initial` แทน
+ * ดึงค่าข้อมูลจากรหัสที่กำหนดไว้ 
+ * ถ้าไม่พบข้อมูลระบบจะใช้ค่าเริ่มต้นจาก `initial` แทน
  * 
  * @param key รหัสสำหรับข้อมูลที่ต้องการ
  * @param initial ค่าเริ่มต้นในกรณีที่ไม่พบข้อมูล
@@ -83,5 +83,5 @@ content.getBoolean = function (key: string, initial: boolean)
 
     return initial;
 }
-
+Object.freeze (content);
 export default content;
