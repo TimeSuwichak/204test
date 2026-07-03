@@ -1,0 +1,11 @@
+backend/build
+backend/dist
+backend/data
+
+frontend/build
+frontend/dist
+frontend/data
+frontend/src/doc/.vitepress/cache
+
+backend/node_modules
+frontend/node_modules

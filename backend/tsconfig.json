@@ -1,0 +1,69 @@
+{
+    "compilerOptions": 
+    {
+        "target": "es2022",
+        "module": "nodenext",
+        "lib": 
+        [
+            "ES2022", 
+            "ES2022.String",
+            "ES2022.Error",
+            "ES2022.Array",
+            "ES2022.Object",
+        ],
+        "types": ["node"],
+        "useDefineForClassFields": true,
+        "skipLibCheck": false,
+
+        "paths": 
+        {
+            "#controller/*": ["./src/controller/*"],
+            "#core/*": ["./src/core/*"],
+            "#model/*": ["./src/model/*"],
+            "#router/*": ["./src/router/*"],
+            "#type/*": ["./src/type/*"],
+        },
+
+        //
+        // Bundler Configuration
+        //
+        "moduleResolution": "nodenext",
+        "verbatimModuleSyntax": true,
+        "allowImportingTsExtensions": true,
+        "moduleDetection": "auto",
+        "noEmit": true,
+
+        //
+        // Linting Configuration
+        //
+        "strict": true,
+        "strictNullChecks": true,
+        "strictBindCallApply": true,
+        "strictBuiltinIteratorReturn": true,
+        "strictPropertyInitialization": true,
+        "strictFunctionTypes": true,
+        "alwaysStrict": true,
+
+        "noCheck": false,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": false,
+        "erasableSyntaxOnly": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitReturns": true,
+        "noImplicitOverride": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedSideEffectImports": true,
+        "exactOptionalPropertyTypes": true,
+    },
+    "include": [
+        "src", 
+        "src/**/*",
+        "eslint.config.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

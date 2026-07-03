@@ -1,0 +1,66 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": 
+    [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Frontend",
+            "restart": true,
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": ["<node_internals>/**"],
+            "cwd": "${workspaceFolder}/frontend",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev"],
+
+            "presentation": 
+            {
+                "hidden": true,
+                "order": 1,
+                "group": "Runtime"
+            },
+            "preLaunchTask": "Install Frontend"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Backend",
+            "restart": true,
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": ["<node_internals>/**"],
+            "cwd": "${workspaceFolder}/backend",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev"],
+
+            "presentation": 
+            {
+                "hidden": true,
+                "order": 1,
+                "group": "Runtime"
+            },
+            "preLaunchTask": "Install Backend"
+        },
+    ],
+    "compounds": 
+    [
+        {
+            "name": "Launch",
+            "configurations": 
+            [
+                "Frontend",
+                "Backend",
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "Runtime",
+                "order": 1,
+            },
+            "stopAll": true
+        },
+    ]
+}

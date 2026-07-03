@@ -1,0 +1,50 @@
+{
+    "name": "project-backend",
+    "version": "prototype",
+    "type": "module",
+    "private": true,
+    "keywords": [],
+	
+    "main": "./src/app.ts",
+    "imports": 
+    {
+        "#controller/*": "./src/controller/*",
+        "#core/*": "./src/core/*",
+        "#model/*": "./src/model/*",
+        "#router/*": "./src/router/*",
+        "#type/*": "./src/type/*"
+    },
+    "scripts": 
+	{
+        "start": "node \"./src/app.ts\"",
+        "seed": "node \"./src/app_seed.ts\"",
+        "debug": "nodemon --watch src ./src/app.ts -r ts-node/register --inspect",
+        "dev": "nodemon --watch src ./src/app.ts -r ts-node/register --inspect",
+        "lint": "eslint ."
+    },
+    "dependencies": 
+	{
+        "compression": "1.8.1",
+        "cors": "2.8.6",
+        "dotenv": "17.4.2",
+        "express": "5.2.1",
+        "express-rate-limit": "8.5.2",
+        "helmet": "8.2.0",
+        "mysql2": "3.22.0"
+    },
+    "devDependencies": 
+	{
+        "@types/compression": "1.8.1",
+        "@types/cors": "2.8.19",
+        "@types/express": "5.0.6",
+        "@types/node": "25.9.3",
+        "@eslint/js": "10.0.1",
+        "eslint": "10.5.0",
+        "nodemon": "3.1.14",
+        "ts-node": "10.9.2",
+        "typescript": "6.0.3",
+        "typescript-eslint": "8.61.0",
+        "jiti": "2.7.0",
+        "globals": "17.6.0"
+    }
+}

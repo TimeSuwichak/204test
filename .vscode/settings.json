@@ -1,0 +1,22 @@
+{
+    "[html]":
+    {
+        "editor.indentSize": "tabSize",
+        "editor.tabSize": 2
+    },
+    "[css]": 
+    {
+        "editor.indentSize": "tabSize",
+        "editor.tabSize": 4
+    },
+    "[typescript]":
+    {
+        "editor.indentSize": "tabSize",
+        "editor.tabSize": 4
+    },
+    "[typescriptreact]": 
+    {
+        "editor.indentSize": "tabSize",
+        "editor.tabSize": 2
+    }
+}
