@@ -7,7 +7,7 @@
 | 6711762503 | ชนันธร สะอาดจินดา | Project Manager / System Analyst |
 | 67168514 | ปิยะบุตร อิ่มทอง | Backend Developer & Database Administrator |
 | 67163266 | สิรภพ อ่วมแก้ว| Backend Developer & API |
-||||
+| 67151039 | ณัฐดนัย แสงศรี | Frontend Developer / UI Designer |
 | 67173119 | สุวิจักขณ์ ทัพเจริญ | Frontend Developer / UI Designer |
 
 ## ชื่อโครงการ ระบบร้านขายแผ่นและตลับเกม (Game Disc and Cartridge E-Commerce System)
