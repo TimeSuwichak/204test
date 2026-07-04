@@ -44,7 +44,7 @@
                 "group": "Runtime"
             },
             "preLaunchTask": "Install Backend"
-        },
+        }
     ],
     "compounds": 
     [

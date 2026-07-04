@@ -1,9 +1,10 @@
-# docker-compose -f "Docker.Compose.yaml" up -d --build 
+# docker-compose -f "docker.compose.yml" up -d --build 
+
 name: project-csi
 services:
   #
   # ฐานข้อมูล: MySQL
-  # การเชื่อมต่อ: 44102
+  # การเชื่อมต่อ: 51100
   #
   DbMySQL:
     container_name: DbMySQL
@@ -22,14 +23,14 @@ services:
 
   #
   # ฐานข้อมูล: PhpMyAdmin
-  # การเชื่อมต่อ: 44001
+  # การเชื่อมต่อ: 50002
   #
   DbPhpMyAdmin:
     container_name: DbPhpMyAdmin
     image: phpmyadmin:latest
     restart: always
     ports:
-      - "50001:80"
+      - "50002:80"
     environment:
       - PMA_HOST=DbMySQL
       - PMA_PORT=3306
