@@ -1,16 +1,14 @@
-# 204test
+## ชื่อโครงการ ระบบร้านขายแผ่นและตลับเกม (Game Disc and Cartridge E-Commerce System)
 
 ## ข้อมูลสมาชิกทีม
 
 | เลขประจำตัว | ชื่อและนามสกุล | ตำแหน่ง |
 |---|---|---|
-| 6711762503 | ชนันธร สะอาดจินดา | Project Manager / System Analyst |
+| 67117502 | ชนันธร สะอาดจินดา | Project Manager / System Analyst |
 | 67168514 | ปิยะบุตร อิ่มทอง | Backend Developer & Database Administrator |
 | 67163266 | สิรภพ อ่วมแก้ว| Backend Developer & API |
 | 67151039 | ณัฐดนัย แสงศรี | Frontend Developer / UI Designer |
 | 67173119 | สุวิจักขณ์ ทัพเจริญ | Frontend Developer / UI Designer |
-
-## ชื่อโครงการ ระบบร้านขายแผ่นและตลับเกม (Game Disc and Cartridge E-Commerce System)
 
 ### 1. หลักการและเหตุผล (Rationale)
 
@@ -139,25 +137,25 @@ Use Cases Diagram, Sequences Diagram
 ### 3. การออกแบบสถาปัตยกรรมระบบ (System Architecture Design)
 ระบบถูกแบ่งออกเป็น 4 ส่วนหลัก เพื่อให้การประมวลผลสอดคล้องกับแนวทางการพัฒนาซอฟต์แวร์ ดังนี้:
 
-•	3.1 Frontend Architecture (ส่วนติดต่อผู้ใช้งาน)
+3.1 Frontend Architecture (ส่วนติดต่อผู้ใช้งาน)
 
 o	หน้าที่: ทำหน้าที่แสดงผลหน้าจอผู้ใช้งาน (UI/UX) และรับคำสั่งจากผู้ใช้งานทั้ง 3 กลุ่มผ่านเว็บเบราว์เซอร์ 
 
 o	เทคโนโลยีที่ใช้: พัฒนาด้วย React ร่วมกับ HTML/CSS 
 
-•	3.2 Backend Architecture (ส่วนประมวลผลหลัก)
+3.2 Backend Architecture (ส่วนประมวลผลหลัก)
 
 o	หน้าที่: ควบคุมตรรกะทางธุรกิจ (Business Logic) เช่น การคำนวณเงินในตะกร้าสินค้า การตรวจสอบสิทธิ์การเข้าใช้งาน (Authentication) และการจัดการคำสั่งซื้อ พร้อมทั้งควบคุมเวอร์ชันของโค้ดผ่าน GitHub 
 
 o	เทคโนโลยีที่ใช้: พัฒนา Backend API ด้วย Node.js
 
-•	3.3 Database Architecture (ระบบจัดเก็บข้อมูล)
+3.3 Database Architecture (ระบบจัดเก็บข้อมูล)
 
 o	หน้าที่: จัดเก็บข้อมูลทุกอย่างในระบบ เช่น ข้อมูลผู้ใช้ สินค้า สต็อก และออเดอร์ 
 
 o	เทคโนโลยีที่ใช้: เชื่อมต่อฐานข้อมูล MySQL
 
-•	3.4 External Services (บริการภายนอก)
+3.4 External Services (บริการภายนอก)
 
 o	หน้าที่: บริการภายนอกที่นำมาเชื่อมต่อเพื่อเติมเต็มฟังก์ชันของ E-Commerce ให้กระบวนการซื้อขายครบวงจร 
 
