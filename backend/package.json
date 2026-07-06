@@ -1,5 +1,5 @@
 {
-    "name": "project-backend",
+    "name": "web-backend",
     "version": "prototype",
     "type": "module",
     "private": true,
@@ -17,10 +17,12 @@
     "scripts": 
 	{
         "start": "node \"./src/app.ts\"",
-        "seed": "node \"./src/app_seed.ts\"",
-        "debug": "nodemon --watch src ./src/app.ts -r ts-node/register --inspect",
-        "dev": "nodemon --watch src ./src/app.ts -r ts-node/register --inspect",
-        "lint": "eslint ."
+        "seed": "node \"./src/appSeed.ts\"",
+        "lint": "eslint .",
+        "debug": 
+            "nodemon --watch src ./src/app.ts -r ts-node/register --inspect",
+        "dev": 
+            "nodemon --watch src ./src/app.ts -r ts-node/register --inspect"
     },
     "dependencies": 
 	{

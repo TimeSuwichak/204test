@@ -4,15 +4,21 @@
  * ระบบนี้พร้อมแสดงสีข้อความเพิ่มอำนวนความสะดวกในการมองเห็น
  * 
 */
-import util     from "node:util"
-import logging  from "#core/log.ts"
+import util from "node:util"
+import logging from "#core/log.ts"
 
+/**
+ * ระบบบันทึกกิจกรรมเริ่มต้น
+*/
 const log = logging.scoped ("LogConsole");
-
 /**
  * ระบบส่งข้อมูลกิจกรรมไปยังหน่วยแสดงผล (Console)
 */
-const content = function ()
+const content = function Stub () { return; }
+/**
+ * เริ่มต้นการทำงานของระบบ
+*/
+content.init = function ()
 {
     logging.addListener ((value) =>
     {
@@ -24,21 +30,27 @@ const content = function ()
             value.level === logging.LEVEL_VERBOSE ? "green" :
             "gray";
 
-        const time = ((value.time.getTime () - logging.start.getTime ()) / 1000).toFixed (3);
+        const timeStart = logging.start.getTime ();
+        const timeLog = value.time.getTime ();
+        const time = ((timeLog - timeStart) / 1000).toFixed (3);
+        
         const tag = value.tag;
-        const message = formatMessage (value.message);
+        const message = content.formatMessage (value.message);
 
-            JSON.stringify (value.message, null, 4);
+        const fTime = util.styleText ("gray", time);
+        const fTag = util.styleText ("cyan", tag);
+        const fMessage = util.styleText (level, message);
+        const fOut = `${fTime} ${fTag} ${fMessage}`;
 
-        const formatted = `${util.styleText ("gray", time)} ${util.styleText ("cyan", `[${tag}]`)} ${util.styleText (level, message)}`;
-
-        console.log (formatted);
+        console.log (fOut);
     });
     console.clear ();
     log.info (`Started (${new Date ().toLocaleString ()})`);
 }
-
-function formatMessage (data: unknown)
+/**
+ * แปลงข้อมูลให้เป็นรูปแบบข้อความที่อ่านได้ง่ายขึ้น
+*/
+content.formatMessage = function (data: unknown)
 {
     if (typeof data === "string")
     {
