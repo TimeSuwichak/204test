@@ -8,13 +8,13 @@ import Init from "#page/init.tsx";
 const domElement = document.getElementById ("app") as HTMLDivElement;
 const domReact = ReactDOM.createRoot (domElement);
 
-
-
 domReact.render (
   <React.StrictMode>
-   <Init/>
+    <Init/>
   </React.StrictMode>
-)
+);
+
+
 
 // domReact.render (
 //   <react.StrictMode>

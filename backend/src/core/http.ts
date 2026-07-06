@@ -47,20 +47,14 @@ const connectionHttps = https.createServer (connection);
 const log = logging.scoped ("Http");
 
 /**
- * เริ่มต้นการทำงานของระบบ HTTP/HTTPS
+ * ระบบจัดการเชื่อมต่อผ่านโปรโตคอล HTTP/HTTPS
 */
 const content = function ()
 {
-    connection.use (useHelment ());
-    connection.use (useCors ());
-    connection.use (useRateLimit ());
-    connection.use (useCompression ());
-    connection.use (express.json ({
-        strict: true,
-        inflate: true,
-    }))
-    connection.use (connectionRouter);
+    return;
 }
+content.http = connectionHttp;
+content.https = connectionHttps;
 /**
  * ติดตั้งตัวจำกัดการใช้งาน สิ่งนี้ช่วยเรื่องการทำ DDoS
 */
@@ -314,88 +308,120 @@ content.STATUS_NOT_EXTENDED = 510;
 content.STATUS_NETWORK_AUTH_REQUIRED = 511;
 
 /**
- * เริ่มการทำงานขั้นตอนสุดท้าย
- * คำสั่งนี้ถูกเรียกหลังจากทุกระบบเริ่มต้นการทำงานเรียบร้อยแล้ว
+ * เริ่มต้นการทำงานของระบบ HTTP/HTTPS
 */
-content.finalize = async function ()
+content.init = async function ()
 {
-    const httpEnabled = dotenv.getBoolean ("HttpListen", true);
-    const httpPort = dotenv.getInteger ("HttpListenPort", 51000);
+    connection.use (useHelment ());
+    connection.use (useCors ());
+    connection.use (useRateLimit ());
+    connection.use (useCompression ());
+    connection.use (express.json ({
+        strict: true,
+        inflate: true,
+    }))
+    connection.use (connectionRouter);
 
-    const httpsEnabled = dotenv.getBoolean ("HttpListenSecured", false);
-    const httpsPort = dotenv.getInteger ("HttpListenSecuredPort", 51000);
+    const enableHttp = dotenv.getBoolean ("HttpListen", true);
+    const enableHttps = dotenv.getBoolean ("HttpListenSecured", false);
+
+    const portHttp = dotenv.getInteger ("HttpListenPort", 51000);
+    const portHttps = dotenv.getInteger ("HttpListenSecuredPort", 51000);
 
     connection.use ((request: express.Request, response: express.Response) =>
     {
+        void request;
+        void response;
+
         const path = request.path;
         const socket = request.socket;
-        const address = (typeof socket.remoteAddress !==  "undefined") ? socket.remoteAddress : "(unknown address)";
+        const address = (typeof socket.remoteAddress !==  "undefined") ? 
+            socket.remoteAddress : "(unknown address)";
 
-        log.warn (`${address} is initiating unrecognized endpoint (${path})`);
+        log.warn (`${address} initiated unhandled endpoint: ${path}`);
 
-        response.status (404);
-        response.end ();
+        request.socket.destroy ();
+
+        // response.status (content.STATUS_NOT_FOUND);
+        // response.end ();
     });
-    connection.use ((error: Error, request: express.Request, response: express.Response) =>
+    connection.use ((
+        error: Error, 
+        request: express.Request, 
+        response: express.Response,
+        next: express.NextFunction
+    ) =>
     {
+        void error;
+        void request;
+        void response;
+        void next;
+
+        const path = request.path;
+        const socket = request.socket;
+        const address = (typeof socket.remoteAddress !==  "undefined") ? 
+            socket.remoteAddress : "(unknown address)";
+
+        log.error (`${address} initiated unhandled exception: ${path}`);
         log.error (error);
 
         response.status (content.STATUS_INTERNAL_SERVER_ERROR);
         response.end ();
-        return;
     });
 
-    const httpListen = new Promise ((resolve, reject) =>
+    await new Promise ((resolve, reject) =>
     {
+        if (!enableHttp) 
+        {
+            resolve (undefined);
+            return;
+        }
         try
         {
-            if (httpEnabled)
+            connectionHttp.listen (portHttps, "0.0.0.0", 128, () =>
             {
-                connectionHttp.listen (httpPort, "0.0.0.0", 128, () =>
-                {
-                    log.info ("Insecured (http) connection established");
-                    resolve (undefined);
-                });
-            }
-            else
-            {
-                log.info ("Insecured (http) connection disabled");
+                log.info ("Established connection (HTTP)");
                 resolve (undefined);
-            }
+                return;
+            });
         }
-        catch (error)
+        catch (error: unknown)
         {
             log.error (error);
-
-            reject (new Error (undefined, { cause: error }));
+            reject (new Error ("Establishment failure (HTTP)", 
+            { 
+                cause: error 
+            }));
+            return;
         }
     });
-    const httpsListen = new Promise ((resolve, reject) =>
+    await new Promise ((resolve, reject) =>
     {
+        if (!enableHttps) 
+        {
+            resolve (undefined);
+            return;
+        }
         try
         {
-            if (httpsEnabled)
+            connectionHttps.listen (portHttp, "0.0.0.0", 128, () =>
             {
-                connectionHttps.listen (httpsPort, "0.0.0.0", 128, () =>
-                {
-                    log.info ("Secured (https) connection established");
-                    resolve (undefined);
-                });
-            }
-            else
-            {
-                log.info ("Secured (https) connection disabled");
+                log.info ("Established connection (HTTPS)");
                 resolve (undefined);
-            }
+                return;
+            });
         }
-        catch (error)
+        catch (error: unknown)
         {
             log.error (error);
-
-            reject (new Error (undefined, { cause: error }));
+            reject (new Error ("Establishment failure (HTTPS)", 
+            { 
+                cause: error 
+            }));
+            return;
         }
     });
-    await Promise.all ([httpListen, httpsListen]);
+
 }
 /**
  * สร้างการเชื่อมต่อเส้นทางย่อยจากตำแหน่งที่กำหนดไว้

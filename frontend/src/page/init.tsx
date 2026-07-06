@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy } from "react";
 import { HashRouter, Routes, Route, Outlet } from "react-router";
+import InitDebug from "#page/initDebug.tsx";
 
 //
 // โหลดหน้าต่างเมื่อจำเป็นเท่านั้น
@@ -51,9 +52,20 @@ export default function Init ()
 
   const View = () =>
   {
-    return <>
-      {completed ? <Outlet/> : <></>}
-    </>
+    if (completed && import.meta.env.DEV)
+    {
+      return <>
+        <Outlet/>
+        <InitDebug/>
+      </>;
+    }
+    if (completed && import.meta.env.PROD)
+    {
+      return <>
+        <Outlet/>
+      </>
+    }
+    return <></>;
   };
 
   return <>

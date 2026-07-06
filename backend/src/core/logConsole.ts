@@ -18,7 +18,7 @@ const content = function Stub () { return; }
 /**
  * เริ่มต้นการทำงานของระบบ
 */
-content.init = function ()
+content.init = async function ()
 {
     logging.addListener ((value) =>
     {
@@ -46,6 +46,8 @@ content.init = function ()
     });
     console.clear ();
     log.info (`Started (${new Date ().toLocaleString ()})`);
+
+    return Promise.resolve ();
 }
 /**
  * แปลงข้อมูลให้เป็นรูปแบบข้อความที่อ่านได้ง่ายขึ้น
