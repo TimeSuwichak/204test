@@ -1,9 +1,3 @@
-/**
- * 
- * ทำหน้าที่ในการโหลดข้อมูลจากไฟล์ .env 
- * และเป็นตัวแทนในการดึงข้อมูลให้กับระบบอื่น ๆ ใช้งานต่อไป
- * 
-*/
 import dotenv from "dotenv";
 
 /**
@@ -11,9 +5,19 @@ import dotenv from "dotenv";
 */
 let collection: dotenv.DotenvParseOutput | undefined = undefined;
 /**
- * ทำการโหลดข้อมูลจากไฟล์ .env ที่มีอยู่ในไฟล์โครงงาน
+ * 
+ * ทำหน้าที่ในการโหลดข้อมูลจากไฟล์ .env 
+ * และเป็นตัวแทนในการดึงข้อมูลให้กับระบบอื่น ๆ ใช้งานต่อไป
+ * 
 */
 const content = function ()
+{
+    return;
+}
+/**
+ * ทำการโหลดข้อมูลจากไฟล์ .env ที่มีอยู่ในไฟล์โครงงาน
+*/
+content.init = async function ()
 {
     const info = dotenv.configDotenv (
     {
@@ -21,6 +25,8 @@ const content = function ()
         encoding: "utf8",
     });
     collection = info.parsed ?? {};
+
+    return Promise.resolve ();
 }
 /**
  * ดึงค่าข้อมูลจากรหัสที่กำหนดไว้

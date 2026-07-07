@@ -1,5 +1,6 @@
 import http from "#core/http.ts";
 import event from "#core/event.ts";
+import logging from "#core/log.ts";
 import { WebSocket } from "ws";
 import { WebSocketServer } from "ws";
 
@@ -7,8 +8,12 @@ interface Client
 {
     sendJson: (data: Record<string, unknown>) => void;
     sendBinary: (data: ArrayBuffer) => void;
+    close: () => void;
 };
-
+/**
+ * ระบบบันทึกกิจกรรมเริ่มต้น
+*/
+const log = logging.scoped ("WebSocket");
 /**
  * 
  * ทำหน้าที่ในการประมวลผลข้อมูลจากโปรโตคอล WebSocket
@@ -31,7 +36,13 @@ const connect = function (client: WebSocket)
         {
             client.send (data);
         },
-        
+        close () 
+        {
+            //
+            // Normal closure: standard graceful shutdown
+            //
+            client.close (1000);
+        },
     };
 
     client.on ("open", () =>
@@ -47,8 +58,10 @@ const connect = function (client: WebSocket)
     {
         return;
     });
-    client.on ("error", () =>
+    client.on ("error", (error: unknown) =>
     {
+        log.error ("Unhandled exception:");
+        log.error (error);
         return;
     });
     client.on ("unexpected-response", () =>
@@ -80,7 +93,7 @@ content.init = async function ()
     });
     insecure.on ("connection", connect);
     secure.on ("connection", connect);
-
+    log.info ("Started");
     return Promise.resolve ();
 }
 content.onConnect = onConnect;

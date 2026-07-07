@@ -156,25 +156,25 @@ content.init = async function ()
 /**
  * แปลงข้อมูลให้เป็นรูปแบบข้อความที่อ่านได้ง่ายขึ้น
 */
-content.formatMessage = function (data: unknown)
+content.formatMessage = function (data: unknown [])
 {
-    if (typeof data === "string")
+    return data.map ((x) =>
     {
-        return data;
-    }
-    if (typeof data === "number" || typeof data === "boolean")
-    {
-        return String (data);
-    }
-    if (data instanceof Date)
-    {
-        return data.toLocaleString ();
-    }
-    if (data instanceof Error)
-    {
-        return String (data.stack) + "\n";
-    }
-    return JSON.stringify (data, null, 4);
+        if (typeof x === "string") { 
+            return x; 
+        }
+        if (typeof x === "number" || typeof x === "boolean") { 
+            return String (x);
+        }
+        if (typeof x === "object" && x instanceof Date) {
+            return x.toLocaleString ();
+        }
+        if (typeof x === "object" && x instanceof Error) {
+            return decodeURI (String (x.stack));
+        }
+        return JSON.stringify (data, null, 4);
+
+    }).join (" ");
 }
 
 Object.freeze (content);

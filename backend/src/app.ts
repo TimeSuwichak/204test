@@ -2,14 +2,16 @@ import env          from "#core/env.ts";
 import log          from "#core/log.ts";
 import logConsole   from "#core/logConsole.ts";
 import logFile      from "#core/logFile.ts";
+import logInject    from "#core/logInject.ts";
 import http         from "#core/http.ts";
 import webSocket    from "#core/webSocket.ts";
 import sql          from "#core/sql.ts";
 
-env ();
-log ();
+await env.init ();
+await log.init ();
 await logConsole.init ();
 await logFile.init ();
+await logInject.init ();
 await http.init ();
 await webSocket.init ();
 sql ();
