@@ -8,6 +8,7 @@ interface Client
 {
     sendJson: (data: Record<string, unknown>) => void;
     sendBinary: (data: ArrayBuffer) => void;
+    terminate: () => void;
     close: () => void;
 };
 /**
@@ -35,6 +36,10 @@ const connect = function (client: WebSocket)
         sendBinary (data) 
         {
             client.send (data);
+        },
+        terminate ()
+        {
+            client.terminate ();
         },
         close () 
         {
@@ -64,8 +69,12 @@ const connect = function (client: WebSocket)
         log.error (error);
         return;
     });
-    client.on ("unexpected-response", () =>
+    client.on ("unexpected-response", (req) =>
     {
+        const socket = req.socket;
+        const address = socket ? socket.remoteAddress : "(unknown address)";
+
+        log.warn (`${String (address)} closed: protocol violation`);
         //
         // Protocol Violation: invalid frame, bad data format.
         //
@@ -76,8 +85,8 @@ const connect = function (client: WebSocket)
 }
 const onConnect = event<Client> ();
 const onDisconnect = event<Client> ();
-let insecure: WebSocketServer;
-let secure: WebSocketServer;
+let insecure: WebSocketServer | undefined;
+let secure: WebSocketServer | undefined;
 /**
  * เริ่มต้นการทำงานของระบบ WebSocket
 */
@@ -86,6 +95,7 @@ content.init = async function ()
     insecure = new WebSocketServer ({
         allowSynchronousEvents: false,
         server: http.http,
+
     });
     secure = new WebSocketServer ({
         allowSynchronousEvents: false,
@@ -95,6 +105,40 @@ content.init = async function ()
     secure.on ("connection", connect);
     log.info ("Started");
     return Promise.resolve ();
+}
+content.sendJson = function (data: Record<string, unknown>)
+{
+    if (insecure)
+    {
+        insecure.clients.forEach ((v) =>
+        {
+            v.send (JSON.stringify (data));
+        });
+    }
+    if (secure)
+    {
+        secure.clients.forEach ((v) =>
+        {
+            v.send (JSON.stringify (data));
+        });
+    }
+}
+content.sendBinary = function (data: ArrayBuffer)
+{
+    if (insecure)
+    {
+        insecure.clients.forEach ((v) =>
+        {
+            v.send (data);
+        });
+    }
+    if (secure)
+    {
+        secure.clients.forEach ((v) =>
+        {
+            v.send (data);
+        });
+    }
 }
 content.onConnect = onConnect;
 content.onDisconnect = onDisconnect;
