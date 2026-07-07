@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy } from "react";
 import { HashRouter, Routes, Route, Outlet } from "react-router";
+import log from "#util/log.ts";
 import InitDebug from "#page/initDebug.tsx";
 
 //
@@ -18,24 +19,35 @@ export default function Init ()
 {
   const [completed, setCompleted] = useState (false);
 
+  const onInit = () =>
+  {
+    log.init ();
+  }
+  const onTerminate = () =>
+  {
+    log.terminate ();
+  }
+
   useEffect (() =>
   {
-    void new Promise (() =>
+    try
     {
-      const initAuth = () => { return; }
-      const initAccount = () => { return; }
-
-      try
-      {
-          initAuth ();
-          initAccount ();
-          setCompleted (true);
-      }
-      catch (except)
-      {
-        console.error (except);
-      }
-    });
+      onInit ();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCompleted (true);
+    }
+    catch (except)
+    {
+      console.error (except);
+      setCompleted (false);
+      onTerminate ();
+      return;
+    }
+    return () =>
+    {
+      setCompleted (false);
+      onTerminate ();
+    }
   },
   []);
   useEffect (() =>

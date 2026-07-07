@@ -1,17 +1,25 @@
 import react from "react";
 import styled from "styled-components";
-import logRemote from "#util/api.logRemote.ts";
+import logMain from "#util/log.ts";
+import logConsole from "#util/logConsole.ts";
+import logInject from "#util/logInject.ts";
+import logRemote from "#util/logRemote.ts";
 
 import type { ReactNode } from "react";
-import type {  CallbackMessage } from "#util/api.logRemote.ts";
+import type {  CallbackData as LogCallbackData } from "#util/log.ts";
 
 const content = function InitDebug ()
 {
+  return <>
+    <content.ViewLog/>
+  </>
+}
+content.ViewLog = function ViewLog ()
+{
   const [log, setLog] = react.useState<ReactNode[]> ([]);
-  const logHistory = react.useRef<CallbackMessage []> ([]);
-  const mounted = react.useRef (false);
+  const logHistory = react.useRef<LogCallbackData []> ([]);
 
-  const onLogMessage = (x: CallbackMessage) =>
+  const onLogMessage = (x: LogCallbackData) =>
   {
     const backlog = 16;
     const backlogLimited = logHistory.current.length > backlog;
@@ -27,11 +35,11 @@ const content = function InitDebug ()
     {
       const colorTag = "gray";
       const colorMsg = 
-          x.level === logRemote.LEVEL_INFO ? "white" :
-          x.level === logRemote.LEVEL_WARN ? "yellow" :
-          x.level === logRemote.LEVEL_ERROR ? "red" :
-          x.level === logRemote.LEVEL_FATAL ? "magenta" :
-          x.level === logRemote.LEVEL_VERBOSE ? "green" : "gray";
+          x.level === logMain.LEVEL_INFO ? "white" :
+          x.level === logMain.LEVEL_WARN ? "yellow" :
+          x.level === logMain.LEVEL_ERROR ? "red" :
+          x.level === logMain.LEVEL_FATAL ? "magenta" :
+          x.level === logMain.LEVEL_VERBOSE ? "green" : "gray";
   
       view.push (
         <span key={String (i)}>
@@ -39,14 +47,20 @@ const content = function InitDebug ()
           <span>&nbsp;</span>
           <span style={{ color: colorMsg }}>{x.message.map ((y) => 
           {
-            switch (y.key)
-            {
-              case 0: return JSON.stringify (y.value);
-              case 1: return String (y.value);
-              case 2: return String (y.value);
-              case 3: return new Date (y.value).toLocaleString ();
-              case 4: return String (y.stack);
+            if (typeof y === "string") { 
+              return y; 
             }
+            if (typeof y === "number" || typeof y === "boolean") { 
+              return String (y);
+            }
+            if (typeof y === "object" && y instanceof Date) {
+              return y.toLocaleString ();
+            }
+            if (typeof y === "object" && y instanceof Error) {
+              return decodeURI (String (y.stack));
+            }
+            return JSON.stringify (y, null, 4);
+
           }).join (" ")}</span>
           <br/>
         </span>
@@ -58,25 +72,22 @@ const content = function InitDebug ()
     return;
   }
 
-  react.useEffect (() =>
-  {
-    if (mounted.current) {
-      return;
-    }
-    void logRemote.init ();
-
-    logRemote.onMessage.add (onLogMessage);
-    mounted.current = true;
+  react.useEffect (() => 
+  { 
+    logMain.addListener (onLogMessage);
+    logConsole.init ();
+    logInject.init ();
+    logRemote.init ();
 
     return () =>
     {
-      void logRemote.close ();
+      logMain.removeListener (onLogMessage);
+      logRemote.terminate ();
+      logInject.terminate ();
+      logConsole.terminate ();
+    };
 
-      logRemote.onMessage.remove (onLogMessage);
-      mounted.current = false;
-    }
-  },
-  []);
+  },[]);
 
   return <>
     <LogView>{log}</LogView>
@@ -89,9 +100,10 @@ const LogView = styled.pre`
   pointer-events: none;
   inset: auto 0px 0px 0px;
   display: block;
-  font-family: monospace;
+  font-family: 'font-code', 'monospace';
   font-weight: normal;
   font-style: normal;
+  opacity: 0.25;
 `;
 
 export default content;

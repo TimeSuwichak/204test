@@ -163,6 +163,13 @@ content.scoped = function (tag: string)
         */
         tag: tag,
         /**
+         * ส่งข้อความ ไปยังตัวบันทึกกิจกรรมของระบบ
+        */
+        log: (level: number, ... message: Message) =>
+        {
+            content.log (tag, level, ... message);
+        },
+        /**
          * ส่งข้อความปกติ ไปยังตัวบันทึกกิจกรรมของระบบ
         */
         info: (... message: Message) =>
