@@ -9,6 +9,13 @@ import fsa from "node:fs/promises";
 import path from "node:path";
 import logging from "#core/log.ts"
 
+import type
+{
+    CallbackData
+}
+from "#core/log.ts"
+
+let stream: fs.WriteStream | undefined;
 /**
  * ระบบบันทึกกิจกรรมเริ่มต้น
 */
@@ -21,6 +28,31 @@ const backlog = 4;
  * ทำหน้าที่ส่งข้อมูลที่ได้จากบันทึกไปยังไฟล์บันทึก (File)
 */
 const content = function () { return; }
+const receiver = function (data: CallbackData)
+{
+    if (!stream)
+    {
+        return;
+    }
+    const level = 
+        data.level === logging.LEVEL_INFO ? "I" :
+        data.level === logging.LEVEL_WARN ? "W" :
+        data.level === logging.LEVEL_ERROR ? "E" :
+        data.level === logging.LEVEL_FATAL ? "F" :
+        data.level === logging.LEVEL_VERBOSE ? "V" :
+    "gray";
+
+    const timeStart = logging.start.getTime ();
+    const timeLog = data.time.getTime ();
+    const time = ((timeLog - timeStart) / 1000).toFixed (3);
+    
+    const tag = data.tag;
+    const message = content.formatMessage (data.message);
+    const out = `${level} ${time} [${tag}] ${message}`;
+
+    stream.write (out);
+    stream.write ("\n");
+}
 /**
  * เริ่มต้นการทำงานของระบบ
 */
@@ -80,32 +112,12 @@ content.init = async function ()
     try
     {
 
-        const stream = fs.createWriteStream (file, 
+        stream = fs.createWriteStream (file, 
         {
             autoClose: true,
             encoding: "utf8",
         });
-        logging.addListener ((value) =>
-        {
-            const level = 
-                value.level === logging.LEVEL_INFO ? "I" :
-                value.level === logging.LEVEL_WARN ? "W" :
-                value.level === logging.LEVEL_ERROR ? "E" :
-                value.level === logging.LEVEL_FATAL ? "F" :
-                value.level === logging.LEVEL_VERBOSE ? "V" :
-            "gray";
-
-            const timeStart = logging.start.getTime ();
-            const timeLog = value.time.getTime ();
-            const time = ((timeLog - timeStart) / 1000).toFixed (3);
-            
-            const tag = value.tag;
-            const message = content.formatMessage (value.message);
-            const out = `${level} ${time} [${tag}] ${message}`;
-    
-            stream.write (out);
-            stream.write ("\n");
-        });
+        logging.addListener (receiver);
         log.info (`Backlog: ${String (backlog)}`);
         log.info ("Started");
     }
@@ -152,6 +164,27 @@ content.init = async function ()
             log.warn (error);
         });
     }
+    log.info ("Started");
+}
+/**
+ * ยุติการทำงานของระบบ
+*/
+content.terminate = async function ()
+{
+    logging.removeListener (receiver);
+
+    if (stream)
+    {
+        
+        stream.end ();
+        stream.close ();
+
+        log.info (`Saved ${String (stream.bytesWritten)} bytes`);
+        stream = undefined;
+
+    }
+    log.info ("Stopped");
+    return Promise.resolve ();
 }
 /**
  * แปลงข้อมูลให้เป็นรูปแบบข้อความที่อ่านได้ง่ายขึ้น

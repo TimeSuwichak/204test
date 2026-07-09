@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import fs from "node:fs";
 
 /**
  * กลุ่มข้อมูลที่ได้จากการโหลดไฟล์ .env
@@ -19,14 +20,36 @@ const content = function ()
 */
 content.init = async function ()
 {
-    const info = dotenv.configDotenv (
+    if (fs.existsSync ("../env.local"))
     {
-        debug: true,
-        encoding: "utf8",
-    });
-    collection = info.parsed ?? {};
+        const local = dotenv.configDotenv (
+        {
+            path: "../.env.local",
+            debug: false,
+            encoding: "utf8",
+        });
+        collection = local.parsed ?? {};
+    }
+    if (fs.existsSync ("../.env"))
+    {
+        const global = dotenv.configDotenv  (
+        {
+            path: "../.env",
+            debug: false,
+            encoding: "utf8",
+        });
+        collection = global.parsed ?? {};
+    }
+
 
     return Promise.resolve ();
+}
+/**
+ * ยุติการทำงานของระบบ .env
+*/
+content.terminate = function ()
+{
+    collection = {};
 }
 /**
  * ดึงค่าข้อมูลจากรหัสที่กำหนดไว้

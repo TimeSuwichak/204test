@@ -1,3 +1,9 @@
+/**
+ * 
+ * ระบบจัดการกิจกรรม 
+ * ให้ระบบอื่นสามารถติดตามการทำงานของระบบดังกล่าวได้
+ * 
+*/
 const content = function<A> ()
 {
     type callback = (argument: A) => void;

@@ -70,6 +70,12 @@ export class ErrorConstraint extends Error
 export class ErrorCommand extends Error
 {
     /* ไม่ระบุ */
+};/**
+ * คลางข้อผิดพลาด จากสาเหตุทางด้านเครือข่าย
+*/
+export class ErrorNetwork extends Error
+{
+    /* ไม่ระบุ */
 };
 /**
  * คลางข้อผิดพลาด จากสาเหตุที่ระบุไม่ได้

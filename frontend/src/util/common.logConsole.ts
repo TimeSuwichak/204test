@@ -4,8 +4,8 @@
  * ระบบนี้พร้อมแสดงสีข้อความเพิ่มอำนวนความสะดวกในการมองเห็น
  * 
 */
-import logging from "#util/log.ts"
-import type { CallbackData } from "#util/log.ts";
+import logging from "#util/common.log.ts"
+import type { CallbackData } from "#util/common.log.ts";
 
 const originalLog = console.log;
 const originalWarn = console.warn;

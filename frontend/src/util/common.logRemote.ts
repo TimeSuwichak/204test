@@ -1,4 +1,4 @@
-import logging from "#util/log.ts";
+import logging from "#util/common.log.ts";
 
 export interface PacketStructure
 {
@@ -21,7 +21,7 @@ const content = function ()
 {
     return;
 }
-
+let running = false;
 let server: WebSocket | undefined;
 /**
  * เริ่มต้นการทำงานของระบบ
@@ -32,12 +32,19 @@ content.init = function ()
     const client = new WebSocket (url);
 
     server = client;
+    running = true;
+
     client.onopen = () =>
     {
         return;
     };
     client.onclose = () =>
     {
+        if (running) 
+        {
+            this.init ();
+            return;
+        }
         return;
     };
     client.onmessage = (event: MessageEvent) =>
@@ -76,6 +83,8 @@ content.init = function ()
 */
 content.terminate = function ()
 {
+    running = false;
+
     if (server)
     {
         //

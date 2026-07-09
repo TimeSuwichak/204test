@@ -8,6 +8,39 @@ import http         from "#core/http.ts";
 import webSocket    from "#core/webSocket.ts";
 import sql          from "#core/sql.ts";
 
+import auth         from "#router/auth.ts";
+
+let shutdownRequested = false;
+const shutdown = function ()
+{
+    if (shutdownRequested) {
+        return;
+    }
+    shutdownRequested = true;
+    process.off ("beforeExit", shutdown);
+    process.off ("SIGINT", shutdown);
+    process.off ("SIGTERM", shutdown);
+
+    log.warn ("Main", "Shutdown request initiated");
+    
+    const callback = async function ()
+    {
+        log.info ("Main", "Stopping ...");
+        await sql.terminate ();
+        await webSocket.terminate ();
+        await http.terminate ();
+        await logRemote.terminate ();
+        await logFile.terminate ();
+        env.terminate ();
+        log.info ("Main", "Stopped");
+
+    };
+    void callback ();
+}
+process.on ("beforeExit", shutdown);
+process.on ("SIGINT", shutdown);
+process.on ("SIGTERM", shutdown);
+
 await env.init ();
 await log.init ();
 await logConsole.init ();
@@ -16,16 +49,6 @@ await logInject.init ();
 await logRemote.init ();
 await http.init ();
 await webSocket.init ();
-sql ();
+await sql.init ();
 
-const start = Date.now ();
-let counter = 0;
-
-http.get ("/uptime", (request, response) =>
-{
-    counter += 1;
-    throw new Error ("I am a problem: " + String (counter));
-    return response.json ({
-        value: Date.now () - start
-    });
-});
+auth.init ();

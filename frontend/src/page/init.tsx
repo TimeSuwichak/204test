@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy } from "react";
 import { HashRouter, Routes, Route, Outlet } from "react-router";
-import log from "#util/log.ts";
+import log from "#util/common.log.ts";
 import InitDebug from "#page/initDebug.tsx";
 
 //

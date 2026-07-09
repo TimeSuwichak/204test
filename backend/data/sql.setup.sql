@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS `project`.`account`
 
     `email`     CHAR(32) DEFAULT "" COMMENT 'อีเมล' ,
     
-    CONSTRAINT PK_Account PRIMARY KEY (`id`)
+    CONSTRAINT pk_account PRIMARY KEY (`id`) ,
+    CONSTRAINT uc_account UNIQUE (`id`)
 ) 
 ENGINE = InnoDB COMMENT = 'ข้อมูลบัญชีผู้ใช้';
 
@@ -49,9 +50,9 @@ CREATE TABLE IF NOT EXISTS `project`.`auth`
     `password`  CHAR(128) NOT NULL  COMMENT 'รหัสผ่าน' , 
     `link`      BIGINT NOT NULL     COMMENT 'รหัสบัญชี' , 
     
-    CONSTRAINT PK_Auth PRIMARY KEY (`id`), 
-    CONSTRAINT FK_Auth FOREIGN KEY (`link`) REFERENCES Account (`id`) ,
-    CONSTRAINT UC_Auth UNIQUE (`link`)
+    CONSTRAINT pk_auth PRIMARY KEY (`id`) , 
+    CONSTRAINT fk_auth FOREIGN KEY (`link`) REFERENCES account (`id`) ,
+    CONSTRAINT uc_auth UNIQUE (`link`)
 ) 
 ENGINE = InnoDB COMMENT = 'ข้อมูลการเข้าสู่ระบบ';
 
@@ -63,7 +64,8 @@ CREATE TABLE IF NOT EXISTS `project`.`authMfa`
     `id`        BIGINT NOT NULL                 COMMENT 'รหัสบัญชี' ,
     `totp`      CHAR(64) NOT NULL DEFAULT ""    COMMENT 'ข้อมูล TOTP' ,
     
-    CONSTRAINT PK_AuthMfa PRIMARY KEY (`id`) ,
-    CONSTRAINT FK_AuthMfa FOREIGN KEY (`id`) REFERENCES Account (`id`) ,
+    CONSTRAINT pk_authMfa PRIMARY KEY (`id`) ,
+    CONSTRAINT fk_authMfa FOREIGN KEY (`id`) REFERENCES account (`id`) ,
+    CONSTRAINT uc_authMfa UNIQUE (`id`)
 )
 ENGINE = InnoDB COMMENT = 'ข้อมูลการยืนยันตัวตนสองชั้น (MFA)';

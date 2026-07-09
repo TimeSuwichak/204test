@@ -1,12 +1,12 @@
 import react from "react";
 import styled from "styled-components";
-import logMain from "#util/log.ts";
-import logConsole from "#util/logConsole.ts";
-import logInject from "#util/logInject.ts";
-import logRemote from "#util/logRemote.ts";
+import logMain from "#util/common.log.ts";
+import logConsole from "#util/common.logConsole.ts";
+import logInject from "#util/common.logInject.ts";
+import logRemote from "#util/common.logRemote.ts";
 
 import type { ReactNode } from "react";
-import type {  CallbackData as LogCallbackData } from "#util/log.ts";
+import type {  CallbackData as LogCallbackData } from "#util/common.log.ts";
 
 const content = function InitDebug ()
 {

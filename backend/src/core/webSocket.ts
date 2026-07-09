@@ -106,6 +106,59 @@ content.init = async function ()
     log.info ("Started");
     return Promise.resolve ();
 }
+/**
+ * ยุติการทำงานของระบบ WebSocket
+*/
+content.terminate = async function ()
+{
+    await new Promise ((resolve) =>
+    {
+        if (!insecure) 
+        {
+            resolve (undefined);
+            return;
+        }
+        insecure.close ((error ?: Error) =>
+        {
+            if (error) 
+            {
+                log.warn ("Closed connection (with error): unencrypted");
+                log.warn (error);
+            }
+            else
+            {
+                log.info ("Closed connection: unencrypted");
+            }
+            resolve (undefined);
+        });
+    });
+    await new Promise ((resolve) =>
+    {
+        if (!secure) 
+        {
+            resolve (undefined);
+            return;
+        }
+        secure.close ((error ?: Error) =>
+        {
+            if (error) 
+            {
+                log.warn ("Closed connection (with error): encrypted");
+                log.warn (error);
+            }
+            else
+            {
+                log.info ("Closed connection: encrypted");
+            }
+            resolve (undefined);
+        });
+    });
+    insecure = undefined;
+    secure = undefined;
+    log.info ("Stopped");
+
+    return Promise.resolve ();
+}
 content.sendJson = function (data: Record<string, unknown>)
 {
     if (insecure)

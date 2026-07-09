@@ -6,6 +6,7 @@
 */
 import http         from "node:http";
 import https        from "node:https";
+import net          from "node:net";
 import rateLimit    from "express-rate-limit";
 import helmet       from "helmet";
 import cors         from "cors";
@@ -322,17 +323,23 @@ content.init = async function ()
     }))
     connection.use (connectionRouter);
 
-    const enableHttp = dotenv.getBoolean ("HttpListen", true);
-    const enableHttps = dotenv.getBoolean ("HttpListenSecured", false);
+    const enableHttp = dotenv.getBoolean ("B_HTTP_INSECURE_ENABLED", true);
+    const enableHttps = dotenv.getBoolean ("B_HTTP_SECURE_ENABLED", false);
 
-    const portHttp = dotenv.getInteger ("HttpListenPort", 51000);
-    const portHttps = dotenv.getInteger ("HttpListenSecuredPort", 51000);
+    const portHttp = dotenv.getInteger ("B_HTTP_INSECURE_PORT", 51000);
+    const portHttps = dotenv.getInteger ("B_HTTP_SECURE_PORT", 51001);
 
+    const serverName = dotenv.getString ("B_HTTP_SERVER", "");
+
+    if (serverName.length > 0)
+    {
+        log.info ("Name:", serverName);
+    }
     connection.use ((request: express.Request, response: express.Response) =>
     {
         void request;
         void response;
-
+    
         const path = request.path;
         const socket = request.socket;
         const address = (typeof socket.remoteAddress !==  "undefined") ? 
@@ -378,9 +385,13 @@ content.init = async function ()
         }
         try
         {
-            connectionHttp.listen (portHttps, "0.0.0.0", 128, () =>
+            connectionHttp.listen (portHttp, "0.0.0.0", 128, () =>
             {
-                log.info ("Established connection (HTTP)");
+                const info = connectionHttp.address () as net.AddressInfo;
+                const addr = info.address;
+                const port = String (info.port);
+                
+                log.info (`Established connection (HTTP): ${addr}:${port}`);
                 resolve (undefined);
                 return;
             });
@@ -404,9 +415,13 @@ content.init = async function ()
         }
         try
         {
-            connectionHttps.listen (portHttp, "0.0.0.0", 128, () =>
+            connectionHttps.listen (portHttps, "0.0.0.0", 128, () =>
             {
-                log.info ("Established connection (HTTPS)");
+                const info = connectionHttps.address () as net.AddressInfo;
+                const addr = info.address;
+                const port = String (info.port);
+                
+                log.info (`Established connection (HTTPS): ${addr}:${port}`);
                 resolve (undefined);
                 return;
             });
@@ -421,7 +436,58 @@ content.init = async function ()
             return;
         }
     });
-
+    log.info ("Started");
+}
+/**
+ * ยุติการทำงานของระบบ HTTP/HTTPS
+*/
+content.terminate = async function ()
+{
+    await new Promise ((resolve) =>
+    {
+        if (!connectionHttp.listening) 
+        {
+            resolve (undefined);
+            return;
+        }
+        connectionHttp.close ((error ?: Error) =>
+        {
+            if (error) 
+            {
+                log.warn ("Closed connection (with error): HTTP");
+                log.warn (error);
+            }
+            else
+            {
+                log.info ("Closed connection: HTTP");
+            }
+            connectionHttp.closeAllConnections ();
+            resolve (undefined);
+        });
+    });
+    await new Promise ((resolve) =>
+    {
+        if (!connectionHttps.listening) 
+        {
+            resolve (undefined);
+            return;
+        }
+        connectionHttps.close ((error ?: Error) =>
+        {
+            if (error) 
+            {
+                log.warn ("Closed connection (with error): HTTPS");
+                log.warn (error);
+            }
+            else
+            {
+                log.info ("Closed connection: HTTPS");
+            }
+            connectionHttps.closeAllConnections ();
+            resolve (undefined);
+        });
+    });
+    log.info ("Stopped");
 }
 /**
  * สร้างการเชื่อมต่อเส้นทางย่อยจากตำแหน่งที่กำหนดไว้
@@ -470,6 +536,21 @@ content.patch = function (path: string, routeHandler: RequestHandler)
 content.delete = function (path: string, routeHandler: RequestHandler)
 {
     return connectionRouter.delete (path, routeHandler);
+}
+content.useRateLimit = function ({ window = 10000, limit = 100 })
+{
+    return rateLimit ({
+        legacyHeaders: false,
+        windowMs: window,
+        limit: limit,
+        skipFailedRequests: false,
+
+        handler: (request: express.Request, response: express.Response) =>
+        {
+            response.status (429);
+            response.end ();
+        },        
+    });
 }
 
 export type Request = ExpReq;

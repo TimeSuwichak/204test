@@ -6,7 +6,7 @@
 */
 import dotenv from "#core/env.ts"
 
-interface CallbackData
+export interface CallbackData
 {
     /**
      * เวลาที่ประทับไว้ในบันทึก
@@ -23,10 +23,10 @@ interface CallbackData
     /**
      * ข้อมูลที่อยู่ในบันทึก
     */
-    readonly message: Message;
+    readonly message: CallbackMessage;
 }
-type Callback = (data: CallbackData) => void;
-type Message = unknown [];
+export type Callback = (data: CallbackData) => void;
+export type CallbackMessage = unknown [];
 
 const listener: Callback[] = [];
 const start = new Date ();
@@ -118,35 +118,35 @@ content.log = function
 /**
  * ส่งข้อความปกติ ไปยังตัวบันทึกกิจกรรมของระบบ
 */
-content.info = function (tag: string, ... message: Message)
+content.info = function (tag: string, ... message: CallbackMessage)
 {
     content.log (tag, content.LEVEL_INFO, ... message);
 }
 /**
  * ส่งข้อความเตือน ไปยังตัวบันทึกกิจกรรมของระบบ
 */
-content.warn = function (tag: string, ... message: Message)
+content.warn = function (tag: string, ... message: CallbackMessage)
 {
     content.log (tag, content.LEVEL_WARN, ... message);
 }
 /**
  * ส่งข้อความผิดพลาด ไปยังตัวบันทึกกิจกรรมของระบบ
 */
-content.error = function (tag: string, ... message: Message)
+content.error = function (tag: string, ... message: CallbackMessage)
 {
     content.log (tag, content.LEVEL_ERROR, ... message);
 }
 /**
  * ส่งข้อความร้ายแรง ไปยังตัวบันทึกกิจกรรมของระบบ
 */
-content.fatal = function (tag: string, ... message: Message)
+content.fatal = function (tag: string, ... message: CallbackMessage)
 {
     content.log (tag, content.LEVEL_FATAL, ... message);
 }
 /**
  * ส่งข้อความไปเรื่อย ไปยังตัวบันทึกกิจกรรมของระบบ
 */
-content.verbose = function (tag: string, ... message: Message)
+content.verbose = function (tag: string, ... message: CallbackMessage)
 {
     content.log (tag, content.LEVEL_VERBOSE, ... message);
 }
@@ -165,42 +165,42 @@ content.scoped = function (tag: string)
         /**
          * ส่งข้อความ ไปยังตัวบันทึกกิจกรรมของระบบ
         */
-        log: (level: number, ... message: Message) =>
+        log: (level: number, ... message: CallbackMessage) =>
         {
             content.log (tag, level, ... message);
         },
         /**
          * ส่งข้อความปกติ ไปยังตัวบันทึกกิจกรรมของระบบ
         */
-        info: (... message: Message) =>
+        info: (... message: CallbackMessage) =>
         {
             content.log (tag, content.LEVEL_INFO, ... message);
         },
         /**
          * ส่งข้อความเตือน ไปยังตัวบันทึกกิจกรรมของระบบ
         */
-        warn: (... message: Message) =>
+        warn: (... message: CallbackMessage) =>
         {
             content.log (tag, content.LEVEL_WARN, ... message);
         },
         /**
          * ส่งข้อความผิดพลาด ไปยังตัวบันทึกกิจกรรมของระบบ
         */
-        error: (... message: Message) =>
+        error: (... message: CallbackMessage) =>
         {
             content.log (tag, content.LEVEL_ERROR, ... message);
         },
         /**
          * ส่งข้อความร้ายแรง ไปยังตัวบันทึกกิจกรรมของระบบ
         */
-        fatal: (... message: Message) =>
+        fatal: (... message: CallbackMessage) =>
         {
             content.log (tag, content.LEVEL_FATAL, ... message);
         },
         /**
          * ส่งข้อความไปเรื่อย ไปยังตัวบันทึกกิจกรรมของระบบ
         */
-        verbose: (message: Message) =>
+        verbose: (message: CallbackMessage) =>
         {
             content.log (tag, content.LEVEL_VERBOSE, ... message);
         },

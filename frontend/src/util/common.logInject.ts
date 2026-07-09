@@ -1,4 +1,4 @@
-import logging from "#util/log.ts";
+import logging from "#util/common.log.ts";
 
 const originalLog = console.log;
 const originalWarn = console.warn;

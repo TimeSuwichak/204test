@@ -1,4 +1,4 @@
-import sql from "#core/sql.ts";
+import sql from "#core/sqlLegacy.ts";
 
 const content = function ()
 {

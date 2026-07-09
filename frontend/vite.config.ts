@@ -31,7 +31,7 @@ export default defineConfig (
         },
         watch:
         {
-            ignored: ["src/doc/**"]
+            ignored: ["**/src/doc/**"]
         }
     },
 });
