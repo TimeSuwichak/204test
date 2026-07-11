@@ -16,10 +16,10 @@ const content = function InitDebug ()
 }
 content.ViewLog = function ViewLog ()
 {
-  const [log, setLog] = react.useState<ReactNode[]> ([]);
+  const [logView, setLogView] = react.useState<ReactNode[]> ([]);
   const logHistory = react.useRef<LogCallbackData []> ([]);
 
-  const onLogMessage = (x: LogCallbackData) =>
+  const onLogReceived = (x: LogCallbackData) =>
   {
     const backlog = 16;
     const backlogLimited = logHistory.current.length > backlog;
@@ -28,9 +28,17 @@ content.ViewLog = function ViewLog ()
       (backlogLimited) ? 1 : 0,
       (backlogLimited) ? length - 1 : length
     );
-    const view: ReactNode[] = [];
 
     origin.push (x);
+    logHistory.current = origin;
+    onLogRender ();
+    return;
+  }
+  const onLogRender = () =>
+  {
+    const view: ReactNode[] = [];
+    const origin = logHistory.current;
+
     origin.forEach ((x, i) =>
     {
       const colorTag = "gray";
@@ -40,57 +48,57 @@ content.ViewLog = function ViewLog ()
           x.level === logMain.LEVEL_ERROR ? "red" :
           x.level === logMain.LEVEL_FATAL ? "magenta" :
           x.level === logMain.LEVEL_VERBOSE ? "green" : "gray";
+
+      const message = x.message.map ((y) => 
+      {
+          if (typeof y === "string") { 
+            return y; 
+          }
+          if (typeof y === "number" || typeof y === "boolean") { 
+            return String (y);
+          }
+          if (typeof y === "object" && y instanceof Date) {
+            return y.toLocaleString ();
+          }
+          if (typeof y === "object" && y instanceof Error) {
+            return decodeURI (String (y.stack));
+          }
+          return JSON.stringify (y, null, 4);
+      });
+      const messageId = String (i);
+      const messageString = message.join (" ");
   
       view.push (
-        <span key={String (i)}>
+        <LogViewText key={messageId} $color={colorMsg}>
           <span style={{ color: colorTag }}>{x.tag}</span>
           <span>&nbsp;</span>
-          <span style={{ color: colorMsg }}>{x.message.map ((y) => 
-          {
-            if (typeof y === "string") { 
-              return y; 
-            }
-            if (typeof y === "number" || typeof y === "boolean") { 
-              return String (y);
-            }
-            if (typeof y === "object" && y instanceof Date) {
-              return y.toLocaleString ();
-            }
-            if (typeof y === "object" && y instanceof Error) {
-              return decodeURI (String (y.stack));
-            }
-            return JSON.stringify (y, null, 4);
-
-          }).join (" ")}</span>
-          <br/>
-        </span>
+          {messageString}
+        </LogViewText>
       );
     });
-
-    logHistory.current = origin;
-    setLog (view);
+    setLogView (view);
     return;
   }
 
   react.useEffect (() => 
   { 
-    logMain.addListener (onLogMessage);
+    logMain.addListener (onLogReceived);
     logConsole.init ();
-    logInject.init ();
+    // logInject.init ();
     logRemote.init ();
 
     return () =>
     {
-      logMain.removeListener (onLogMessage);
+      logMain.removeListener (onLogReceived);
       logRemote.terminate ();
-      logInject.terminate ();
+      // logInject.terminate ();
       logConsole.terminate ();
     };
 
   },[]);
 
   return <>
-    <LogView>{log}</LogView>
+    <LogView>{logView}</LogView>
   </>;
 }
 
@@ -100,10 +108,23 @@ const LogView = styled.pre`
   pointer-events: none;
   inset: auto 0px 0px 0px;
   display: block;
+  text-shadow: 1px 1px 0px #000000;
   font-family: 'font-code', 'monospace';
   font-weight: normal;
   font-style: normal;
-  opacity: 0.25;
+  opacity: 0.50;
+  overflow: hidden;
+`;
+const LogViewText = styled.p<{ $color: string }>`
+  text-shadow: 1px 1px 0px #000000;
+  font-family: 'font-code', 'monospace';
+  font-size: 1rem;
+  font-weight: normal;
+  font-style: normal;
+  color: ${prop => prop.$color};
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-all;
 `;
 
 export default content;
