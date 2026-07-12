@@ -4,7 +4,17 @@ import styled from "styled-components";
 
 interface ContentProperty
 {
-  children: react.ReactNode;
+  children ?: react.ReactNode;
+}
+interface MenuProperty
+{
+  children ?: react.ReactNode;
+}
+interface MenuItemProperty
+{
+  icon ?: string;
+  text ?: string;
+  onClick ?: () => void;
 }
 interface SpacingProperty
 {
@@ -52,17 +62,16 @@ const content = function NavBar (prop: ContentProperty)
 content.Branding = function NavBarBranding ()
 {
   const context = react.useContext (ContentContext);
-
-  console.log (context.width);
+  const readable = context.width >= 768;
 
   return <Branding>
     <BrandingImg src={undefined}/>
-    <BrandingLabel>ร้านขายแผ่นและตลับเกม</BrandingLabel>
+    <BrandingLabel $show={readable}>ร้านขายแผ่นและตลับเกม</BrandingLabel>
   </Branding>;
 }
 content.Search = function NavBarSearch ()
 {
-  return <Search/>
+  return <Search placeholder="ค้นหา เกมสุดที่รัก ..."/>
 }
 content.Profile = function NavBarProfile ()
 {
@@ -70,6 +79,30 @@ content.Profile = function NavBarProfile ()
     <ProfileImg/>
   </Profile>
 }
+content.Menu = function NavBarMenu (prop: MenuProperty)
+{
+  return <Menu>
+    {prop.children}
+  </Menu>
+}
+content.MenuItem = function NavBarMenuItem (prop: MenuItemProperty)
+{
+  const onClick = (event: react.MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    if (prop.onClick) {
+      prop.onClick ();
+    }
+  }
+
+  return <MenuItem onClick={onClick}>
+    {prop.icon ? <MenuItemIcon src={prop.icon}/> : <></>}
+    {prop.text ? <MenuItemText>{prop.text}</MenuItemText> : <></>}
+  </MenuItem>
+}
+
 content.Spacing = function NavBarSpacing (prop: SpacingProperty)
 {
   return <Spacing $level={prop.level ?? 1}/>;
@@ -103,12 +136,14 @@ const BrandingImg = styled.img`
   width: 32px;
   height: 32px;
 `;
-const BrandingLabel = styled.label`
+const BrandingLabel = styled.label<{ $show: boolean }>`
   width: auto;
   height: 32px;
   font-size: 1.25rem;
   font-weight: bold;
   padding: 0px 16px;
+  visibility: ${prop => prop.$show ? "visible": "hidden"};
+  pointer-events: ${prop => prop.$show ? "all" : "none"};
 `;
 const Search = styled.input`
   display: block;
@@ -122,6 +157,11 @@ const Search = styled.input`
   outline: none;
   color: white;
   padding: 0px 16px;
+
+  &::placeholder
+  {
+    color: #9ad3cb; 
+  }
 `;
 const Profile = styled.div`
   width: 32px;
@@ -139,6 +179,27 @@ const ProfileImg = styled.img`
   {
     border-width: 2px;
   }
+`;
+const Menu = styled.div`
+  margin: 0px 8px;
+  height: 32px;
+`;
+const MenuItem = styled.button`
+  width: 96px;
+  height: 32px;
+  background-color: transparent;
+  border: transparent;
+`;
+const MenuItemIcon = styled.img`
+  width: 32px;
+  height: 32px;
+  margin-right: 16px;
+`;
+const MenuItemText = styled.span`
+  color: var(--text-primary);
+  font-size: 1rem;
+  height: 32px;
+  // margin: 0px 16px;
 `;
 const Spacing = styled.div<{ $level: number }>`
   min-height: 32px;
