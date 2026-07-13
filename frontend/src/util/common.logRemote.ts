@@ -74,7 +74,7 @@ content.init = function ()
                 case 4: return x.stack;
             }
         });
-
+        // console.log (tag, level, ... conversion);
         logging.scoped (tag).log (level, ... conversion);
     };
 }

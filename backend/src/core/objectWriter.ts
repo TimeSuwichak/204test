@@ -14,12 +14,14 @@ const content = function (data ?: Record<string, unknown>)
     let instance = data ?? {};
     const init = () => { return; };
 
+    init.toJson = () => JSON.stringify (instance, undefined, undefined);
+    init.toObject = () => instance;
     init.requireString = (name: string, value: string) =>
     {
         instance = Object.defineProperty (instance, name, 
         {
             configurable: false,
-            enumerable: false,
+            enumerable: true,
             writable: false,
             value: value,
         });
@@ -29,7 +31,7 @@ const content = function (data ?: Record<string, unknown>)
         instance = Object.defineProperty (instance, name, 
         {
             configurable: false,
-            enumerable: false,
+            enumerable: true,
             writable: false,
             value: Math.trunc (value),
         });
@@ -39,7 +41,7 @@ const content = function (data ?: Record<string, unknown>)
         instance = Object.defineProperty (instance, name, 
         {
             configurable: false,
-            enumerable: false,
+            enumerable: true,
             writable: false,
             value: value,
         });
@@ -49,7 +51,7 @@ const content = function (data ?: Record<string, unknown>)
         instance = Object.defineProperty (instance, name, 
         {
             configurable: false,
-            enumerable: false,
+            enumerable: true,
             writable: false,
             value: value.getTime (),
         });
@@ -59,7 +61,7 @@ const content = function (data ?: Record<string, unknown>)
         instance = Object.defineProperty (instance, name, 
         {
             configurable: false,
-            enumerable: false,
+            enumerable: true,
             writable: false,
             value: value.toISOString (),
         });

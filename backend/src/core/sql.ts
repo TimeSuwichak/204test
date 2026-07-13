@@ -1,26 +1,15 @@
-import env from "#core/env.ts";
-import logging from "#core/log.ts";
-import mysql from "mysql2/promise";
+import env      from "#core/env.ts";
+import logging  from "#core/log.ts";
+import error    from "#core/error.ts";
 
+import mysql from "mysql2/promise";
 import type
 {
     FieldPacket,
     ResultSetHeader,
     RowDataPacket 
 }
-from "mysql2/promise"
-import
-{
-    ErrorCommand,
-    ErrorConstraint,
-    ErrorDuplicate,
-    ErrorNetwork,
-    ErrorNotAuthorized,
-    ErrorNotAvailable,
-    ErrorNotFound,
-    ErrorUnknown
-}
-from "#core/error.ts"
+from "mysql2/promise";
 
 type InputCommand = string;
 type InputValue = (string | number | Date | null) [];
@@ -64,32 +53,27 @@ const log = logging.scoped ("MySQL");
 /**
  * ดักจับข้อผิดพลาดที่เกิดขึ้นในระหว่างการทำงานของคำสั่ง
 */
-const error = function (info: ResultError)
+const mediate = function (info: ResultError) : number
 {
     switch (info.code)
     {
         case "ER_DUP_ENTRY": 
-            return new ErrorDuplicate (info.sqlMessage, { cause: info });
-        case "ER_NO_REFERENCED_ROW": 
-            return new ErrorConstraint (info.sqlMessage, { cause: info });
+            return error.DUPLICATE;
+        case "ER_NO_REFERENCED_ROW":
         case "ER_NO_REFERENCED_ROW_2": 
-            return new ErrorConstraint (info.sqlMessage, { cause: info });
-        case "ER_PARSE_ERROR": 
-            return new ErrorCommand (info.sqlMessage, { cause: info });
+            return error.CONSTRAINT;
+        case "ER_PARSE_ERROR":
         case "ER_BAD_FIELD_ERROR": 
-            return new ErrorCommand (info.sqlMessage, { cause: info });
-        case "ER_NO_SUCH_TABLE":
-            return new ErrorNotFound (info.sqlMessage, { cause: info });
-        case "ER_ACCESS_DENIED_ERROR":
+            return error.COMMAND;
+        case "ER_NO_SUCH_TABLE": 
+            return error.NOT_FOUND;
+        case "ER_ACCESS_DENIED_ERROR": 
         case "ER_DBACCESS_DENIED_ERROR":
-            return new ErrorNotAuthorized (info.sqlMessage, { cause: info });
+            return error.NOT_AUTHORIZED;
         case "ECONNREFUSED":
-            return new ErrorNetwork (info.sqlMessage, { cause: info });
+            return error.NETWORK;
     }
-    return new ErrorUnknown ("Unknown error has occurred during SQL command", 
-    { 
-        cause: info 
-    });
+    return error.UNKNOWN;
 }
 /**
  * 
@@ -155,23 +139,27 @@ content.select = async function
     command: InputCommand,
     value: InputValue = []
 
-) : Promise<Record<string,unknown>>
+) : Promise<Record<string,unknown>[]>
 {
-    if (!client) {
-        throw new ErrorNotAvailable ("SQL was called in uninitialized state");
+    if (!client) 
+    {
+        //
+        // ระบบไม่สามารถใช้งานได้
+        //
+        throw error.NOT_AVAILABLE;
     }
 
     try
     {
         const raw: [RowDataPacket[], FieldPacket[]] 
             = await client.execute (command, value);
-        const row = raw[0][0];
-
-        return row as Record<string, unknown>;
+        const row = raw[0];
+        
+        return row;
     }
     catch (info: unknown)
     {
-        throw error (info as ResultError);
+        throw mediate (info as ResultError);
     }
 }
 /**
@@ -188,8 +176,12 @@ content.selectMultiple = async function
 
 ) : Promise<Record<string, unknown>[]>
 {
-    if (!client) {
-        throw new ErrorNotAvailable ("SQL was called in uninitialized state");
+    if (!client) 
+    {
+        //
+        // ระบบไม่สามารถใช้งานได้
+        //
+        throw error.NOT_AVAILABLE;
     }
 
     try
@@ -202,7 +194,7 @@ content.selectMultiple = async function
     }
     catch (info: unknown)
     {
-        throw error (info as ResultError);
+        throw mediate (info as ResultError);
     }
 }
 /**
@@ -219,8 +211,12 @@ content.insert = async function
     
 ) : Promise<unknown>
 {
-    if (!client) {
-        throw new ErrorNotAvailable ("SQL was called in uninitialized state");
+    if (!client) 
+    {
+        //
+        // ระบบไม่สามารถใช้งานได้
+        //
+        throw error.NOT_AVAILABLE;
     }
     try
     {
@@ -231,7 +227,7 @@ content.insert = async function
     }
     catch (info: unknown)
     {
-        throw error (info as ResultError);
+        throw mediate (info as ResultError);
     }
 }
 /**
@@ -248,8 +244,12 @@ content.insertMultiple =  async function
     
 ) : Promise<unknown []>
 {
-    if (!client) {
-        throw new ErrorNotAvailable ("SQL was called in uninitialized state");
+    if (!client) 
+    {
+        //
+        // ระบบไม่สามารถใช้งานได้
+        //
+        throw error.NOT_AVAILABLE;
     }
     try
     {
@@ -260,7 +260,7 @@ content.insertMultiple =  async function
     }
     catch (info: unknown)
     {
-        throw error (info as ResultError);
+        throw mediate (info as ResultError);
     }
 }
 /**
@@ -277,8 +277,12 @@ content.update = async function
 
 ) : Promise<number>
 {
-    if (!client) {
-        throw new ErrorNotAvailable ("SQL was called in uninitialized state");
+    if (!client) 
+    {
+        //
+        // ระบบไม่สามารถใช้งานได้
+        //
+        throw error.NOT_AVAILABLE;
     }
     try
     {
@@ -289,7 +293,7 @@ content.update = async function
     }
     catch (info: unknown)
     {
-        throw error (info as ResultError);
+        throw mediate (info as ResultError);
     }
 }
 /**
@@ -306,8 +310,12 @@ content.updateMultiple = async function
 
 ) : Promise<number[]>
 {
-    if (!client) {
-        throw new ErrorNotAvailable ("SQL was called in uninitialized state");
+    if (!client) 
+    {
+        //
+        // ระบบไม่สามารถใช้งานได้
+        //
+        throw error.NOT_AVAILABLE;
     }
     try
     {
@@ -318,7 +326,7 @@ content.updateMultiple = async function
     }
     catch (info: unknown)
     {
-        throw error (info as ResultError);
+        throw mediate (info as ResultError);
     }
 }
 /**
@@ -334,8 +342,12 @@ content.delete = async function (
 
 ) : Promise<number>
 {
-    if (!client) {
-        throw new ErrorNotAvailable ("SQL was called in uninitialized state");
+    if (!client) 
+    {
+        //
+        // ระบบไม่สามารถใช้งานได้
+        //
+        throw error.NOT_AVAILABLE;
     }
     try
     {
@@ -346,7 +358,7 @@ content.delete = async function (
     }
     catch (info: unknown)
     {
-        throw error (info as ResultError);
+        throw mediate (info as ResultError);
     }
 }
 /**
@@ -363,8 +375,12 @@ content.deleteMultiple = async function
 
 ) : Promise<number[]>
 {
-    if (!client) {
-        throw new ErrorNotAvailable ("SQL was called in uninitialized state");
+    if (!client) 
+    {
+        //
+        // ระบบไม่สามารถใช้งานได้
+        //
+        throw error.NOT_AVAILABLE;
     }
     try
     {
@@ -375,7 +391,7 @@ content.deleteMultiple = async function
     }
     catch (info: unknown)
     {
-        throw error (info as ResultError);
+        throw mediate (info as ResultError);
     }
 }
 /**
@@ -384,13 +400,17 @@ content.deleteMultiple = async function
 */
 content.transaction = async function ()
 {
-    if (!client) {
-        throw new ErrorNotAvailable ("SQL was called in uninitialized state");
+    if (!client) 
+    {
+        //
+        // ระบบไม่สามารถใช้งานได้
+        //
+        throw error.NOT_AVAILABLE;
     }
 
     const subject = await client.getConnection ().catch ((info: unknown) => 
     {
-        throw error (info as ResultError);
+        throw mediate (info as ResultError);
     });
     
     try
@@ -409,7 +429,7 @@ content.transaction = async function ()
     catch (info: unknown)
     {
         subject.release ();
-        throw error (info as ResultError);
+        throw mediate (info as ResultError);
     }
 }
 Object.freeze (content);

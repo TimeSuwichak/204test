@@ -1,15 +1,70 @@
 import config from "#util/api.config.ts";
+import reader from "#util/common.objectReader.ts";
 
 const content = function ()
 {
     return;
 }
 
+content.ERROR_UNKNOWN = 0;
+content.ERROR_NETWORK = 1;
+content.ERROR_JSON = 2;
+content.ERROR_JSON_DATA = 3;
+content.ERROR_NOT_AUTHORIZED = 4;
+content.ERROR_NOT_AVAILABLE = 5;
+content.ERROR_NOT_FOUND = 6;
+content.ERROR_TOO_MANY_REQUEST = 7;
+
 content.signIn = async function (input: string)
 {
-    void input;
+    let response: Response;
+    let json: Record<string, unknown>;
 
-    return Promise.resolve ();
+    try
+    {
+        response = await config.postJson (config.AUTH_URL, "/sign-in", 
+        {
+            "value": input
+        });
+    }
+    catch
+    {
+        return content.ERROR_NETWORK;
+    }
+
+    switch (response.status)
+    {
+        case 200: break;
+        case 401: throw content.ERROR_NOT_AUTHORIZED;
+        case 404: throw content.ERROR_NOT_FOUND;
+        case 429: throw content.ERROR_TOO_MANY_REQUEST;
+        case 500: throw content.ERROR_NOT_AVAILABLE;
+        case 503: throw content.ERROR_NOT_AVAILABLE;
+        default: throw content.ERROR_UNKNOWN;
+    }
+
+    try
+    {
+        json = await response.json ();
+    }
+    catch
+    {
+        return content.ERROR_JSON;
+    }
+
+    try
+    {
+        const data = reader (json);
+        const result = {
+
+        };
+        return data;
+    }
+    catch
+    {
+        return content.ERROR_JSON_DATA;
+    }
+
 }
 content.signInPwd = async function (session: string, input: string)
 {

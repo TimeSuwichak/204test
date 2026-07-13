@@ -11,15 +11,23 @@ from "react-router";
 
 import log from "#util/common.log.ts";
 import navigation from "#util/common.navigation.ts";
-import InitDebug from "#page/initDebug.tsx";
 
 //
 // โหลดหน้าต่างเมื่อจำเป็นเท่านั้น
 //
+const CoAbout 
+  = react.lazy (() => import ("./about.tsx"));
 const CoAuth 
   = react.lazy (() => import ("./auth.tsx"));
 const CoSettings 
   = react.lazy (() => import ("./settings.tsx"));
+const CoDebug 
+  = react.lazy (() => import ("./initDebug.tsx"));
+const CoNavBarCustomer 
+  = react.lazy (() => import ("../component/navbar.customer.tsx"));
+
+const CoError404
+  = react.lazy (() => import ("./error.404.tsx"));
 
 const CsHome 
   = react.lazy (() => import ("./customer.home.tsx"));
@@ -27,6 +35,7 @@ const CsProduct
   = react.lazy (() => import ("./customer.product.tsx"));
 const CsProductBrowser 
   = react.lazy (() => import ("./customer.productBrowser.tsx"));
+
 
 interface PropSplash
 {
@@ -141,14 +150,18 @@ content.Bootstrap = function InitBootstrap (prop: PropBootstrap)
   return (
   <Routes>
     <Route caseSensitive Component={content.Outlet}>
+      <Route path="/about" element={<CoAbout/>}/>
       <Route path="/auth" element={<CoAuth/>}/>
       <Route path="/settings" element={<CoSettings/>}/>
     </Route>
-    <Route caseSensitive>
+    <Route caseSensitive Component={content.OutletCustomer}>
       <Route index element={<CsHome/>}/>
       <Route path="/product" element={<CsProduct/>}/>
       <Route path="/product-browser" element={<CsProductBrowser/>}/>
     </Route>;
+    <Route>
+      <Route path="*" element={<CoError404/>}/>
+    </Route>
   </Routes>
   );
 }
@@ -158,9 +171,24 @@ content.Outlet = function InitOutlet ()
   {
     return <>
       <Outlet/>
-      <InitDebug/>
+      <CoDebug/>
     </>;
   }
   return <Outlet/>
+}
+content.OutletCustomer = function InitOutletCustomer ()
+{
+  if (import.meta.env.DEV)
+  {
+    return <>
+      <Outlet/>
+      <CoNavBarCustomer/>
+      <CoDebug/>
+    </>;
+  }
+  return <>
+    <Outlet/>
+    <CoNavBarCustomer/>
+  </>;
 }
 export default content;

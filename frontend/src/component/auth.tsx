@@ -1,6 +1,7 @@
-import react from "react";
+import react  from "react";
 import styled from "styled-components";
-import api from "#util/api.auth.ts";
+import api    from "#util/api.auth.ts";
+
 import { keyframes } from "styled-components";
 
 
@@ -109,6 +110,7 @@ content.HvSignIn = function AuthHvSignIn ()
 }
 content.HvSignInId = function AuthHvSignInId (prop: PropHvSignInId)
 {
+  const [pending, setPending] = react.useState (false);
   const [feedback, setFeedback] = react.useState ({
     type: content.FEEDBACK_UNDEFINED,
     text: ""
@@ -143,10 +145,55 @@ content.HvSignInId = function AuthHvSignInId (prop: PropHvSignInId)
       return;
     }
     setFeedback ({ type: content.FEEDBACK_UNDEFINED, text: "" });
+    setPending (true);
 
-    if (prop.onContinue) {
-      prop.onContinue ();
-    }
+    api.signIn (input).then (() =>
+    {
+      if (prop.onContinue) {
+        prop.onContinue ();
+      }
+    })
+    .catch ((error) =>
+    {
+      setPending (false);
+
+      if (error === api.ERROR_NETWORK) 
+      {
+        setFeedback ({ 
+          type: content.FEEDBACK_ERROR, 
+          text: "เกิดข้อผิดพลาดทางด้านเครือข่าย โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ" 
+        });
+        return;
+      }
+      if (error === api.ERROR_NOT_FOUND) 
+      {
+        setFeedback ({ 
+          type: content.FEEDBACK_ERROR, 
+          text: "ไม่พบบัญชีผู้ใช้งาน โปรดตรวจสอบรหัสประจำตัวของคุณอีกครั้ง" 
+        });
+        return;
+      }
+      if (error === api.ERROR_TOO_MANY_REQUEST) 
+      {
+        setFeedback ({ 
+          type: content.FEEDBACK_ERROR, 
+          text: "ระบบปฏิเสธคำขอของคุณ โปรดรอสักครู่" 
+        });
+        return;
+      }
+      if (error === api.ERROR_NOT_AVAILABLE) 
+      {
+        setFeedback ({ 
+          type: content.FEEDBACK_ERROR, 
+          text: "ระบบไม่สามารถทำงานได้ในเวลานี้ โปรดลองใหม่อีกครั้งในภายหลัง" 
+        });
+        return;
+      }
+      setFeedback ({ 
+        type: content.FEEDBACK_ERROR, 
+        text: "เกิดข้อผิดพลาดบางอย่าง โปรดลองใหม่อีกครั้ง" 
+      });
+    });
   }
   function onCreate ()
   {

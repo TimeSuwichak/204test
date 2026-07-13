@@ -1,93 +1,66 @@
-
+/**
+ * คำสั่งว่างเปล่าไม่ได้ใช้งาน
+*/
+const content = function () { return; }
+/**
+ * คลาสข้อผิดพลาด จากสาเหตุที่ระบุไม่ได้
+*/
+content.UNKNOWN = 0;
+/**
+ * คลาสข้อผิดพลาด จากสาเหตุที่ไม่ได้ระบุ
+*/
+content.UNSPECIFIED = 1;
+/**
+ * คลางข้อผิดพลาด จากสาเหตุทางด้านเครือข่าย
+*/
+content.NETWORK = 2;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่สามารถประมวลข้อมูลได้
  * เนื่องจากชุดข้อมูลดังกล่าวไม่เป็นข้อมูล JSON ถูกต้องหรือสมบูรณ์
 */
-export class ErrorBadJson extends Error
-{
-    /* ไม่ระบุ */
-};
+content.BAD_JSON = 3;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่สามารถประมวลข้อมูลได้
  * เนื่องจากชุดข้อมูลดังกล่าวไม่ถูกต้องหรือสมบูรณ์
 */
-export class ErrorBadData extends Error
-{
-    /* ไม่ระบุ */
-};
+content.BAD_DATA = 4;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่พบข้อมูล
 */
-export class ErrorNotFound extends Error 
-{
-    /* ไม่ระบุ */
-};
+content.NOT_FOUND = 5;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่พร้อมใช้งาน
 */
-export class ErrorNotAvailable extends Error 
-{
-    /* ไม่ระบุ */
-};
+content.NOT_AVAILABLE = 6;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบยังไม่มีตรรกะในการทำงาน
 */
-export class ErrorNotImplemented extends Error 
-{
-    /* ไม่ระบุ */
-};
+content.NOT_IMPLEMENTED = 7;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบยังไม่สามารถยืนยันตัวตนได้
 */
-export class ErrorNotAuthorized extends Error
-{
-    /* ไม่ระบุ */
-};
+content.NOT_AUTHORIZED = 8;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบปฎิเสธคำร้องเนื่องสิทธิ์เข้าถึง
 */
-export class ErrorForbidden extends Error
-{
-    /* ไม่ระบุ */
-};
+content.FORBIDDEN = 9;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบพบข้อมูลซ้ำกัน
 */
-export class ErrorDuplicate extends Error
-{
-    /* ไม่ระบุ */
-};
+content.DUPLICATE = 10;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบพบข้อมูลซ้ำซ้อนกัน
 */
-export class ErrorConflict extends Error
-{
-    /* ไม่ระบุ */
-};
+content.CONFLICT = 11;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบปฎิเสธการทำงานเนื่องจากข้อจำกัด
 */
-export class ErrorConstraint extends Error
-{
-    /* ไม่ระบุ */
-};
+content.CONSTRAINT = 12;
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบปฎิเสธการทำงานเนื่องจากคำสั่งไม่ถูกต้อง
 */
-export class ErrorCommand extends Error
-{
-    /* ไม่ระบุ */
-};/**
- * คลางข้อผิดพลาด จากสาเหตุทางด้านเครือข่าย
-*/
-export class ErrorNetwork extends Error
-{
-    /* ไม่ระบุ */
-};
+content.COMMAND = 13;
 /**
- * คลางข้อผิดพลาด จากสาเหตุที่ระบุไม่ได้
+ * รายการข้อผิดพลาดทั้งหมดที่ใช้โดยทั่วไป
 */
-export class ErrorUnknown extends Error
-{
-    /* ไม่ระบุ */
-};
+export default content;

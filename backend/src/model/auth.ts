@@ -1,27 +1,22 @@
-import jwt from "jsonwebtoken";
-import sql from "#core/sqlLegacy.ts";
-import objreader from "#core/objectReader.ts";
+import jwt          from "jsonwebtoken";
+import error        from "#core/error.ts";
+import sql          from "#core/sql.ts";
+import objreader    from "#core/objectReader.ts";
 import
 {
     type Jwt
 }
 from "jsonwebtoken"
-import
-{
-    ErrorNotFound,
-    ErrorConflict,
-    ErrorNotAvailable
-}
-from "#core/error.ts"
+
 
 interface SignInChallenge
 {
     id: string;
-    pwd: string;
     link: number;
     session: string;
     sessionIssued: Date;
     sessionExpire: Date;
+    restriction: number;
 }
 
 const content = function ()
@@ -47,20 +42,11 @@ content.jwtSign = async function (data: object, exp: number) : Promise<string>
             allowInvalidAsymmetricKeyTypes: false,
             expiresIn: exp
         },
-        (error, encoded) =>
+        (err, encoded) =>
         {
-            if (error)
+            if (err || !encoded)
             {
-                reject (new ErrorNotAvailable ("JWT Signing Error (1)", {
-                    cause: error
-                }));
-                return;
-            }
-            if (!encoded)
-            {
-                reject (new ErrorNotAvailable ("JWT Signing Error (2)", {
-                    cause: error
-                }));
+                reject (error.NOT_AVAILABLE);
                 return;
             }
             resolve (encoded);
@@ -77,20 +63,11 @@ content.jwtVerify = async function (input: string) : Promise<Jwt>
             ignoreNotBefore: true,
             ignoreExpiration: true,
         },
-        (error, decoded) =>
+        (err, decoded) =>
         {
-            if (error)
+            if (err || !decoded)
             {
-                reject (new ErrorNotAvailable ("JWT Verification Error (1)", {
-                    cause: error
-                }));
-                return;
-            }
-            if (!decoded)
-            {
-                reject (new ErrorNotAvailable ("JWT Verificaiton Error (2)", {
-                    cause: error
-                }));
+                reject (error.NOT_AVAILABLE);
                 return;
             }
             resolve (decoded);
@@ -99,21 +76,15 @@ content.jwtVerify = async function (input: string) : Promise<Jwt>
 }
 content.signIn = async function (identifier: string) : Promise<SignInChallenge>
 {
-    const cmd = `
-        SELECT password, link 
-        FROM identifier 
-        WHERE username = ? AND password = ?
-    `;
+    const cmd = `SELECT link FROM auth WHERE id = ?`;
     const param = [identifier];
     const result = await sql.select (cmd, param);
 
-    if (result.length == 0)
-    {
-        throw new ErrorNotFound ();
+    if (result.length == 0) {
+        throw error.NOT_FOUND;
     }
-    if (result.length >= 2)
-    {
-        throw new ErrorConflict ();
+    if (result.length >= 2) {
+        throw error.CONFLICT;
     }
     const session = await content.jwtSign ({}, 300000);
     const sessionIssued = new Date (Date.now ());
@@ -122,11 +93,11 @@ content.signIn = async function (identifier: string) : Promise<SignInChallenge>
     const output: SignInChallenge =
     {
         id: identifier,
-        pwd: reader.requireString ("password"),
         link: reader.requireInteger ("link"),
         session: session,
         sessionIssued: sessionIssued,
         sessionExpire: sessionExpire,
+        restriction: 0,
     };
     return output;
 }

@@ -1,9 +1,9 @@
-import Preset from "#component/common.preset.tsx";
+import Preset from "#component/navbar.customer.tsx";
 
 const content = function ProductBrowser ()
 {
   return <>
-    <Preset.NavBar/>
+  
   </>;
 }
 export default content;

@@ -13,7 +13,7 @@ content.getRouter = function ()
 {
     const route = http.router ();
     const limiter = http.useRateLimit ({
-        window: 60000,
+        window: 1000,
         limit: 3
     });
 

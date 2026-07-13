@@ -569,6 +569,7 @@ content.useRateLimit = function ({ window = 10000, limit = 100 })
         legacyHeaders: false,
         windowMs: window,
         limit: limit,
+        
         skipFailedRequests: false,
 
         handler: (request: express.Request, response: express.Response) =>

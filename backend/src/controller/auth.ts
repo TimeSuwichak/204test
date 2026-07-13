@@ -1,48 +1,57 @@
-import http from "#core/http.ts";
-import logging from "#core/log.ts";
-import objreader from "#core/objectReader.ts";
-import model from "#model/auth.ts";
+import http         from "#core/http.ts";
+import logging      from "#core/log.ts"
+import error        from "#core/error.ts";
+import objReader    from "#core/objectReader.ts";
+import objWriter    from "#core/objectWriter.ts";
+import model        from "#model/auth.ts";
 import
-{
-    ErrorNotFound,
-    ErrorConflict,
-}
-from "#core/error.ts"
-import type 
 { 
-    Request, 
-    Response 
+    type Request, 
+    type Response 
 } 
 from "#core/http.ts";
-
+/**
+ * ระบบบันทึกกิจกรรมเริ่มต้น
+*/
 const log = logging.scoped ("Auth");
+/**
+ * ระบบประมวลคำสั่งยืนยันตัวตนจากเครือข่าย
+*/
 const content = function ()
 {
     return;
 }
+/**
+ * เริ่มต้นการทำงานของระบบ
+*/
 content.init = function ()
 {
     return;
 }
+/**
+ * ยุติการทำงานของระบบ
+*/
 content.terminate = function ()
 {
     return;
 }
-content.routeSignIn = async function (request: Request, response: Response)
+/**
+ * เส้นทางเริ่มต้นการลงชื่อเข้าใช้งาน
+*/
+content.routeSignIn = function (request: Request, response: Response)
 {
     if (!request.body)
     {
-        response.status (http.STATUS_BAD_REQUEST)
+        response.status (http.STATUS_BAD_REQUEST);
         response.end ();
         return;
     }
-    const read = objreader (request.body);
-    let id: string;
-
+    let input: string;
+    const key = "value";
 
     try
     {
-        id = read.requireString ("identifier");
+        input = objReader (request.body).requireString (key);
     }
     catch
     {
@@ -50,44 +59,83 @@ content.routeSignIn = async function (request: Request, response: Response)
         response.end ();
         return;
     }
+
+    model.signIn (input).then ((x) =>
+    {
+        const result = objWriter ();
+
+        result.requireInteger ("id", x.link);
+        result.requireString ("session", x.session);
+        result.requireDate ("sessionIssued", x.sessionIssued);
+        result.requireDate ("sessionExpire", x.sessionExpire);
+        result.requireInteger ("restriction", x.restriction);
+
+        response.status (http.STATUS_OK);
+        response.set ("content-type", "application/json");
+        response.end (result.toJson ());
+    })
+    .catch ((e) =>
+    {
+        switch (Number (e))
+        {
+            case error.NOT_FOUND:
+                response.status (http.STATUS_NOT_FOUND);
+                response.end ();
+                break;
+            case error.CONFLICT:
+                response.status (http.STATUS_CONFLICT);
+                response.end ();
+                break;
+        }
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
+        return;
+    })
+    
+}
+/**
+ * เส้นทางต่อเนื่องการลงชื่อเข้าใช้งาน ดำเนินการต่อโดยการป้อนรหัสผ่าน
+ * คำสั่งนี้ต้องใช้รหัสยืนยันตัวตนที่ถูกต้อง
+*/
+content.routeSignInPwd = function (request: Request, response: Response)
+{
+    if (!request.body)
+    {
+        response.status (http.STATUS_BAD_REQUEST)
+        response.end ();
+        return;
+    }
+    let input: string;
+    const key = "value";
+
     try
     {
-        await model.signIn (id);
+        input = objReader (request.body).requireString (key);
     }
-    catch (error: unknown)
+    catch
     {
-        if (error instanceof ErrorNotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        if (error instanceof ErrorConflict)
-        {
-            response.status (http.STATUS_CONFLICT);
-            response.end ();
-            return;
-        }
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
         return;
     }
-}
-content.routeSignInPwd = function (request: Request, response: Response)
-{
-    try
-    {
-        response.status (http.STATUS_NOT_IMPLEMENTED);
-        response.end ();
-    }
-    catch (error: unknown)
-    {
-        log.error ("Unhandled initiated exception: /sign-in");
-        log.error (error);
 
+    model.signIn (input).catch ((e) =>
+    {
+        switch (Number (e))
+        {
+            case error.NOT_FOUND:
+                response.status (http.STATUS_NOT_FOUND);
+                response.end ();
+                break;
+            case error.CONFLICT:
+                response.status (http.STATUS_CONFLICT);
+                response.end ();
+                break;
+        }
         response.status (http.STATUS_SERVICE_UNAVAILABLE);
         response.end ();
-    }
+        return;
+    });
 }
 content.routeSignInTotp = function (request: Request, response: Response)
 {

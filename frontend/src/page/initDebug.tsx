@@ -83,14 +83,12 @@ content.ViewLog = function ViewLog ()
   { 
     logMain.addListener (onLogReceived);
     logConsole.init ();
-    // logInject.init ();
     logRemote.init ();
 
     return () =>
     {
       logMain.removeListener (onLogReceived);
       logRemote.terminate ();
-      // logInject.terminate ();
       logConsole.terminate ();
     };
 

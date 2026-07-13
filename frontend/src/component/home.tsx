@@ -1,4 +1,6 @@
+import react from "react";
 import styled from "styled-components";
+import navigatior from "#util/common.navigation.ts";
 import testImg from "#asset/image/home.testImage.jpg"
 
 import Scroll from "#component/common.scroll.tsx";
@@ -96,6 +98,12 @@ content.Favorite = function HomeFavorite ()
 }
 content.Ending = function HomeEnding ()
 {
+  function onContinue (event: react.MouseEvent)
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+    navigatior.toProductBrowser ();
+  }
   return <Ending>
     <Scroll.Infinite
       display="flex"
@@ -124,6 +132,7 @@ content.Ending = function HomeEnding ()
     </Scroll.Infinite>
     <h2>และยังไม่จบเพียงแค่เท่านี้</h2>
     <p>ยังมีเกมอีก 280 กำลังรอคุณอยู่ให้คุณสัมผัส</p>
+    <button onClick={onContinue}>เลือกเกมเลย</button>
   </Ending>;
 }
 const IntroView = styled.div`
