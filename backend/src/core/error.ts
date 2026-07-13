@@ -5,61 +5,75 @@ const content = function () { return; }
 /**
  * คลาสข้อผิดพลาด จากสาเหตุที่ระบุไม่ได้
 */
-content.UNKNOWN = 0;
+content.Unknown = class extends Error {};
 /**
  * คลาสข้อผิดพลาด จากสาเหตุที่ไม่ได้ระบุ
 */
-content.UNSPECIFIED = 1;
+content.Unspecified = class extends Error {};
 /**
  * คลางข้อผิดพลาด จากสาเหตุทางด้านเครือข่าย
 */
-content.NETWORK = 2;
+content.Network = class extends Error {};
+/**
+ * คลางข้อผิดพลาด จากสาเหตุปลายทางกำลังปิดระบบเครือข่าย
+*/
+content.NetworkGone = class extends Error {};
+/**
+ * คลางข้อผิดพลาด จากสาเหตุปลายทางไม่สามารถรองรับการเชื่อมต่อได้
+*/
+content.NetworkLimit = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่สามารถประมวลข้อมูลได้
  * เนื่องจากชุดข้อมูลดังกล่าวไม่เป็นข้อมูล JSON ถูกต้องหรือสมบูรณ์
 */
-content.BAD_JSON = 3;
+content.BadJson = class extends Error {};
+/**
+ * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่สามารถประมวลข้อมูลได้
+ * เนื่องจากชุดข้อมูลดังกล่าวไม่เป็นข้อมูล XML ถูกต้องหรือสมบูรณ์
+*/
+content.BadXml = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่สามารถประมวลข้อมูลได้
  * เนื่องจากชุดข้อมูลดังกล่าวไม่ถูกต้องหรือสมบูรณ์
 */
-content.BAD_DATA = 4;
+content.BadData = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่พบข้อมูล
 */
-content.NOT_FOUND = 5;
+content.NotFound = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่พร้อมใช้งาน
 */
-content.NOT_AVAILABLE = 6;
+content.NotAvailable = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบยังไม่มีตรรกะในการทำงาน
 */
-content.NOT_IMPLEMENTED = 7;
+content.NotImplemented = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบยังไม่สามารถยืนยันตัวตนได้
 */
-content.NOT_AUTHORIZED = 8;
+content.NotAuthorized = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบปฎิเสธคำร้องเนื่องสิทธิ์เข้าถึง
 */
-content.FORBIDDEN = 9;
+content.Forbidden = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบพบข้อมูลซ้ำกัน
 */
-content.DUPLICATE = 10;
+content.Duplicate = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบพบข้อมูลซ้ำซ้อนกัน
 */
-content.CONFLICT = 11;
+content.Conflict = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบปฎิเสธการทำงานเนื่องจากข้อจำกัด
 */
-content.CONSTRAINT = 12;
+content.Constraint = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบปฎิเสธการทำงานเนื่องจากคำสั่งไม่ถูกต้อง
 */
-content.COMMAND = 13;
+content.Command = class extends Error {};
+
 /**
  * รายการข้อผิดพลาดทั้งหมดที่ใช้โดยทั่วไป
 */
