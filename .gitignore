@@ -4,6 +4,7 @@
 backend/build
 backend/dist
 backend/data/log
+backend/data/sql
 backend/node_modules
 
 #

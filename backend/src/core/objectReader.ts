@@ -5,76 +5,77 @@
  * เป็นหลักโดยผู้ใช้งานต้องระบุคำสั่งที่ชัดเจนเพื่อระบุข้อมูลที่ต้องการให้แน่ชัด
  * 
 */
+import error from "#core/error.ts";
 
 /**
  * ระบบอ่านข้อมูลวัตถุ (JavaScript Object)
 */
 const content = (data: unknown) =>
 {
+    const catchUndefined = (name: string, value: unknown) : void => 
+    {
+        if (typeof value === "undefined") 
+        {
+            throw new error.BadData (`${name} == undefined`);
+        }
+    }
+    const catchNull = (name: string, value: unknown) : void =>
+    {
+        if (typeof value === "object" && value === null)
+        {
+            throw new error.BadData (`${name} == null`);
+        }
+    }
+    const catchNonString = (name: string, value: unknown) : void =>
+    {
+        if (typeof value === "string")
+        {
+            return;
+        }
+        throw new error.BadType (`${name} != string`);
+    }
+    const catchNonInteger = (name: string, value: unknown) : void =>
+    {
+        if (typeof value !== "number")
+        {
+            throw new error.BadType (`${name} != number`);
+        }
+        if (!Number.isSafeInteger (value))
+        {
+            throw new error.BadData (`${name}: expecting integer`);
+        }
+    }
+    const catchNonFloat = (name: string, value: unknown) : void =>
+    {
+        if (typeof value !== "number")
+        {
+            throw new error.BadType (`${name} != number`);
+        }
+        if (!Number.isFinite (value))
+        {
+            throw new error.BadData (`${name}: expecting finite`);
+        }
+    }
+    const catchNonObject = (name: string, value: unknown) : void =>
+    {
+        if (typeof value !== "object" || Array.isArray (value))
+        {
+            throw new error.BadType (`${name} != object`);
+        }
+    }
+    const catchNonArray = (name: string, value: unknown) : void =>
+    {
+        if (typeof value !== "object" && !Array.isArray (value))
+        {
+            throw new error.BadType (`${name} != array`);
+        }
+    }
     catchUndefined ("<root>", data);
     catchNull ("<root>", data);
     catchNonObject ("<root>", data);
 
     const instance = data as Record<string, unknown>;
     const init = () => { return; };
-
-    function catchUndefined (name: string, value: unknown)
-    {
-        if (typeof value === "undefined") 
-        {
-            throw new content.ErrorData (`${name} has invalid property value: undefined`);
-        }
-    }
-    function catchNull (name: string, value: unknown)
-    {
-        if (typeof value === "object" && value === null)
-        {
-            throw new content.ErrorData (`${name} has invalid property value: null`);
-        }
-    }
-    function catchNonString (name: string, value: unknown)
-    {
-        if (typeof value !== "string")
-        {
-            throw new content.ErrorType (`${name} has invalid property type: non-string`);
-        }
-    }
-    function catchNonInteger (name: string, value: unknown)
-    {
-        if (typeof value !== "number")
-        {
-            throw new content.ErrorType (`${name} has invalid property type: non-number`);
-        }
-        if (!Number.isSafeInteger (value))
-        {
-            throw new content.ErrorData (`${name} has invalid property value: ${String (value)}, expecting integer`);
-        }
-    }
-    function catchNonFloat (name: string, value: unknown)
-    {
-        if (typeof value !== "number")
-        {
-            throw new content.ErrorType (`${name} has invalid property type: non-number`);
-        }
-        if (!Number.isFinite (value))
-        {
-            throw new content.ErrorData (`${name} has invalid property value: ${String (value)}, expecting finite`);
-        }
-    }
-    function catchNonObject (name: string, value: unknown)
-    {
-        if (typeof value !== "object" || Array.isArray (value))
-        {
-            throw new content.ErrorType (`${name} has invalid property type: non-object`);
-        }
-    }
-    function catchNonArray (name: string, value: unknown)
-    {
-        if (typeof value !== "object" && !Array.isArray (value))
-        {
-            throw new content.ErrorType (`${name} has invalid property type: non-array`);
-        }
-    }
 
     /**
      * อ่านข้อมูลตัวเลขจำนวน จากชื่อที่กำหนดไว้
@@ -859,43 +860,20 @@ const content = (data: unknown) =>
 
         return value as Record<string, unknown>;
     }
+    /**
+     * แข็งวัตถุ (ความปลอดภัย)
+    */
+    Object.freeze (init);
+    /**
+     * ส่งออกตัวแปร
+    */
     return init;
 }
 /**
- * ตรวจสอบข้อผิดพลาดที่เกิดขึ้น
+ * แข็งวัตถุ (ความปลอดภัย)
 */
-content.isError = function (error: unknown)
-{
-    return error instanceof content.ErrorUnavailable ||
-            error instanceof content.ErrorData ||
-            error instanceof content.ErrorType;
-}
+Object.freeze (content);
 /**
- * ตรวจสอบข้อผิดพลาดที่เกิดขึ้นว่าเป็นปรเถท `ErrorData` หรือไม่
+ * ส่งออกตัวแปร
 */
-content.isErrorData = function (error: unknown)
-{
-    return error instanceof content.ErrorData;
-}
-/**
- * ตรวจสอบข้อผิดพลาดที่เกิดขึ้นว่าเป็นปรเถท `ErrorType` หรือไม่
-*/
-content.isErrorType = function (error: unknown)
-{
-    return error instanceof content.ErrorType;
-}
-/**
- * ข้อผิดพลาดเนื่องจากไม่สามารถเข้าถึงข้อมูลได้
-*/
-content.ErrorUnavailable = class extends Error {};
-/**
- * ข้อผิดพลาดเนื่องจากข้อมูลไม่ถูกต้อง
-*/
-content.ErrorData = class extends Error {};
-/**
- * ข้อผิดพลาดเนื่องจากข้อมูลประเภทไม่ถูกต้องตามที่ระบบต้องการ
-*/
-content.ErrorType = class extends Error {};
-
-
 export default content;

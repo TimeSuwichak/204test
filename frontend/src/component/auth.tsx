@@ -1,6 +1,7 @@
 import react  from "react";
 import styled from "styled-components";
 import api    from "#util/api.auth.ts";
+import error  from "#util/common.error.ts";
 
 import { keyframes } from "styled-components";
 
@@ -43,7 +44,7 @@ interface PropLvSignInPwd
   onCancel ?: () => void;
 }
 
-const content = function ()
+const content = function Auth ()
 {
   
   return <>
@@ -110,7 +111,6 @@ content.HvSignIn = function AuthHvSignIn ()
 }
 content.HvSignInId = function AuthHvSignInId (prop: PropHvSignInId)
 {
-  const [pending, setPending] = react.useState (false);
   const [feedback, setFeedback] = react.useState ({
     type: content.FEEDBACK_UNDEFINED,
     text: ""
@@ -145,7 +145,6 @@ content.HvSignInId = function AuthHvSignInId (prop: PropHvSignInId)
       return;
     }
     setFeedback ({ type: content.FEEDBACK_UNDEFINED, text: "" });
-    setPending (true);
 
     api.signIn (input).then (() =>
     {
@@ -153,11 +152,9 @@ content.HvSignInId = function AuthHvSignInId (prop: PropHvSignInId)
         prop.onContinue ();
       }
     })
-    .catch ((error) =>
+    .catch ((e: unknown) =>
     {
-      setPending (false);
-
-      if (error === api.ERROR_NETWORK) 
+      if (e instanceof error.Network) 
       {
         setFeedback ({ 
           type: content.FEEDBACK_ERROR, 
@@ -165,7 +162,7 @@ content.HvSignInId = function AuthHvSignInId (prop: PropHvSignInId)
         });
         return;
       }
-      if (error === api.ERROR_NOT_FOUND) 
+      if (e instanceof error.NotFound) 
       {
         setFeedback ({ 
           type: content.FEEDBACK_ERROR, 
@@ -173,7 +170,7 @@ content.HvSignInId = function AuthHvSignInId (prop: PropHvSignInId)
         });
         return;
       }
-      if (error === api.ERROR_TOO_MANY_REQUEST) 
+      if (e instanceof error.NetworkLimit) 
       {
         setFeedback ({ 
           type: content.FEEDBACK_ERROR, 
@@ -181,7 +178,7 @@ content.HvSignInId = function AuthHvSignInId (prop: PropHvSignInId)
         });
         return;
       }
-      if (error === api.ERROR_NOT_AVAILABLE) 
+      if (e instanceof error.NotAvailable) 
       {
         setFeedback ({ 
           type: content.FEEDBACK_ERROR, 

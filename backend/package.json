@@ -31,7 +31,7 @@
         "dotenv": "17.4.2",
         "express": "5.2.1",
         "express-rate-limit": "8.5.2",
-        "jsonwebtoken": "9.0.3",
+        "jose": "6.2.3",
         "helmet": "8.2.0",
         "mysql2": "3.22.6",
         "ws": "8.21.0"
@@ -41,7 +41,6 @@
         "@types/compression": "1.8.1",
         "@types/cors": "2.8.19",
         "@types/express": "5.0.6",
-        "@types/jsonwebtoken": "9.0.10",
         "@types/node": "26.1.1",
         "@types/ws": "8.18.1",
         "@eslint/js": "10.0.1",

@@ -28,7 +28,13 @@ content.HeadIntro = function ProductHeadIntro ()
     <HeadButtonCart>เพิ่มลงในตะกรา</HeadButtonCart>
   </HeadViewContent>;
 }
-
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
+Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;
 
 const HeadView = styled.div`

@@ -1,5 +1,6 @@
 import http from "#core/http.ts";
 import control from "#controller/auth.ts";
+import model from "#model/auth.ts";
 
 const content = function ()
 {
@@ -9,16 +10,20 @@ content.getController = function ()
 {
     return control;
 }
+content.getModel = function ()
+{
+    return model;
+}
 content.getRouter = function ()
 {
     const route = http.router ();
     const limiter = http.useRateLimit ({
-        window: 1000,
+        window: 60000,
         limit: 3
     });
 
     route.post ("/sign-in", limiter, control.routeSignIn);
-    route.post ("/sign-in-password", limiter, control.routeSignInPwd);
+    route.post ("/sign-in-password", limiter, control.validateChallenge, control.routeSignInPwd);
     route.post ("/sign-in-totp", control.routeSignInTotp);
     route.post ("/sign-out", control.routeSignOut);
     

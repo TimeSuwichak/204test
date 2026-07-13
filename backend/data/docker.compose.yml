@@ -17,7 +17,7 @@ services:
     ports:
       - "51100:3306"
     volumes:
-      - "./backend/data/sql:/var/lib/mysql"
+      - "./sql:/var/lib/mysql"
     networks:
       - DbNetwork
 

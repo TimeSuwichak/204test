@@ -9,4 +9,11 @@ const content = function Auth ()
     <Self/>
   </>;
 }
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
+Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

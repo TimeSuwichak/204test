@@ -13,13 +13,3 @@ domReact.render (
     <Init/>
   </React.StrictMode>
 );
-
-
-
-// domReact.render (
-//   <react.StrictMode>
-//     <react.Suspense fallback={Splash}>
-//      
-//     </react.Suspense>
-//   </react.StrictMode>
-// );

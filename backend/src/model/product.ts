@@ -1,13 +1,9 @@
-import Self from "#component/home.tsx";
-
-const content = () =>
+/**
+ * ระบบจัดการข้อมูลสินค้า
+*/
+const content = function ()
 {
-  return <>
-    <Self.Intro/>
-    <Self.Recommendation/>
-    <Self.Favorite/>
-    <Self.Ending/>
-  </>;
+    return;
 }
 /**
  * แข็งวัตถุ (ความปลอดภัย)

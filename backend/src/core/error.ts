@@ -29,6 +29,11 @@ content.NetworkLimit = class extends Error {};
 content.BadJson = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่สามารถประมวลข้อมูลได้
+ * เนื่องจากชุดข้อมูลดังกล่าวไม่เป็นข้อมูลที่ถูกรูปแบบ
+*/
+content.BadFormat = class extends Error {};
+/**
+ * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่สามารถประมวลข้อมูลได้
  * เนื่องจากชุดข้อมูลดังกล่าวไม่เป็นข้อมูล XML ถูกต้องหรือสมบูรณ์
 */
 content.BadXml = class extends Error {};
@@ -37,6 +42,10 @@ content.BadXml = class extends Error {};
  * เนื่องจากชุดข้อมูลดังกล่าวไม่ถูกต้องหรือสมบูรณ์
 */
 content.BadData = class extends Error {};
+/**
+ * ข้อผิดพลาดเนื่องจากข้อมูลประเภทไม่ถูกต้องตามที่ระบบต้องการ
+*/
+content.BadType = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบไม่พบข้อมูล
 */
@@ -53,6 +62,14 @@ content.NotImplemented = class extends Error {};
  * คลาสข้อผิดพลาด ในกรณีที่ระบบยังไม่สามารถยืนยันตัวตนได้
 */
 content.NotAuthorized = class extends Error {};
+/**
+ * คลาสข้อผิดพลาด ในกรณีที่ยังไม่ถึงเวลาการทำงาน
+*/
+content.NotBefore = class extends Error {};
+/**
+ * คลาสข้อผิดพลาด ในกรณีที่หมดอายุการใช้งาน
+*/
+content.Expired = class extends Error {};
 /**
  * คลาสข้อผิดพลาด ในกรณีที่ระบบปฎิเสธคำร้องเนื่องสิทธิ์เข้าถึง
 */
@@ -73,7 +90,10 @@ content.Constraint = class extends Error {};
  * คลาสข้อผิดพลาด ในกรณีที่ระบบปฎิเสธการทำงานเนื่องจากคำสั่งไม่ถูกต้อง
 */
 content.Command = class extends Error {};
-
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
+Object.freeze (content);
 /**
  * รายการข้อผิดพลาดทั้งหมดที่ใช้โดยทั่วไป
 */

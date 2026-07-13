@@ -8,7 +8,9 @@ import http         from "#core/http.ts";
 import webSocket    from "#core/webSocket.ts";
 import sql          from "#core/sql.ts";
 
-import auth         from "#router/auth.ts";
+import routerAuth   from "#router/auth.ts";
+
+import modelAuth    from "#model/auth.ts";
 
 let shutdownRequested = false;
 const shutdown = function ()
@@ -48,11 +50,11 @@ await logFile.init ();
 await logInject.init ();
 await logRemote.init ();
 await sql.init ();
-await webSocket.init ();
 await http.init (() =>
 {
-    http.routeTo ("/auth", auth.getRouter ());
+    http.routeTo ("/auth", routerAuth.getRouter ());
     return;
 });
+await webSocket.init ();
 
-auth.getRouter ();
+await modelAuth.init ();

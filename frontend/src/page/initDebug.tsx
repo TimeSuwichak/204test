@@ -123,5 +123,11 @@ const LogViewText = styled.p<{ $color: string }>`
   word-wrap: break-word;
   word-break: break-all;
 `;
-
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
+Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

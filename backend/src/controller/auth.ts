@@ -7,7 +7,8 @@ import model        from "#model/auth.ts";
 import
 { 
     type Request, 
-    type Response 
+    type Response,
+    type NextFunction
 } 
 from "#core/http.ts";
 /**
@@ -21,19 +22,70 @@ const content = function ()
 {
     return;
 }
-/**
- * เริ่มต้นการทำงานของระบบ
-*/
-content.init = function ()
+content.validate = function ()
 {
-    return;
+    return function (
+        request: Request,
+        response: Response,
+        next: NextFunction
+    )
+    {
+        void request;
+        void response;
+        void next;
+    }
 }
-/**
- * ยุติการทำงานของระบบ
-*/
-content.terminate = function ()
+content.validateChallenge = function ()
 {
-    return;
+    return function (
+        request: Request,
+        response: Response,
+        next: NextFunction
+    )
+    {
+        void request;
+        void response;
+        void next;
+
+        if (!request.headers.authorization)
+        {
+            response.status (http.STATUS_UNAUTHORIZED);
+            response.end ();
+            return;
+        }
+        const header = request.headers.authorization;
+        const map = header.split (" ");
+
+        if (map.length != 2)
+        {
+            response.status (http.STATUS_UNAUTHORIZED);
+            response.end ();
+            return;
+        }
+        const key = String (map [0]);
+        const value = String (map [1]);
+
+        if (key !== "Bearer")
+        {
+            response.status (http.STATUS_UNAUTHORIZED);
+            response.end ();
+            return;
+        }
+        void model.jwtVerify (value).then (() =>
+        {
+            next ();
+        })
+        .catch ((e: unknown) =>
+        {
+            log.error ("Session validation failed");
+            log.error ("------------------------");
+            log.error (e);
+
+            response.status (http.STATUS_UNAUTHORIZED);
+            response.end ();
+            return;
+        })
+    }
 }
 /**
  * เส้นทางเริ่มต้นการลงชื่อเข้าใช้งาน
@@ -64,7 +116,7 @@ content.routeSignIn = function (request: Request, response: Response)
     {
         const result = objWriter ();
 
-        result.requireInteger ("id", x.link);
+        result.requireInteger ("id", x.authLink);
         result.requireString ("session", x.session);
         result.requireDate ("sessionIssued", x.sessionIssued);
         result.requireDate ("sessionExpire", x.sessionExpire);
@@ -74,19 +126,21 @@ content.routeSignIn = function (request: Request, response: Response)
         response.set ("content-type", "application/json");
         response.end (result.toJson ());
     })
-    .catch ((e) =>
+    .catch ((e: unknown) =>
     {
-        switch (Number (e))
+        if (e instanceof error.NotFound)
         {
-            case error.NOT_FOUND:
-                response.status (http.STATUS_NOT_FOUND);
-                response.end ();
-                break;
-            case error.CONFLICT:
-                response.status (http.STATUS_CONFLICT);
-                response.end ();
-                break;
+            response.status (http.STATUS_NOT_FOUND);
+            response.end ();
+            return;
         }
+        if (e instanceof error.Conflict)
+        {
+            response.status (http.STATUS_CONFLICT);
+            response.end ();
+            return;
+        }
+        log.error (e);
         response.status (http.STATUS_SERVICE_UNAVAILABLE);
         response.end ();
         return;
@@ -119,22 +173,24 @@ content.routeSignInPwd = function (request: Request, response: Response)
         return;
     }
 
-    model.signIn (input).catch ((e) =>
+    model.signIn (input).catch ((e: unknown) =>
     {
-        switch (Number (e))
+        if (e instanceof error.NotFound)
         {
-            case error.NOT_FOUND:
-                response.status (http.STATUS_NOT_FOUND);
-                response.end ();
-                break;
-            case error.CONFLICT:
-                response.status (http.STATUS_CONFLICT);
-                response.end ();
-                break;
+            response.status (http.STATUS_NOT_FOUND);
+            response.end ();
+            return;
         }
+        if (e instanceof error.Conflict)
+        {
+            response.status (http.STATUS_CONFLICT);
+            response.end ();
+            return;
+        }
+        log.error (e);
         response.status (http.STATUS_SERVICE_UNAVAILABLE);
         response.end ();
-        return;
+        return;;
     });
 }
 content.routeSignInTotp = function (request: Request, response: Response)
