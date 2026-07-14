@@ -3,7 +3,7 @@ import styled from "styled-components";
 import navigatior from "#util/common.navigation.ts";
 import testImg from "#asset/image/home.testImage.jpg"
 
-import Scroll from "#component/common.scroll.tsx";
+import Scroll from "#component/scroll.infinite.tsx";
 
 /**
  * ส่วนประกอบแสดงผลสำหรับหน้าแรก

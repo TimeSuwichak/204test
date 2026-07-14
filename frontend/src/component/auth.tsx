@@ -742,6 +742,7 @@ const StyleTempHeaderBack = styled.button`
   & > img,
   & > svg
   {
+    display: inline-block;
     margin-right: 16px;
     vertical-align: middle;
   }

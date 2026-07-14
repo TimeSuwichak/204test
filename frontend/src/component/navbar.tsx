@@ -77,6 +77,33 @@ interface PropSpacing
   */
   level ?: number;
 }
+interface PropContextMenu
+{
+    children ?: react.ReactNode;
+}
+interface PropContextItem
+{
+    /**
+     * ไอคอนสำหรับปุ่มกด
+    */
+    icon ?: string | undefined; 
+    /**
+     * ข้อความสำหรับปุ่มกด
+    */
+    text ?: string;
+    /**
+     * ระบุว่ากำลังเลือกอยู่
+    */
+    highlighted ?: boolean;
+    /**
+     * ระบุว่าต้องการซ่อน
+    */
+    hidden ?: boolean;
+    /**
+     * คำสั่งที่ทำงานเมื่อผู้ใช้กดปุ่ม
+    */
+    onClick ?: () => void; 
+}
 
 /**
  * โครงสร้างข้อมูลบริบทของเมนูนำทาง
@@ -254,6 +281,35 @@ content.Spacing = function NavBarSpacing (prop: PropSpacing)
     <Spacing $level={prop.level ?? 1}/>
   );
 }
+content.ContextMenu = function NavBarContextMenu (property: PropContextMenu)
+{
+    return <>
+      <ContextMenu>{property.children}</ContextMenu>   
+    </>;
+}
+content.ContextItem = function NavBarContextItem (property: PropContextItem)
+{
+    const highligted  = property.highlighted ?? false;
+    const hidden      = property.hidden ?? false;
+    const icon        = property.icon ?? undefined;
+    const text        = property.text ?? "";
+    const click       = property.onClick ?? function () { return; };
+
+    function onClick (event: React.MouseEvent)
+    {
+        event.preventDefault ();
+        event.stopPropagation ();
+
+        click ();
+    }
+
+    return <>
+      <ContextItem $highlighted={highligted} $hidden={hidden} onClick={onClick}>
+        <img src={icon} alt=""/>
+        <label>{text}</label>
+      </ContextItem>
+    </>;
+}
 
 const Root = styled.div`
   position: fixed;
@@ -361,11 +417,14 @@ const MenuItem = styled.button`
   height: 32px;
   background-color: transparent;
   border: transparent;
+  vertical-align: middle
 `;
 const MenuItemIcon = styled.img`
   width: 32px;
   height: 32px;
   margin-right: 16px;
+  display: inline-block;
+  vertical-align: middle;
 `;
 const MenuItemText = styled.span`
   color: var(--text-primary);
@@ -376,6 +435,54 @@ const MenuItemText = styled.span`
 const Spacing = styled.div<{ $level: number }>`
   min-height: 32px;
   flex-grow: ${prop => prop.$level}
+`;
+const ContextMenu = styled.div `
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0px;
+`;
+const ContextItem = styled.button
+<{ $highlighted ?: boolean, $hidden ?: boolean }>`
+
+    display: ${props => props.$hidden ? "none" : "block"};
+    visibility: ${props => props.$hidden ? "hidden" : "visible"};
+    pointer-events: ${props => props.$hidden ? "none" : "auto"};
+
+    background-color: ${props => props.$highlighted ? "rgb(188, 226, 254)" : "transparent"} !important;
+    border: none !important;
+    outline: none !important;
+    width: 144px;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    & > img
+    {
+        width: 24px;
+        height: 24px;
+    }
+    &:hover, &:focus
+    {
+        background-color: ${props => props.$highlighted ? "rgb(154, 203, 239)" : "rgb(210, 236, 255)"} !important;
+    }
+    &:active
+    {
+        background-color: ${props => props.$highlighted ? "rgb(111, 179, 228)" : "rgb(150, 194, 226)"} !important;
+    }
+    @media (max-width: 1024px)
+    {
+        width: 32px;
+
+        & > label
+        {
+            display: none;
+        }
+    }
 `;
 /**
  * แข็งวัตถุ (ความปลอดภัย)
