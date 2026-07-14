@@ -1,54 +1,33 @@
 import react from "react";
-import 
-{
-  useNavigate,
-  HashRouter,
-  Outlet,
-  Route,
-  Routes
-} 
-from "react-router";
+import commonCtx from "#context/common.ts";
+import commonLog from "#util/common.log.ts";
+import commonNav from "#util/common.navigation.ts";
+import apiAuth from "#util/api.auth.ts";
 
-import log from "#util/common.log.ts";
-import navigation from "#util/common.navigation.ts";
-
-import ctxAuth from "#context/common.ts";
-
-//
-// โหลดหน้าต่างเมื่อจำเป็นเท่านั้น
-//
-const CoAuth 
-  = react.lazy (() => import ("./auth.tsx"));
-const CoSettings 
-  = react.lazy (() => import ("./settings.tsx"));
-const CoDebug 
-  = react.lazy (() => import ("./initDebug.tsx"));
-const CoNavBarCustomer 
-  = react.lazy (() => import ("../component/customer.navbar.tsx"));
-
-const CoError404
-  = react.lazy (() => import ("./error.404.tsx"));
-
-const CsAbout
-  = react.lazy (() => import ("./customer.about.tsx"));
-const CsHome 
-  = react.lazy (() => import ("./customer.home.tsx"));
-const CsProduct 
-  = react.lazy (() => import ("./customer.product.tsx"));
-const CsProductBrowser 
-  = react.lazy (() => import ("./customer.productBrowser.tsx"));
-const CsShipping
-  = react.lazy (() => import ("./customer.shipping.tsx"));
+import { lazy } from "react";
+import { HashRouter, Routes, Route, Outlet, useNavigate } from "react-router";
 
 interface PropSplash
 {
   visible: boolean;
 }
-interface PropBootstrap
-{
-  onComplete: () => void;
-  onError: () => void;
-}
+
+//
+// โหลดหน้าต่างเมื่อจำเป็นเท่านั้น
+//
+const GAuth = lazy (() => import ("#page/auth.tsx"));
+const GSettings = lazy (() => import ("#page/settings.tsx"));
+const G404 = lazy (() => import ("#page/error.404.tsx"));
+
+const CAbout = lazy (() => import ("#page/customer.about.tsx"));
+const CHome = lazy (() => import ("#page/customer.home.tsx"));
+const CProd = lazy (() => import ("#page/customer.product.tsx"));
+const CProdBrowse = lazy (() => import ("#page/customer.productBrowser.tsx"));
+const CShipping = lazy (() => import ("#page/customer.shipping.tsx"));
+
+const ADashboard = lazy (() => import ("#page/admin.dashboard.tsx"));
+
+const VCustomer = lazy (() => import ("#page/customer.tsx"));
 
 /**
  * หน้าต่างที่ไม่มีการแสดงผลเป็นของตัวเอง
@@ -56,23 +35,156 @@ interface PropBootstrap
 */
 const content = function Init ()
 {
+  return (
+    <>
+      <content.Splash visible={false}/>
+      <commonCtx.ProviderAuth value={commonCtx.initAuth ()}>
+        <HashRouter>
+          <content.System/>
+        </HashRouter>
+      </commonCtx.ProviderAuth>
+    </>
+  );
+}
+content.System = function InitSystem ()
+{
+  const navigate = useNavigate ();
   const [completed, setCompleted] = react.useState (false);
+  const auth = commonCtx.useAuth ();
 
-  function onComplete ()
+  function onInit ()
   {
-    setCompleted (true);
+    commonLog.init ();
+    commonNav.init (navigate);
+
+    apiAuth.saveLoad ();
+
+    const saved = apiAuth.saveGetItemPrefered ();
+
+    if (saved)
+    {
+      auth.name = saved.name;
+      auth.session = saved.secret;
+      auth.sessionIssued = saved.issued;
+      auth.sessionExpire = saved.expired;
+    }
+  }
+  function onTerminate ()
+  {
+    commonNav.terminate ();
+    commonLog.terminate ();
+  }
+  const onComplete = () =>
+  {
     return;
   }
-  function onError ()
+  const onError = () =>
   {
     return;
   }
-  return <>
-    <HashRouter>
-      <content.Splash visible={!completed}/>
-      <content.Bootstrap onComplete={onComplete} onError={onError}/>
-    </HashRouter>
-  </>;
+  react.useLayoutEffect (() =>
+  {
+    try
+    {
+      onInit ();
+      onComplete ();
+      setCompleted (true);
+    }
+    catch (except)
+    {
+      console.error (except);
+      onTerminate ();
+      onError ();
+      return;
+    }
+    return () =>
+    {
+      onTerminate ();
+    }
+  },
+  []);
+
+  if (!completed)
+  {
+    return (<></>);
+  }
+  return (
+    <Routes>
+      <Route Component={content.Outlet}>
+        {/* Common */}
+        <Route>
+          <Route path="/auth" element={<GAuth/>}/>
+          <Route path="/settings" element={<GSettings/>}/>
+        </Route>
+        {/* Customer */}
+        <Route Component={VCustomer}>
+          <Route index Component={CHome}/>
+          <Route path="/about" Component={CAbout}/>
+          <Route path="/product/:id" Component={CProd}/>
+          <Route path="/product-browser" Component={CProdBrowse}/>
+          <Route path="/shipping" Component={CShipping}/>
+        </Route>
+        {/* Staff && Manager */}
+        <Route>
+          <Route path="/admin/dashboard" Component={ADashboard}/>
+        </Route>
+        <Route>
+          <Route path="/*" Component={G404}/>
+        </Route>
+      </Route>
+    </Routes>
+  );
+}
+content.Outlet = function InitOutlet ()
+{
+  const navigate = useNavigate ();
+
+  function onInit ()
+  {
+    commonLog.init ();
+    commonNav.init (navigate);
+  }
+  function onTerminate ()
+  {
+    commonNav.terminate ();
+    commonLog.terminate ();
+  }
+  const onComplete = () =>
+  {
+    return;
+  }
+  const onError = () =>
+  {
+    return;
+  }
+  react.useEffect (() =>
+  {
+    try
+    {
+      onInit ();
+      onComplete ();
+    }
+    catch (except)
+    {
+      console.error (except);
+      onTerminate ();
+      onError ();
+      return;
+    }
+    return () =>
+    {
+      onTerminate ();
+    }
+  },
+  []);
+
+  if (import.meta.env.DEV)
+  {
+    return <>
+      <Outlet/>
+    </>;
+  }
+  return <Outlet/>
 }
 content.Splash = function InitSplash (prop: PropSplash)
 {
@@ -106,102 +218,6 @@ content.Splash = function InitSplash (prop: PropSplash)
   },
   [prop]);
 
-  return <></>;
+  return (<></>);
 }
-content.Bootstrap = function InitBootstrap (prop: PropBootstrap)
-{
-  const navigator = useNavigate ();
-
-  function onInit ()
-  {
-    log.init ();
-    navigation.init (navigator);
-  }
-  function onTerminate ()
-  {
-    navigation.terminate ();
-    log.terminate ();
-  }
-  function onComplete ()
-  {
-    prop.onComplete ();
-  }
-  function onError ()
-  {
-    prop.onError ();
-  }
-  react.useEffect (() =>
-  {
-    try
-    {
-      onInit ();
-      onComplete ();
-    }
-    catch (except)
-    {
-      console.error (except);
-      onTerminate ();
-      onError ();
-      return;
-    }
-    return () =>
-    {
-      onTerminate ();
-    }
-  },
-  []);
-  return (
-  <ctxAuth.ProviderAuth value={ctxAuth.init ()}>
-    <Routes>
-      <Route caseSensitive Component={content.Outlet}>
-        <Route path="/auth" element={<CoAuth/>}/>
-        <Route path="/settings" element={<CoSettings/>}/>
-      </Route>
-      <Route caseSensitive Component={content.OutletCustomer}>
-        <Route index element={<CsHome/>}/>
-        <Route path="/about" element={<CsAbout/>}/>
-        <Route path="/product" element={<CsProduct/>}/>
-        <Route path="/product-browser" element={<CsProductBrowser/>}/>
-        <Route path="/shipping" element={<CsShipping/>}/>
-      </Route>;
-      <Route>
-        <Route path="*" element={<CoError404/>}/>
-      </Route>
-    </Routes>
-  </ctxAuth.ProviderAuth>
-  );
-}
-content.Outlet = function InitOutlet ()
-{
-  if (import.meta.env.DEV)
-  {
-    return <>
-      <Outlet/>
-      <CoDebug/>
-    </>;
-  }
-  return <Outlet/>
-}
-content.OutletCustomer = function InitOutletCustomer ()
-{
-  if (import.meta.env.DEV)
-  {
-    return <>
-      <Outlet/>
-      <CoNavBarCustomer/>
-      <CoDebug/>
-    </>;
-  }
-  return <>
-    <Outlet/>
-    <CoNavBarCustomer/>
-  </>;
-}
-/**
- * แข็งวัตถุ (ความปลอดภัย)
-*/
-Object.freeze (content);
-/**
- * ส่งออกตัวแปร
-*/
 export default content;

@@ -3,7 +3,7 @@
 //
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Component from "#page/initV2.tsx";
+import Component from "#page/init.tsx";
 
 const domElement = document.getElementById ("app") as HTMLDivElement;
 const domReact = ReactDOM.createRoot (domElement);
