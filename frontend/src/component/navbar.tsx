@@ -286,6 +286,7 @@ const BrandingImg = styled.img`
   width: 32px;
   height: 32px;
   vertical-align: middle;
+  display: inline-block;
 `;
 const BrandingLabel = styled.label<{ $show: boolean }>`
   width: auto;

@@ -795,6 +795,7 @@ const StyleTempOption = styled.button`
   & > img,
   & > svg
   {
+    display: inline-block;
     width: 24px;
     height: 24px;
     vertical-align: middle;
