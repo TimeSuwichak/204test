@@ -9,6 +9,7 @@ import webSocket    from "#core/webSocket.ts";
 import sql          from "#core/sql.ts";
 
 import routerAuth   from "#router/auth.ts";
+import routerProduct from "#router/product.ts";
 
 import modelAuth    from "#model/auth.ts";
 
@@ -53,6 +54,7 @@ await sql.init ();
 await http.init (() =>
 {
     http.routeTo ("/auth", routerAuth.getRouter ());
+    http.routeTo ("/product", routerProduct.getRouter ());
     return;
 });
 await webSocket.init ();

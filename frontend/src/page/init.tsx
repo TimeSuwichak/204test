@@ -15,8 +15,6 @@ import navigation from "#util/common.navigation.ts";
 //
 // โหลดหน้าต่างเมื่อจำเป็นเท่านั้น
 //
-const CoAbout 
-  = react.lazy (() => import ("./about.tsx"));
 const CoAuth 
   = react.lazy (() => import ("./auth.tsx"));
 const CoSettings 
@@ -24,18 +22,21 @@ const CoSettings
 const CoDebug 
   = react.lazy (() => import ("./initDebug.tsx"));
 const CoNavBarCustomer 
-  = react.lazy (() => import ("../component/navbar.customer.tsx"));
+  = react.lazy (() => import ("../component/customer.navbar.tsx"));
 
 const CoError404
   = react.lazy (() => import ("./error.404.tsx"));
 
+const CsAbout
+  = react.lazy (() => import ("./about.tsx"));
 const CsHome 
   = react.lazy (() => import ("./customer.home.tsx"));
 const CsProduct 
   = react.lazy (() => import ("./customer.product.tsx"));
 const CsProductBrowser 
   = react.lazy (() => import ("./customer.productBrowser.tsx"));
-
+const CsShipping
+  = react.lazy (() => import ("./customer.shipping.tsx"));
 
 interface PropSplash
 {
@@ -150,14 +151,15 @@ content.Bootstrap = function InitBootstrap (prop: PropBootstrap)
   return (
   <Routes>
     <Route caseSensitive Component={content.Outlet}>
-      <Route path="/about" element={<CoAbout/>}/>
       <Route path="/auth" element={<CoAuth/>}/>
       <Route path="/settings" element={<CoSettings/>}/>
     </Route>
     <Route caseSensitive Component={content.OutletCustomer}>
       <Route index element={<CsHome/>}/>
+      <Route path="/about" element={<CsAbout/>}/>
       <Route path="/product" element={<CsProduct/>}/>
       <Route path="/product-browser" element={<CsProductBrowser/>}/>
+      <Route path="/shipping" element={<CsShipping/>}/>
     </Route>;
     <Route>
       <Route path="*" element={<CoError404/>}/>

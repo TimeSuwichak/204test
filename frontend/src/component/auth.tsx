@@ -396,9 +396,9 @@ content.SignUp = function AuthSignUp ()
 {
   return <></>;
 }
-export default content;
 
-const SignInOpening = keyframes`
+
+const AnimOpening = keyframes`
   from { scale: 1.25;}
   to { scale: 1.0; }
 `;
@@ -417,7 +417,7 @@ const FormBox = styled.div`
   background-color: var(--bg-primary);
   border-radius: 8px;
   transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
-  animation-name: ${SignInOpening};
+  animation-name: ${AnimOpening};
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-duration: 500ms;
 
@@ -475,3 +475,12 @@ const FormOption = styled.button`
   width: 100%;
   text-align: start;
 `;
+
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
+Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
+export default content;

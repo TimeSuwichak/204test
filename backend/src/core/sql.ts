@@ -1,21 +1,64 @@
 import env      from "#core/env.ts";
 import logging  from "#core/log.ts";
 import error    from "#core/error.ts";
-
-import mysql from "mysql2/promise";
-import type
+import mysql    from "mysql2/promise";
+import
 {
-    FieldPacket,
-    ResultSetHeader,
-    RowDataPacket 
+    type FieldPacket,
+    type ResultSetHeader,
+    type RowDataPacket 
 }
 from "mysql2/promise";
 
-type InputCommand = string;
-type InputValue = (string | number | Date | null) [];
+export type InputCommand = string;
+export type InputValue = (string | number | Date | null) [];
 
 interface ResultTransaction
 {
+    /**
+    * เริ่มการดึงหนนึ่งข้อมูล จากในตารางที่กำหนดไว้
+    * คำสั่งนี้จะคืนค่าข้อมูลเป็นรายการข้อมูลที่ผู้ใช้ร้องขอ
+    * 
+    * @param command คำสั่งภาษา SQL
+    * @param value ข้อมูลเพิ่มเติมที่ป้อนสำหรับการดึงข้อมูล
+    */
+    select: (
+        command: InputCommand, 
+        value: InputValue
+    ) => Promise<Record<string, unknown>[]>;
+    /**
+     * เริ่มการแทรกข้อมูลหนึ่งจำนวนลงไปในตารางที่กำหนดไว้
+     * คำสั่งนี้จะคืนค่าข้อมูลเป็นรหัสกุญแจหลัก (PRIMARY KEY)
+     * 
+     * @param command คำสั่งภาษา SQL
+     * @param value ข้อมูลเพิ่มเติมที่ป้อนสำหรับการแทรกข้อมูล
+    */
+    insert: (
+        command: InputCommand,
+        value: InputValue
+    ) => Promise<unknown>;
+    /**
+     * เริ่มการแก้ไขข้อมูลหนึ่งจำนวน (หรือมากกว่า) ลงไปในหนึ่งตารางที่กำหนดไว้
+     * คำสั่งนี้จะคืนค่าข้อมูลเป็นจำนวนข้อมูลที่ถูกกระทบ (affected rows)
+     * 
+     * @param command คำสั่งภาษา SQL
+     * @param field ข้อมูลเพิ่มเติมที่ป้อนสำหรับการแทรกข้อมูล
+    */
+   update: (
+        command: InputCommand,
+        value: InputValue
+   ) => Promise<number>;
+    /**
+     * เริ่มการลบข้อมูลหนึ่งจำนวน (หรือมากกว่า) จากไปในหนึ่งตารางที่กำหนดไว้
+     * คำสั่งนี้จะคืนค่าข้อมูลเป็นจำนวนข้อมูลที่ถูกกระทบ (affected rows)
+     * 
+     * @param command คำสั่งภาษา SQL
+     * @param value ข้อมูลเพิ่มเติมที่ป้อนสำหรับการแทรกข้อมูล
+    */
+    delete: (
+        command: InputCommand,
+        value: InputValue
+    ) => Promise<number>;
     /**
      * จบการทำงานในรูปแบบธุรกรรม (transaction)
      * และข้อมูลทั้งหมดที่ถูกเขียนบนธุรกรรมจะถูกบันทึกลงในฐานข้อมูล
@@ -204,12 +247,12 @@ content.insert = async function
  * คำสั่งนี้จะคืนค่าข้อมูลเป็นจำนวนข้อมูลที่ถูกกระทบ (affected rows)
  * 
  * @param command คำสั่งภาษา SQL
- * @param field ข้อมูลเพิ่มเติมที่ป้อนสำหรับการแทรกข้อมูล
+ * @param value ข้อมูลเพิ่มเติมที่ป้อนสำหรับการแทรกข้อมูล
 */
 content.update = async function
 (
     command: InputCommand, 
-    field: InputValue = []
+    value: InputValue = []
 
 ) : Promise<number>
 {
@@ -222,7 +265,7 @@ content.update = async function
     }
     try
     {
-        const raw = await client.execute<ResultSetHeader> (command, field);
+        const raw = await client.execute<ResultSetHeader> (command, value);
         const affected = raw [0].affectedRows;
 
         return affected;
@@ -289,6 +332,39 @@ content.transaction = async function ()
 
         const instance: ResultTransaction = 
         {
+            select (command, value) 
+            {
+                return subject.execute <RowDataPacket[]> 
+                    (command, value)
+                    .then ((x) => x [0])
+                    .catch ((x: unknown) => {
+                        throw mediate (x as ResultError);
+                    });
+            },
+            insert (command, value) 
+            {
+                return subject.execute <ResultSetHeader> (command, value)
+                    .then ((x) => x [0].affectedRows)
+                    .catch ((x: unknown) => { 
+                        throw mediate (x as ResultError); 
+                    });
+            },
+            update (command, value) 
+            {
+                return subject.execute <ResultSetHeader> (command, value)
+                    .then ((x) => x [0].affectedRows)
+                    .catch ((x: unknown) => { 
+                        throw mediate (x as ResultError); 
+                    });
+            },
+            delete (command, value) 
+            {
+                return subject.execute <ResultSetHeader> (command, value)
+                    .then ((x) => x [0].affectedRows)
+                    .catch ((x: unknown) => { 
+                        throw mediate (x as ResultError); 
+                    });
+            },
             commit () { return subject.commit () },
             rollback () { return subject.rollback () },
             release () { subject.release (); },
@@ -302,5 +378,11 @@ content.transaction = async function ()
         throw mediate (info as ResultError);
     }
 }
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
 Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

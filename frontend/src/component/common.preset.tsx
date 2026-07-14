@@ -1,4 +1,4 @@
-import NavBar from "#component/navbar.tsx";
+import NavBar from "#component/common.navbar.tsx";
 import navigation from "#util/common.navigation.ts";
 
 const content = function ()
@@ -27,4 +27,11 @@ content.NavBar = function PresetNavBar ()
   </NavBar>
   </>;
 }
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
+Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

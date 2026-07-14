@@ -235,6 +235,11 @@ content.clearListener = function ()
 {
     listener.splice (0, listener.length);
 }
-
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
 Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

@@ -158,11 +158,11 @@ content.ROLE_STAFF = 2;
 /**
  * บทบาทบัญชี:ผู้ดูแลระบบ
 */
-content.ROLE_MANAGER = 999;
+content.ROLE_MANAGER = 3;
 /**
  * บทบาทบัญชี:ผู้พัฒนาระบบ
 */
-content.ROLE_DEVELOPER = 9999;
+content.ROLE_DEVELOPER = 4;
 
 
 /**

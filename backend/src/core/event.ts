@@ -30,5 +30,11 @@ const content = function<A> ()
     Object.freeze (instance);
     return instance;
 }
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
 Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

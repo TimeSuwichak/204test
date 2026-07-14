@@ -267,7 +267,7 @@ content.signIn = async (input: string) =>
         cache: "default",
         body: JSON.stringify (
         {
-            "value": input
+            "Value": input
         }),
         signal: AbortSignal.abort (content.NET_TIMEOUT)
     }

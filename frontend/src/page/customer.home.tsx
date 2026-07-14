@@ -1,9 +1,9 @@
-import Self from "#component/home.tsx";
+import Self from "#component/customer.home.tsx";
 
 const content = () =>
 {
   return <>
-    <Self.Intro/>
+    <Self.Opening/>
     <Self.Recommendation/>
     <Self.Favorite/>
     <Self.Ending/>

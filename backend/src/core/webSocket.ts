@@ -196,5 +196,11 @@ content.sendBinary = function (data: ArrayBuffer)
 content.onConnect = onConnect;
 content.onDisconnect = onDisconnect;
 
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
 Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

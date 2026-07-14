@@ -112,5 +112,11 @@ content.getBoolean = function (key: string, initial: boolean)
 
     return initial;
 }
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
 Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

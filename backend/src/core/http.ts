@@ -585,5 +585,11 @@ export type RequestHandler = ExpReqHandler;
 export type Response = ExpRes;
 export type NextFunction = ExpNext;
 
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
 Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

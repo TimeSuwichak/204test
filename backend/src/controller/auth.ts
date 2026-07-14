@@ -11,6 +11,28 @@ import
     type NextFunction
 } 
 from "#core/http.ts";
+import 
+{ 
+    type AccountId,
+    type AccountRole
+} 
+from "#model/account.ts";
+
+export interface ValidationSettings
+{
+    allowedRole ?: number [];
+    allowedRestriction ?: number;
+}
+export interface ValidationResult
+{
+    id: AccountId;
+    role: AccountRole;
+    restriction: number;
+    session: string;
+    sessionIssued: Date;
+    sessionExpire: Date;
+}
+
 /**
  * ระบบบันทึกกิจกรรมเริ่มต้น
 */
@@ -22,8 +44,11 @@ const content = function ()
 {
     return;
 }
-content.validate = function ()
+content.validate = function (config: ValidationSettings)
 {
+    config.allowedRole = config.allowedRole ?? [];
+    config.allowedRestriction = config.allowedRestriction ?? 0;
+
     return function (
         request: Request,
         response: Response,
@@ -33,6 +58,67 @@ content.validate = function ()
         void request;
         void response;
         void next;
+
+        if (!request.headers.authorization)
+        {
+            response.status (http.STATUS_UNAUTHORIZED);
+            response.end ();
+            return;
+        }
+        const header = request.headers.authorization;
+        const map = header.split (" ");
+
+        if (map.length != 2)
+        {
+            response.status (http.STATUS_UNAUTHORIZED);
+            response.end ();
+            return;
+        }
+        const key = String (map [0]);
+        const value = String (map [1]);
+
+        if (key !== "Bearer")
+        {
+            response.status (http.STATUS_UNAUTHORIZED);
+            response.end ();
+            return;
+        }
+        void model.jwtVerify (value).then ((x) =>
+        {
+            const result: ValidationResult = {
+                session: value,
+                sessionIssued: new Date (Number (x.data.iat)),
+                sessionExpire: new Date (Number (x.data.exp)),
+                id: x.data ["Id"] as AccountId,
+                role: x.data ["Role"] as AccountRole,
+                restriction: x.data ["Restriction"] as number
+            };
+
+            const passRole = config.allowedRole?.includes (result.role);
+            const passRestriction =  
+                (result.restriction & (config.allowedRestriction ?? 0)) != 0;
+
+            if (!passRole || !passRestriction)
+            {
+                response.status (http.STATUS_FORBIDDEN);
+                response.end ();
+                return;
+            }
+
+            response.locals ["AuthValidation"] = result;
+
+            next ();
+        })
+        .catch ((e: unknown) =>
+        {
+            log.error ("Session validation failed");
+            log.error ("------------------------");
+            log.error (e);
+
+            response.status (http.STATUS_UNAUTHORIZED);
+            response.end ();
+            return;
+        })
     }
 }
 content.validateChallenge = function ()
@@ -71,8 +157,17 @@ content.validateChallenge = function ()
             response.end ();
             return;
         }
-        void model.jwtVerify (value).then (() =>
+        void model.jwtVerify (value).then ((x) =>
         {
+            const result: ValidationResult = {
+                session: value,
+                sessionIssued: new Date (Number (x.data.iat)),
+                sessionExpire: new Date (Number (x.data.exp)),
+                id: x.data ["Id"] as AccountId,
+                role: x.data ["Role"] as AccountRole
+            };
+            response.locals ["AuthValidation"] = result;
+
             next ();
         })
         .catch ((e: unknown) =>
@@ -86,6 +181,10 @@ content.validateChallenge = function ()
             return;
         })
     }
+}
+content.validateResult = (response: Response) : ValidationResult =>
+{
+    return response.locals ["AuthValidation"] as ValidationResult;
 }
 /**
  * เส้นทางเริ่มต้นการลงชื่อเข้าใช้งาน
@@ -230,5 +329,11 @@ content.routeDelete = function (request: Request, response: Response)
     response.status (http.STATUS_NOT_IMPLEMENTED);
     response.end ();
 }
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
 Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

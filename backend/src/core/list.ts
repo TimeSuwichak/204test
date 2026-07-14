@@ -53,6 +53,11 @@ const content = function<T> ()
         }
     };
 }
-
+/**
+ * แข็งวัตถุ (ความปลอดภัย)
+*/
 Object.freeze (content);
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

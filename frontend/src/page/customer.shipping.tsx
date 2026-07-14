@@ -3,7 +3,7 @@
 */
 const content = function ()
 {
-  return <></>;
+  return (<></>);
 }
 /**
  * แข็งวัตถุ (ความปลอดภัย)

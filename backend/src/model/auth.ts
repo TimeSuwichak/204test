@@ -3,6 +3,12 @@ import env          from "#core/env.ts";
 import error        from "#core/error.ts";
 import sql          from "#core/sql.ts";
 import objreader    from "#core/objectReader.ts";
+import
+{
+    type InputCommand as SqlInputCommand,
+    type InputValue as SqlInputValue
+}
+from "#core/sql.ts"
 
 /**
  * ระบบจัดการระบบยืนยันตัวตนผู้ใช้
@@ -133,29 +139,47 @@ content.jwtVerify = async (input: string) =>
 */
 content.signIn = async (authId: string) : Promise<ResultSession> =>
 {
-    void authId;
+    let cmd: SqlInputCommand = `SELECT Link FROM Auth WHERE Id = ?`;
+    let val: SqlInputValue = [authId];
+    const auth = await sql.select (cmd, val);
 
-    const cmd = `SELECT link FROM auth WHERE id = ?`;
-    const param = [authId];
-    const result = await sql.select (cmd, param);
-
-    if (result.length == 0) {
+    if (auth.length == 0) {
         throw new error.NotFound ();
     }
-    if (result.length >= 2) {
+    if (auth.length >= 2) {
         throw new error.Conflict ();
     }
-    const sessionIssued = new Date (Date.now ());
-    const sessionExpire = new Date (Date.now () + EXPIRE_CHALLENGE);
-    const session = await content.jwtSign ({}, sessionIssued, sessionExpire);
-    const reader = objreader (result.at (0));
+
+    let reader = objreader (auth.at (0));
+    const outLink = reader.requireInteger ("Link");
+
+    cmd = `SELECT Role FROM Account WHERE = ?`;
+    val = [outLink];
+
+    const account = await sql.select (cmd, val);
+    
+    if (account.length !=  1) {
+        throw new error.Conflict ();
+    }
+
+    reader = objreader (account.at (0));
+    const outRole = reader.requireInteger ("Role");
+    
+    const seIssued = new Date (Date.now ());
+    const seExpire = new Date (Date.now () + EXPIRE_CHALLENGE);
+    const seValue = await content.jwtSign ({
+        "Id": outLink,
+        "Role": outRole
+    }, 
+    seIssued, seExpire);
+
     const output: ResultSession =
     {
         authId: authId,
-        authLink: reader.requireInteger ("link"),
-        session: session,
-        sessionIssued: sessionIssued,
-        sessionExpire: sessionExpire,
+        authLink: outLink,
+        session: seValue,
+        sessionIssued: seIssued,
+        sessionExpire: seExpire,
         restriction: 0,
     };
     return output;
