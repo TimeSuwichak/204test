@@ -5,6 +5,7 @@ const content = () =>
   return <>
     <Self.Opening/>
     <Self.Recommendation/>
+    <Self.Selected/>
     <Self.Favorite/>
     <Self.Ending/>
   </>;

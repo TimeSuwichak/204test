@@ -1,9 +1,15 @@
 import react from "react";
 import styled from "styled-components";
 import navigatior from "#util/common.navigation.ts";
-import testImg from "#asset/image/home.testImage.jpg"
+import testBanner from "#asset/image/home.testImage2.jpg"
+import testArtwork from "#asset/image/test.artwork.jpg";
 
 import Scroll from "#component/scroll.infinite.tsx";
+import
+{
+  ShoppingCartIcon
+}
+from "lucide-react"
 
 /**
  * ส่วนประกอบแสดงผลสำหรับหน้าแรก
@@ -21,10 +27,15 @@ content.Opening = function HomeOpening ()
     <Opening>
       <OpeningContainer>
         <OpeningBanner>
-          <OpeningBannerImg src={testImg}/>
+          <OpeningBannerImg src={testBanner}/>
           <OpeningBannerView>
             <h1>สวัสดีชาวออกซิเจน</h1>
-            <p>เวอร์เซิร์ฟเวอร์ 00:00:00</p>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              Nam eget lacus ultricies, finibus libero nec, mattis lorem. 
+              Nunc nec felis consectetur, lacinia risus vulputate, 
+              fringilla est.
+            </p>
           </OpeningBannerView>
         </OpeningBanner>
       </OpeningContainer>
@@ -38,7 +49,7 @@ content.Recommendation = function HomeRecommendation ()
 {
   return (
     <Rec>
-      <RecImg src={undefined}/>
+      <RecImg src={testArtwork}/>
       <RecBody>
         <RecTitle>ที่เราแนะนำในวันนี้: ชื่อเกม</RecTitle>
         <p>
@@ -71,11 +82,31 @@ content.Recommendation = function HomeRecommendation ()
     </Rec>
   );
 }
+/**
+ * ส่วนประกอบแสดงผลสำหรับที่คัดสรรมาแล้ว
+*/
+content.Selected = function HomeSelected ()
+{
+  return (
+    <Selected>
+      <SelectedTitle>ทั้งหมดนี้ เราได้คัดสรรมาแล้ว</SelectedTitle>
+      <SelectedContainer>
+        <EndingArtwork src={testArtwork}/>
+        <EndingArtwork src={testArtwork}/>
+        <EndingArtwork src={testArtwork}/>
+        <EndingArtwork src={testArtwork}/>
+      </SelectedContainer>
+    </Selected>
+  );
+}
+/**
+ * ส่วนประกอบแสดงผลสำหรับเกมโปรด
+*/
 content.Favorite = function HomeFavorite ()
 {
   return (
     <Fav>
-      <FavImg src={undefined}/>
+      <FavImg src={testArtwork}/>
       <FavBody>
         <FavTitle>สุดโปรด สุดหัวใจ: ชื่อเกม</FavTitle>
         <p>
@@ -126,25 +157,29 @@ content.Ending = function HomeEnding ()
       width="100%"
       margin="0px 0px 32px 0px"
     >
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
-     <EndingArtwork/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
+     <EndingArtwork src={testArtwork}/>
     </Scroll.Infinite>
-    <h2>และยังไม่จบเพียงแค่เท่านี้</h2>
-    <p>ยังมีเกมอีก 280 กำลังรอคุณอยู่ให้คุณสัมผัส</p>
-    <br/>
-    <button onClick={onContinue}>เลือกเกมเลย</button>
+    <EndingTitle>และยังไม่จบเพียงแค่เท่านี้</EndingTitle>
+    <EndingText>
+      ยังมีเกมอีก 280 กำลังรอคุณอยู่ให้คุณสัมผัส
+    </EndingText>
+    <EndingButton onClick={onContinue}>
+      <ShoppingCartIcon/>
+      เลือกเกมเลย
+    </EndingButton>
   </Ending>;
 }
 const Opening = styled.div`
@@ -205,17 +240,35 @@ const OpeningBannerView = styled.div`
   justify-content: center;
   padding: 64px;
 
-  h1
+  & > h1
   {
     color: #9ad3cb;
     font-size: 2.5rem;
     text-shadow: 2px 2px 0px #000000;
+
+    width: 40%;
   }
-  p
+  & > p
   {
     color: #ffffff;
     font-size: 1.5rem;
     text-shadow: 2px 2px 0px #000000;
+
+    width: 40%;
+  }
+
+  @media (max-width: 1024px)
+  {
+    & > h1 { width: 100%; }
+    & > p { width: 100%; }
+  }
+  @media (max-width: 768px)
+  {
+    padding: 32px;
+  }
+  @media (max-width: 640px)
+  {
+    padding: 16px;
   }
 `;
 
@@ -252,17 +305,20 @@ const Rec = styled.div`
   }
 `;
 const RecImg = styled.img`
-  min-width: 130mm;
-  min-height: 184mm;
-  max-width: 130mm;
-  max-height: 184mm;
+
+  object-fit: cover;
+
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  max-height: 800px;
 
   @media (max-width: 1024px)
   {
-    min-width: 65mm;
-    min-height: 92mm;
-    max-width: 65mm;
-    max-height: 92mm;
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    max-height: 600px;
   }
 `;
 const RecBody = styled.div`
@@ -273,8 +329,8 @@ const RecBody = styled.div`
 `;
 const RecTitle = styled.h2`
   display: block;
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 2.5rem;
+  font-weight: normal;
   padding: 0px 0px 16px 0px;
 `;
 
@@ -310,17 +366,19 @@ const Fav = styled.div`
   }
 `;
 const FavImg = styled.img`
-  min-width: 130mm;
-  min-height: 184mm;
-  max-width: 130mm;
-  max-height: 184mm;
+
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  max-height: 800px;
 
   @media (max-width: 1024px)
   {
-    min-width: 65mm;
-    min-height: 92mm;
-    max-width: 65mm;
-    max-height: 92mm;
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    max-height: 600px;
   }
 `;
 const FavBody = styled.div`
@@ -331,11 +389,52 @@ const FavBody = styled.div`
 `;
 const FavTitle = styled.h2`
   display: block;
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 2.5rem;
+  font-weight: normal;
   padding: 0px 0px 16px 0px;
 `;
 
+const Selected = styled.div`
+
+  width: 100%;
+  padding: 32px 256px;
+  overflow: hidden;
+
+  @media (max-width: 1600px)
+  {
+    padding: 32px 128px;
+  }
+  @media (max-width: 1400px)
+  {
+    padding: 32px 64px;
+  }
+  @media (max-width: 1268px)
+  {
+    padding: 32px 32px;
+  }
+  @media (max-width: 1268px)
+  {
+    padding: 32px 16px;
+  }
+`;
+const SelectedTitle = styled.h2`
+  margin: 32px 16px 32px 16px;
+  display: block;
+  font-size: 2.5rem;
+  font-weight: normal;
+  text-align: center;
+`;
+const SelectedContainer = styled.div`
+  margin: 32px 16px 32px 16px;
+  width: 100%;
+  height: 640px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+`;
 
 const Ending = styled.div`
   width: 100%;
@@ -346,12 +445,37 @@ const Ending = styled.div`
   align-items: center;
   justify-content: center;
 `;
+const EndingTitle = styled.h2`
+  display: block;
+  font-size: 2rem;
+  font-weight: normal;
+  margin: 16px 16px;
+`;
+const EndingText = styled.p`
+  display: block;
+  font-size: 1rem;
+  font-weight: normal;
+  margin: 0px 16px 32px 16px;
+`;
+const EndingButton = styled.button`
+  width: 160px;
+  height: 40px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+`;
 const EndingArtwork = styled.img`
   display: block;
-  min-width: 65mm;
-  min-height: 92mm;
-  max-width: 65mm;
-  max-height: 92mm;
+
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  max-width: 200px;
+  max-height: 500px;
 `;
 
 export default content;

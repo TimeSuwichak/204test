@@ -1,9 +1,7 @@
 
 const content = function ProductBrowser ()
 {
-  return <>
-  
-  </>;
+  return (<></>);
 }
 /**
  * แข็งวัตถุ (ความปลอดภัย)
