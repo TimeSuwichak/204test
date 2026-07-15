@@ -344,7 +344,7 @@ content.transaction = async function ()
             insert (command, value) 
             {
                 return subject.execute <ResultSetHeader> (command, value)
-                    .then ((x) => x [0].affectedRows)
+                    .then ((x) => x [0].insertId)
                     .catch ((x: unknown) => { 
                         throw mediate (x as ResultError); 
                     });

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-body, *, *::before, *::after
+body
 {
     margin: 0px;
     padding: 0px;

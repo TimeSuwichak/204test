@@ -16,20 +16,24 @@ content.getRouter = function ()
     const auth = controlAuth.validateLeastUser ();
     const authStaff = controlAuth.validateOnlyStaff ();
     const authManager = controlAuth.validateOnlyManager ();
+    const authStaffOrManager = controlAuth.validateLeastStaff ();
 
-    router.get ("/:id", control.getProduct);
-    router.get ("/:id/preview/:pid", control.getProductPreview);
-    router.get ("/:id/comment/:cid", control.getProductComment);
+    router.get ("/:id", control.get);
+    router.get ("/:id/preview/:pid", control.getPreview);
+    router.get ("/:id/comment/:cid", control.getComment);
+    router.get ("/:id/stock", authStaffOrManager, control.getStock);
 
     router.put ("/:id", authManager, control.putProduct);
-    router.put ("/:id/preview/:pid", auth, control.putProductPreview);
-    router.put ("/:id/comment/:cid", auth, control.putProductComment);
+    router.put ("/:id/preview/:pid", auth, control.putPreview);
+    router.put ("/:id/comment/:cid", auth, control.putComment);
+    router.put ("/:id/stock", authStaffOrManager, control.putStock);
 
-    router.post ("/", authManager, control.postProduct);
-    router.post ("/:id/preview", authStaff, control.postProductPreview);
-    router.post ("/:id/comment", authStaff, control.postProductComment);
+    router.post ("/", authManager, control.post);
+    router.post ("/:id/preview", authStaff, control.postReview);
+    router.post ("/:id/comment", authStaff, control.postComment);
 
-    router.delete ("/:id", authManager, control.deleteProduct);
+    router.delete ("/:id", authManager, 
+        control.deleteProduct);
     router.delete ("/:id/preview/:pid", authStaff, 
         control.deleteProductPreview);
     router.delete ("/:id/comment/:cid", authStaff, 

@@ -75,12 +75,12 @@ content.create = async (info: CreateAccount) : Promise<AccountId> =>
     try
     {
         const id = await ctx.insert (`
-            INSERT INTO Account (Name, Role)
+            INSERT INTO User (Name, Role)
             VALUES (?, ?)`,
             [info.name, info.role]
         ) as AccountId;
         await ctx.insert (`
-            INSERT INTO AccountContact (Id)
+            INSERT INTO UserContact (Id)
             VALUES (?)`,
             [id]
         );

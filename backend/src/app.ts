@@ -12,6 +12,7 @@ import routerAuth       from "#router/auth.ts";
 import routerProduct    from "#router/product.ts";
 import modelAuth        from "#model/auth.ts";
 import modelAccount     from "#model/account.ts";
+import modelProduct     from "#model/product.ts";
 
 
 const content = () =>
@@ -42,6 +43,7 @@ content.start = async () =>
     //
     await modelAuth.init ();
     await modelAccount.init ();
+    await modelProduct.init ();
 }
 content.seed = async () =>
 {
@@ -60,3 +62,30 @@ content.seed = async () =>
     return;
 }
 await content.start ();
+await modelProduct.delete (2);
+
+// await modelProduct.create ({
+//     name: "Abith Product #" + String (Math.floor (Math.random () * 1000)),
+//     description: "This is a test product.",
+//     price: 100.00,
+//     priceCode: 1,
+//     category: [{
+//         value: 0xDEAD
+//     }, {
+//         value: 0xBEEF
+//     }],
+//     preview: [
+//         {
+//             mime: "image/jpeg",
+//             link: "https://example.com/preview1.jpg"
+//         },
+//         {
+//             mime: "image/jpeg",
+//             link: "https://example.com/preview2.jpg"
+//         }
+//     ],
+//     stock: {
+//         quantity: 50
+//     }
+// });
+// await content.seed ();

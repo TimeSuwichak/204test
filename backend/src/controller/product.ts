@@ -2,6 +2,7 @@ import http from "#core/http.ts";
 import error from "#core/error.ts";
 import logging from "#core/log.ts";
 import objReader from "#core/objectReader.ts";
+import auth from "#controller/auth.ts";
 import model from "#model/product.ts";
 import
 {
@@ -14,6 +15,19 @@ import
     type Response 
 } 
 from "#core/http.ts";
+import
+{
+    type UpdateProductBasic,
+    type UpdateProductComment,
+    type UpdateProductOrder,
+    type UpdateProductReview,
+    type UpdateProductStock,
+    type CreateProduct,
+    type CreateProductCategory,
+    type CreateProductComment,
+    type CreateProductReview,
+}
+from "#model/product.ts";
 
 /**
  * ระบบบันทึกกิจกรรมเริ่มต้น
@@ -26,7 +40,7 @@ const content = function ()
 {
     return;
 }
-content.getProduct = (request: Request, response: Response) =>
+content.get = (request: Request, response: Response) =>
 {
     const id = Number (request.params ["id"]);
 
@@ -63,7 +77,7 @@ content.getProduct = (request: Request, response: Response) =>
         return;
     });
 }
-content.getProductPreview = (request: Request, response: Response) =>
+content.getPreview = (request: Request, response: Response) =>
 {
     const id = Number (request.params ["id"]);
     const pid = Number (request.params ["pid"]);
@@ -102,7 +116,7 @@ content.getProductPreview = (request: Request, response: Response) =>
         return;
     });
 }
-content.getProductComment = (request: Request, response: Response) =>
+content.getComment = (request: Request, response: Response) =>
 {
     const id = Number (request.params ["id"]);
     const cid = Number (request.params ["cid"]);
@@ -141,46 +155,67 @@ content.getProductComment = (request: Request, response: Response) =>
         return;
     });
 }
+content.getStock = (request: Request, response: Response) =>
+{
+    const id = Number (request.params ["id"]);
 
+    if (id === 0 || !Number.isSafeInteger (id))
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    void model.getStock (id).then ((x) =>
+    {
+        void x;
+        response.status (http.STATUS_OK);
+        response.end ();
+    })
+    .catch ((e: unknown) =>
+    {
+        if (e instanceof error.NotFound)
+        {
+            response.status (http.STATUS_NOT_FOUND);
+            response.end ();
+            return;
+        }
+        if (e instanceof error.Conflict)
+        {
+            response.status (http.STATUS_CONFLICT);
+            response.end ();
+            return;
+        }
+        log.error (e);
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
+        return;
+    });
+}
 
 content.putProduct = (request: Request, response: Response) =>
 {
-    response.status (http.STATUS_NOT_IMPLEMENTED);
-    response.end ();
-}
-content.putProductPreview = (request: Request, response: Response) =>
-{
-    response.status (http.STATUS_NOT_IMPLEMENTED);
-    response.end ();
-}
-content.putProductComment = (request: Request, response: Response) =>
-{
-    response.status (http.STATUS_NOT_IMPLEMENTED);
-    response.end ();
-}
+    const productId = Number (request.params ["id"]);
 
-
-content.postProduct = (request: Request, response: Response) =>
-{
-    if (!request.body)
+    if (productId === 0 || !Number.isSafeInteger (productId))
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
         return;
     }
-    let name: string;
-    let description: string;
-    let price: number;
-    let priceCode: string;
+    let content: UpdateProductBasic;
 
     try
     {
         const reader = objReader (request.body);
 
-        name = reader.requireString ("Name");
-        description = reader.requireString ("Description");
-        price = reader.requireFloat ("Price");
-        priceCode = reader.requireString ("PriceCode");
+        content = {
+            productId: productId,
+            name: reader.requireString ("Name"),
+            description: reader.requireString ("Description"),
+            price: reader.requireFloat ("Price"),
+            priceCode: reader.requireInteger ("PriceCode")
+        };
     }
     catch
     {
@@ -189,13 +224,183 @@ content.postProduct = (request: Request, response: Response) =>
         return;
     }
 
-    void model.create ({
-        name: name,
-        description: description,
-        price: price,
-        priceCode: priceCode
+    void model.updateBasic (content).then (() =>
+    {
+        response.status (http.STATUS_NO_CONTENT);
+        response.end ();
     })
-    .then (() =>
+    .catch ((e: unknown) =>
+    {
+        if (e instanceof error.NotFound)
+        {
+            response.status (http.STATUS_NOT_FOUND);
+            response.end ();
+            return;
+        }
+        if (e instanceof error.Conflict)
+        {
+            response.status (http.STATUS_CONFLICT);
+            response.end ();
+            return;
+        }
+        log.error (e);
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
+        return;
+    });
+}
+content.putPreview = (request: Request, response: Response) =>
+{
+    const productId = Number (request.params ["id"]);
+    const reviewId = Number (request.params ["pid"]);
+
+    if ((productId === 0 || !Number.isSafeInteger (productId)) ||
+        (reviewId === 0 || !Number.isSafeInteger (reviewId)))
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+    let content: UpdateProductReview;
+    
+    try
+    {
+        const reader = objReader (request.body);
+
+        content = {
+            productId: productId,
+            reviewId: reviewId,
+            mime: reader.requireString ("Mime"),
+            link: reader.requireString ("Link")
+        };
+    }
+    catch
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+    
+    void model.updateReview (content).then (() =>
+    {
+        response.status (http.STATUS_NO_CONTENT);
+        response.end ();
+    })
+    .catch ((e: unknown) =>
+    {
+        if (e instanceof error.NotFound)
+        {
+            response.status (http.STATUS_NOT_FOUND);
+            response.end ();
+            return;
+        }
+        log.error (e);
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
+        return;
+    });
+}
+content.putComment = (request: Request, response: Response) =>
+{
+    const productId = Number (request.params ["id"]);
+    const commentId = Number (request.params ["cid"]);
+
+    if ((productId === 0 || !Number.isSafeInteger (productId)) ||
+        (commentId === 0 || !Number.isSafeInteger (commentId)))
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+    let content: UpdateProductComment;
+    
+    try
+    {
+        const reader = objReader (request.body);
+
+        content = {
+            productId: productId,
+            commentId: commentId,
+            title: reader.requireString ("Title"),
+            text: reader.requireString ("Text"),
+            rating: reader.requireInteger ("Rating")
+        };
+    }
+    catch
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+    
+    void model.updateComment (content).then (() =>
+    {
+        response.status (http.STATUS_NO_CONTENT);
+        response.end ();
+    })
+    .catch ((e: unknown) =>
+    {
+        if (e instanceof error.NotFound)
+        {
+            response.status (http.STATUS_NOT_FOUND);
+            response.end ();
+            return;
+        }
+        log.error (e);
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
+        return;
+    });
+}
+
+
+content.post = (request: Request, response: Response) =>
+{
+    if (!request.body)
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+    let content: CreateProduct;
+
+    try
+    {
+        const reader = objReader (request.body);
+
+        content = {
+            name: reader.requireString ("Name"),
+            description: reader.requireString ("Description"),
+            price: reader.requireFloat ("Price"),
+            priceCode: reader.requireInteger ("PriceCode"),
+            category: reader.requireArrayObject ("Category").map ((x) =>
+            {
+                const y = objReader (x);
+                return {
+                    value: y.requireInteger ("Value")
+                };
+            }),
+            review: reader.requireArrayObject ("Review").map ((x) =>
+            {
+                const y = objReader (x);
+                return {
+                    mime: y.requireString ("Mime"),
+                    link: y.requireString ("Link")
+                };
+            }),
+            stock: {
+                quantity: reader.requireInteger ("StockQuantity")
+            }
+        };
+    }
+    catch
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    void model.create (content).then (() =>
     {
         response.status (http.STATUS_CREATED);
         response.end ();
@@ -208,32 +413,34 @@ content.postProduct = (request: Request, response: Response) =>
         response.end ();
     });
 }
-content.postProductPreview = (request: Request, response: Response) =>
+content.postReview = (request: Request, response: Response) =>
 {
+    const productId = Number (request.params ["id"]);
+
+    if (productId === 0 || !Number.isSafeInteger (productId))
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
     if (!request.body)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
         return;
     }
-    const inherited = Number (request.params ["id"]);
-
-    if (inherited == 0 || !Number.isSafeInteger (inherited))
-    {
-        response.status (http.STATUS_BAD_REQUEST);
-        response.end ();
-        return;
-    }
-
-    let mime: string;
-    let link: string;
+    let content: CreateProductReview;
 
     try
     {
         const reader = objReader (request.body);
 
-        mime = reader.requireString ("Mime");
-        link = reader.requireString ("Link");
+        content = {
+            productId: productId,
+            mime: reader.requireString ("Mime"),
+            link: reader.requireString ("Link")
+        };
     }
     catch
     {
@@ -242,56 +449,55 @@ content.postProductPreview = (request: Request, response: Response) =>
         return;
     }
 
-    void model.createPreview ({
-        inherited: inherited,
-        mime: mime,
-        link: link
-    })
-    .then (() =>
+    void model.createReview (content).then (() =>
     {
         response.status (http.STATUS_CREATED);
         response.end ();
     })
     .catch ((e: unknown) =>
     {
+        if (e instanceof error.NotFound)
+        {
+            response.status (http.STATUS_NOT_FOUND);
+            response.end ();
+            return;
+        }
         log.error (e);
-
         response.status (http.STATUS_SERVICE_UNAVAILABLE);
         response.end ();
     });
 }
-content.postProductComment = (request: Request, response: Response) =>
+content.postComment = (request: Request, response: Response) =>
 {
+    const productId = Number (request.params ["id"]);
+    const validation = auth.validateResult (request);
+
+    if (productId === 0 || !Number.isSafeInteger (productId))
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
     if (!request.body)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
         return;
     }
-
-    const inherited = Number (request.params ["id"]);
-
-    if (inherited == 0 || !Number.isSafeInteger (inherited))
-    {
-        response.status (http.STATUS_BAD_REQUEST);
-        response.end ();
-        return;
-    }
-
-    let author: AccountId;
-    let title: string;
-    let text: string;
-    let rating: number;
+    let content: CreateProductComment;
 
     try
     {
         const reader = objReader (request.body);
 
-        title = reader.requireString ("Mime");
-        text = reader.requireString ("Link");
-        rating = reader.requireInteger ("Rating");
-
-        author = 0;
+        content = {
+            productId: productId,
+            author: validation.id,
+            title: reader.requireString ("Title"),
+            text: reader.requireString ("Text"),
+            rating: reader.requireInteger ("Rating")
+        };
     }
     catch
     {
@@ -300,41 +506,155 @@ content.postProductComment = (request: Request, response: Response) =>
         return;
     }
 
-    void model.createComment ({
-        inherited: inherited,
-        author: author,
-        title: title,
-        text: text,
-        rating: rating
-    })
-    .then (() =>
+    void model.createComment (content).then (() =>
     {
         response.status (http.STATUS_CREATED);
         response.end ();
     })
     .catch ((e: unknown) =>
     {
+        if (e instanceof error.NotFound)
+        {
+            response.status (http.STATUS_NOT_FOUND);
+            response.end ();
+            return;
+        }
         log.error (e);
-
         response.status (http.STATUS_SERVICE_UNAVAILABLE);
         response.end ();
+    });
+}
+content.putStock = (request: Request, response: Response) =>
+{
+    const id = Number (request.params ["id"]);
+
+    if (id === 0 || !Number.isSafeInteger (id))
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    let quantity: number;
+
+    try
+    {
+        const reader = objReader (request.body);
+
+        quantity = reader.requireInteger ("Quantity");
+    }
+    catch
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    void model.updateStock (id, quantity).then (() =>
+    {
+        response.status (http.STATUS_NO_CONTENT);
+        response.end ();
+    })
+    .catch ((e: unknown) =>
+    {
+        if (e instanceof error.NotFound)
+        {
+            response.status (http.STATUS_NOT_FOUND);
+            response.end ();
+            return;
+        }
+        if (e instanceof error.Conflict)
+        {
+            response.status (http.STATUS_CONFLICT);
+            response.end ();
+            return;
+        }
+        log.error (e);
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
+        return;
     });
 }
 
 content.deleteProduct = (request: Request, response: Response) =>
 {
-    response.status (http.STATUS_NOT_IMPLEMENTED);
-    response.end ();
+    const id = Number (request.params ["id"]);
+
+    if (id === 0 || !Number.isSafeInteger (id))
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    void model.deleteBasic (id).then (() =>
+    {
+        response.status (http.STATUS_NO_CONTENT);
+        response.end ();
+    })
+    .catch ((e: unknown) =>
+    {
+        if (e instanceof error.NotFound)
+        {
+            response.status (http.STATUS_NOT_FOUND);
+            response.end ();
+            return;
+        }
+
+        log.error (e);
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
+    });
 }
 content.deleteProductPreview = (request: Request, response: Response) =>
 {
-    response.status (http.STATUS_NOT_IMPLEMENTED);
-    response.end ();
+    const id = Number (request.params ["id"]);
+    const pid = Number (request.params ["pid"]);
+
+    if ((id === 0 || !Number.isSafeInteger (id)) || 
+        (pid === 0 || !Number.isSafeInteger (pid)))
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    void model.deleteReview (id, pid).then (() =>
+    {
+        response.status (http.STATUS_NO_CONTENT);
+        response.end ();
+    })
+    .catch ((e: unknown) =>
+    {
+        log.error (e);
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
+    });
 }
 content.deleteProductComment = (request: Request, response: Response) =>
 {
-    response.status (http.STATUS_NOT_IMPLEMENTED);
-    response.end ();
+    const id = Number (request.params ["id"]);
+    const pid = Number (request.params ["pid"]);
+
+    if ((id === 0 || !Number.isSafeInteger (id)) || 
+        (pid === 0 || !Number.isSafeInteger (pid)))
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    void model.deleteComment (id, pid).then (() =>
+    {
+        response.status (http.STATUS_NO_CONTENT);
+        response.end ();
+    })
+    .catch ((e: unknown) =>
+    {
+        log.error (e);
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
+    });
 }
 
 /**

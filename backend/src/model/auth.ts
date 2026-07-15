@@ -196,7 +196,7 @@ content.signIn = async (authId: string) : Promise<ResultSession> =>
     let reader = objreader (auth.at (0));
     const outLink = reader.requireInteger ("Link");
 
-    cmd = `SELECT Role FROM Account WHERE Id = ?`;
+    cmd = `SELECT Role FROM User WHERE Id = ?`;
     val = [outLink];
 
     const account = await sql.select (cmd, val);
