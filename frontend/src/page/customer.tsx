@@ -33,8 +33,6 @@ content.NavBar = function PresetNavBar ()
   const auth = ctx.useAuth ();
   const authSigned = ctx.authSigned (auth);
 
-  console.log (auth);
-
   return <>
   <NavBar>
     <NavBar.Branding 

@@ -750,7 +750,7 @@ const StyleTempHeaderBack = styled.button`
 const StyleTempHeaderTitle = styled.h1`
   width: 100%;
   font-size: 2rem;
-  font-weight: bold;
+  font-weight: normal;
 `;
 const StyleTempHeaderDesc = styled.p`
   width: 100%;
