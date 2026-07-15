@@ -5,7 +5,7 @@
 | เลขประจำตัว | ชื่อและนามสกุล | บทบาทที่รับผิดชอบ |
 |---|---|---|
 | 67117502 | ชนันธร สะอาดจินดา | Project Manager / System Analyst |
-| 67168514 | ปิยะบุตร อิ่มทอง | Customer & Database Administrator |
+| 67168514 | ปิยะบุตร อิ่มทอง | Customer / Database Administrator |
 | 67151039 | ณัฐดนัย แสงศรี | Customer |
 | 67163266 | สิรภพ อ่วมแก้ว | Staff |
 | 67173119 | สุวิจักขณ์ ทัพเจริญ | Manager |
