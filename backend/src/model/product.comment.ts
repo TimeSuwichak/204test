@@ -160,7 +160,8 @@ content.update = (info: DataUpdate) =>
         info.rating ? "Rating" : undefined
     ]
     .filter (x => x !== undefined)
-    .join (", ")
+    .join (" = ?, ")
+    .concat (" = ? ")
     .concat ("WHERE CategoryId = ?");
 
     const value = [

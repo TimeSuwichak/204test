@@ -137,7 +137,8 @@ content.update = async (info: DataUpdate) : Promise<number> =>
         info.priceCode ? "PriceCode" : undefined
     ]
     .filter (x => x !== undefined)
-    .join (", ")
+    .join (" = ?, ")
+    .concat (" = ? ")
     .concat ("WHERE Id = ?");
 
     const value = [

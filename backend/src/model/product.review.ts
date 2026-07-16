@@ -131,7 +131,8 @@ content.update = (info: DataUpdate) =>
         info.link ? "Link" : undefined
     ]
     .filter (x => x !== undefined)
-    .join (", ")
+    .join (" = ?, ")
+    .concat (" = ? ")
     .concat ("WHERE CategoryId = ?");
 
     const value = [
