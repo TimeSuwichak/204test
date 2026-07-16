@@ -1,5 +1,5 @@
 import http from "#core/http.ts";
-import control from "#controller/product.ts"
+import control from "#controller/product.comment.ts";
 import controlAuth from "#controller/auth.ts";
 
 const content = function ()
@@ -13,13 +13,13 @@ content.getController = function ()
 content.getRouter = function ()
 {
     const router = http.router ();
-    const authManager = controlAuth.validateOnlyManager ();
+    const auth = controlAuth.validateLeastUser ();
 
     router.get ("/:id", control.get);
-    router.put ("/:id", authManager, control.put);
-    router.post ("/", authManager, control.post);
-    router.post ("/:id", authManager, control.delete);
-   
+    router.put ("/:id", auth, control.put);
+    router.post ("/", auth, control.post);
+    router.delete ("/:id", auth, control.delete);
+
     return router;
 }
 /**

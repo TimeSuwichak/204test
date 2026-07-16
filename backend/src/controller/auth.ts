@@ -14,7 +14,7 @@ import
 from "#core/http.ts";
 import 
 { 
-    type AccountId,
+    type DataId,
     type AccountRole
 } 
 from "#model/account.ts";
@@ -26,7 +26,7 @@ export interface ValidationSettings
 }
 export interface ValidationResult
 {
-    id: AccountId;
+    id: DataId;
     role: AccountRole;
     restriction: number;
     session: string;
@@ -102,7 +102,7 @@ content.validate = function (config: ValidationSettings)
                 session: value,
                 sessionIssued: new Date (Number (x.data.iat)),
                 sessionExpire: new Date (Number (x.data.exp)),
-                id: x.data ["Id"] as AccountId,
+                id: x.data ["Id"] as DataId,
                 role: x.data ["Role"] as AccountRole,
                 restriction: x.data ["Restriction"] as number,
                 authStep: x.data ["AuthStep"] as number

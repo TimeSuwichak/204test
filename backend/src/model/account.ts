@@ -1,6 +1,6 @@
 import sql from "#core/sql.ts";
 
-export type AccountId = number;
+export type DataId = number;
 export type AccountRole = number;
 
 export interface CreateAccount
@@ -68,7 +68,7 @@ content.putContact = () =>
 {
     return;
 }
-content.create = async (info: CreateAccount) : Promise<AccountId> =>
+content.create = async (info: CreateAccount) : Promise<DataId> =>
 {
     const ctx = await sql.transaction ();
 
@@ -78,7 +78,7 @@ content.create = async (info: CreateAccount) : Promise<AccountId> =>
             INSERT INTO User (Name, Role)
             VALUES (?, ?)`,
             [info.name, info.role]
-        ) as AccountId;
+        ) as DataId;
         await ctx.insert (`
             INSERT INTO UserContact (Id)
             VALUES (?)`,

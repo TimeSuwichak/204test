@@ -11,7 +11,7 @@ import
 from "#core/sql.ts"
 import
 {
-    type AccountId
+    type DataId
 }
 from "#model/account.ts";
 
@@ -25,21 +25,27 @@ const content =()=>
 
 type AuthId = string;
 type AuthLink = number;
-type Session = string;
 type Restriction = number;
 
 /**
  * ชุดข้อมูลที่ได้รับจากการลงชื่อเข้าใช้
 */
-interface ResultSession
+interface Session
 {
     authId: AuthId;
     authLink: AuthLink;
-    session: Session;
+    session: string;
     sessionIssued: Date;
     sessionExpire: Date;
     restriction: Restriction;
     step: number;
+}
+interface SessionCreate
+{
+    id: AuthLink;
+    role: number;
+    restriction: Restriction;
+    expire ?: Date;
 }
 
 let EXPIRE_SESSION: number;
@@ -67,11 +73,6 @@ content.STEP_MFA = 3;
  * ขั้นตอนการลงชื่อเข้าใช้: เสร็จสิ้น
 */
 content.STEP_COMPLETE = 4;
-
-content.getExpireSession = function () { return EXPIRE_SESSION; }
-content.getExpireChallenge = function () { return EXPIRE_CHALLENGE; }
-content.jwtGetIssuer = function () { return JWT_ISSUER; }
-content.jwtGetSecret = function () { return JWT_SECRET; }
 /**
  * เริ่มต้นการทำงานของระบบ
 */
@@ -116,6 +117,59 @@ content.RESTRICTION_DISABLED = 2;
  * บัญชีถูกระงับโดยระบบหรือผู้ดูแล
 */
 content.RESTRICTION_SUSPENDED = 4;
+
+content.createSession = async (info: SessionCreate) =>
+{
+    const issued = new Date ();
+    const expire = info.expire ?? new Date (8640000000000000);
+
+    const session = await content.jwtSign ({
+        "Id": info.id,
+        "Role": info.role,
+        "Restriction": info.restriction,
+    }, 
+    issued, expire);
+
+    const output: Session =
+    {
+        session: session,
+        sessionIssued: issued,
+        sessionExpire: expire,
+        restriction: info.restriction,
+        authId: "",
+        authLink: 0,
+        step: 0
+    };
+    return output;
+}
+/**
+ * รับหน่วยเวลาที่หมดอายุตลอดการใช้งานระบบ
+*/
+content.getExpireSession = () => 
+{ 
+    return EXPIRE_SESSION; 
+}
+/**
+ * รับหน่วยเวลาที่หมดอายุในระหว่างการเข้าสู่ระบบ
+*/
+content.getExpireChallenge = () => 
+{ 
+    return EXPIRE_CHALLENGE; 
+}
+/**
+ * รับชื่อผู้ออกใบรับรอง JWT
+*/
+content.jwtGetIssuer = () => 
+{ 
+    return JWT_ISSUER; 
+}
+/**
+ * รับรหัสของ JWT
+*/
+content.jwtGetSecret = () => 
+{ 
+    return JWT_SECRET; 
+}
 /**
  * ลงชื่อให้กับชุดข้อมูลดังกล่าวโดยใช้รูปแบบ JWT
  * 
@@ -175,12 +229,13 @@ content.jwtVerify = async (input: string) =>
         throw new error.NotAvailable ("JWT Verification Failed", { cause: e });
     }
 }
+
 /**
  * เริ่มต้นการลงชื่อเข้าใช้โดยรหัสประจำตัวของผู้ใช้
  * 
  * @param authId รหัสประจำตัวของผู้ใช้
 */
-content.signIn = async (authId: string) : Promise<ResultSession> =>
+content.signIn = async (authId: string) : Promise<Session> =>
 {
     let cmd: SqlInputCommand = `SELECT Link FROM Auth WHERE Id = ?`;
     let val: SqlInputValue = [authId];
@@ -218,7 +273,7 @@ content.signIn = async (authId: string) : Promise<ResultSession> =>
     }, 
     seIssued, seExpire);
 
-    const output: ResultSession =
+    const output: Session =
     {
         authId: authId,
         authLink: outLink,
@@ -242,7 +297,7 @@ content.signInPwd = async (
     authId: string, 
     role: number,
     value: string,
-) : Promise<ResultSession> =>
+) : Promise<Session> =>
 {
     const cmd: SqlInputCommand = `SELECT Password FROM Auth WHERE Id = ?`;
     const val: SqlInputValue = [authId];
@@ -270,7 +325,7 @@ content.signInPwd = async (
     }, 
     seIssued, seExpire);
 
-    const output: ResultSession =
+    const output: Session =
     {
         authId: authId,
         authLink: authLink,
@@ -283,7 +338,7 @@ content.signInPwd = async (
     return output;
 }
 
-content.create = async (id: string, pwd: string, link: AccountId) =>
+content.create = async (id: string, pwd: string, link: DataId) =>
 {
     await sql.insert (`
         INSERT INTO Auth (Id, Password, Link) 
