@@ -1,5 +1,17 @@
 import React from 'react';
-import { LayoutDashboard, User, Shield, Truck, CreditCard, ChevronLeft, ChevronRight } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Disc, 
+  Users, 
+  TicketPercent, 
+  CreditCard, 
+  Truck, 
+  MessageSquare, 
+  Settings,
+  ChevronLeft, 
+  ChevronRight 
+} from 'lucide-react';
+
 import type { LucideIcon } from 'lucide-react';
 
 interface Menuitem {
@@ -21,13 +33,17 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
   isCollapsed, 
   setIsCollapsed 
 }) => {
-  // เพิ่มหน้า Dashboard เป็นเมนูแรกสุด
+  
+  // 🔥 ปรับเปลี่ยนเมนูให้ตรงกับ Use Case Diagram ของระบบหลังบ้านทั้งหมด
   const sidebarMenus: Menuitem[] = [
     { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
-    { id: 'general', name: 'ทั่วไป', icon: User },
-    { id: 'security', name: 'ความปลอดภัย', icon: Shield },
-    { id: 'shipping', name: 'การจัดส่ง', icon: Truck },
-    { id: 'payment', name: 'การชำระเงิน', icon: CreditCard },
+    { id: 'items', name: 'จัดการแผ่น/ตลับเกม', icon: Disc },
+    { id: 'users', name: 'จัดการผู้ใช้', icon: Users },
+    { id: 'promotions', name: 'โปรโมชัน & ส่วนลด', icon: TicketPercent },
+    { id: 'payments', name: 'การชำระเงิน', icon: CreditCard },
+    { id: 'shipments', name: 'การจัดส่งสินค้า', icon: Truck },
+    { id: 'reviews', name: 'จัดการรีวิวลูกค้า', icon: MessageSquare },
+    { id: 'settings', name: 'ตั้งค่าเว็บไซต์/ระบบ', icon: Settings },
   ];
 
   return (
@@ -36,7 +52,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
-      <ul className="p-4 space-y-3">
+      {/* รายการเมนูทั้งหมด (รองรับการ scroll ในกรณีที่เปิดจอเล็กแล้วเมนูเยอะ) */}
+      <ul className="p-4 space-y-2 overflow-y-auto flex-1 custom-scrollbar">
         {sidebarMenus.map((menu) => {
           const Icon = menu.icon;
           const isActive = activeMenu === menu.id;
@@ -53,8 +70,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                 }`}
                 title={menu.name}
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  isActive ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-300'
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
+                  isActive ? 'bg-indigo-600 text-white' : 'bg-slate-700/60 text-slate-300'
                 }`}>
                   <Icon size={16} />
                 </div>
@@ -70,6 +87,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         })}
       </ul>
 
+      {/* ปุ่มยุบ/กางเมนู */}
       <div className="p-4 border-t border-slate-800 flex justify-center">
         <button
           onClick={() => { setIsCollapsed(!isCollapsed); }}

@@ -33,6 +33,24 @@ interface PropBranding
   onClick ?: () => void;
 }
 /**
+ * โครงสร้างคุณสมบัติของส่วนประกอบช่องค้นหา
+*/
+interface PropSearch
+{
+  /**
+   * ข้อความตัวอย่าง
+  */
+  placeholder ?: string;
+  /**
+   * ทำงานเมื่อผู้ใช้กดช่องค้นหา
+  */
+  onClick ?: () => void;
+  /**
+   * ทำงานเมื่อผู้ใช้เสร็จสิ้นป้อนคำค้นหา
+  */
+  onChange ?: (value: string) => void;
+}
+/**
  * โครงสร้างคุณสมบัติของส่วนประกอบ Menu
 */
 interface PropMenu
@@ -174,10 +192,28 @@ content.Branding = function NavBarBranding (prop: PropBranding)
 /**
  * ส่วนประกอบแสดงผลช่องค้นหา
 */
-content.Search = function NavBarSearch ()
+content.Search = function NavBarSearch (prop: PropSearch)
 {
+  const onClick = (event: react.MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    if (prop.onClick) {
+      prop.onClick ();
+    }
+  }
+  const onChange = (event: react.ChangeEvent<HTMLInputElement>) =>
+  {
+    if (prop.onChange) {
+      prop.onChange (event.target.value);
+    }
+  }
   return (
-    <Search placeholder="ค้นหา เกมสุดที่รัก ..."/>
+    <Search 
+      placeholder={prop.placeholder}
+      onClick={onClick}
+      onChange={onChange}/>
   );
 }
 /**

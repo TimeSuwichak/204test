@@ -40,7 +40,9 @@ content.NavBar = function PresetNavBar ()
       text="ร้านขายแผ่นและตลับเกม" 
       onClick={toHome}/>
     <NavBar.Spacing/>
-    <NavBar.Search/>
+    <NavBar.Search 
+      placeholder="ค้นหา เกมสุดที่รัก ..."
+      onClick={toProductBrowser}/>
     <NavBar.Menu>
       <NavBar.MenuItem 
         icon={<ShoppingCart/>}
