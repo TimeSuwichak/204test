@@ -48,11 +48,12 @@ content.get = (request: Request, response: Response) =>
     void model.get (productId).then ((x) =>
     {
         response.status (http.STATUS_OK);
-        response.end ({
+        response.json ({
             "Id": x.id,
             "Name": x.name,
             "Description": x.description,
         });
+        response.end ();
     })
     .catch ((e: unknown) =>
     {
@@ -92,10 +93,10 @@ content.put = (request: Request, response: Response) =>
         input = 
         {
             id: productId,
-            name: reader.requireString ("Name"),
-            description: reader.requireString ("Description"),
-            price: reader.requireInteger ("Price"),
-            priceCode: reader.requireInteger ("PriceCode"),
+            name: reader.optionalString ("Name"),
+            description: reader.optionalString ("Description"),
+            price: reader.optionalInteger ("Price"),
+            priceCode: reader.optionalInteger ("PriceCode"),
         };
     }
     catch
@@ -156,10 +157,11 @@ content.post = (request: Request, response: Response) =>
     void model.create (input).then ((x) =>
     {
         response.status (http.STATUS_CREATED);
-        response.end ({
+        response.json ({
             "Id": x,
             "Created": new Date ().getTime ()
         });
+        response.end ();
         return;
     })
     .catch ((e: unknown) =>

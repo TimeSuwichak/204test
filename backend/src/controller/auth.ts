@@ -110,7 +110,8 @@ content.validate = function (config: ValidationSettings)
 
             const passRole = config.allowedRole?.includes (result.role);
             const passRestriction =  
-                (result.restriction & (config.allowedRestriction ?? 0)) != 0;
+                (result.restriction & (config.allowedRestriction ?? 0)) 
+                === config.allowedRestriction;
 
             if (!passRole || !passRestriction)
             {

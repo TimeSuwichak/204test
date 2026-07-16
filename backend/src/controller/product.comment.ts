@@ -48,7 +48,7 @@ content.get = (request: Request, response: Response) =>
     void model.get (commentId).then ((x) =>
     {
         response.status (http.STATUS_OK);
-        response.end ({
+        response.json ({
             "CommentId": x.commentId,
             "ProductId": x.productId,
             "Author": x.author,
@@ -56,6 +56,7 @@ content.get = (request: Request, response: Response) =>
             "Text": x.text,
             "Rating": x.rating,
         });
+        response.end ();
     })
     .catch ((e: unknown) =>
     {
@@ -95,9 +96,9 @@ content.put = (request: Request, response: Response) =>
         input = 
         {
             commentId: categoryId,
-            title: reader.requireString ("Title"),
-            text: reader.requireString ("Text"),
-            rating: reader.requireInteger ("Rating")
+            title: reader.optionalString ("Title"),
+            text: reader.optionalString ("Text"),
+            rating: reader.optionalInteger ("Rating")
         };
     }
     catch
@@ -160,10 +161,11 @@ content.post = (request: Request, response: Response) =>
     void model.create (input).then ((x) =>
     {
         response.status (http.STATUS_CREATED);
-        response.end ({
+        response.json ({
             "Id": x,
             "Created": new Date ().getTime ()
         });
+        response.end ();
         return;
     })
     .catch ((e: unknown) =>

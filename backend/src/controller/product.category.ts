@@ -48,11 +48,12 @@ content.get = (request: Request, response: Response) =>
     void model.get (categoryId).then ((x) =>
     {
         response.status (http.STATUS_OK);
-        response.end ({
+        response.json ({
             "CategoryId": x.categoryId,
             "ProductId": x.productId,
             "Value": x.value,
         });
+        response.end ();
     })
     .catch ((e: unknown) =>
     {
@@ -92,7 +93,7 @@ content.put = (request: Request, response: Response) =>
         input = 
         {
             categoryId: categoryId,
-            value: reader.requireInteger ("Value")
+            value: reader.optionalInteger ("Value")
         };
     }
     catch
@@ -151,10 +152,11 @@ content.post = (request: Request, response: Response) =>
     void model.create (input).then ((x) =>
     {
         response.status (http.STATUS_CREATED);
-        response.end ({
+        response.json ({
             "Id": x,
             "Created": new Date ().getTime ()
         });
+        response.end ();
         return;
     })
     .catch ((e: unknown) =>

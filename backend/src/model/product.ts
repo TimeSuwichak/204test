@@ -35,19 +35,19 @@ export interface DataUpdate
     /**
      * ชื่อสินค้า
     */
-    name ?: string;
+    name ?: string | undefined;
     /**
      * คำอธิบายสินค้า
     */
-    description ?: string;
+    description ?: string | undefined;
     /**
      * ราคา
     */
-    price ?: number;
+    price ?: number | undefined;
     /**
      * รหัสสกุลเงิน
     */
-    priceCode ?: number;
+    priceCode ?: number | undefined;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลลงในฐานข้อมูล

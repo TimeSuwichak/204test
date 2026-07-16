@@ -46,10 +46,11 @@ content.get = (request: Request, response: Response) =>
     void model.get (productId).then ((x) =>
     {
         response.status (http.STATUS_OK);
-        response.end ({
+        response.json ({
             "ProductId": x.productId,
             "Quantity": x.quantity,
         });
+        response.end ();
     })
     .catch ((e: unknown) =>
     {
@@ -89,7 +90,7 @@ content.put = (request: Request, response: Response) =>
         input = 
         {
             productId: productId,
-            quantity: reader.requireInteger ("Quantity"),
+            quantity: reader.optionalInteger ("Quantity"),
         };
     }
     catch

@@ -41,7 +41,7 @@ export interface DataUpdate
     /**
      * รหัสหมวดหมู่
     */
-    value ?: number;
+    value ?: number | undefined;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลลงในฐานข้อมูล

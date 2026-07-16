@@ -47,12 +47,13 @@ content.get = (request: Request, response: Response) =>
     void model.get (reviewId).then ((x) =>
     {
         response.status (http.STATUS_OK);
-        response.end ({
+        response.json ({
             "ReviewId": x.reviewId,
             "ProductId": x.productId,
             "Mime": x.mime,
             "Link": x.link,
         });
+        response.end ();
     })
     .catch ((e: unknown) =>
     {
@@ -92,8 +93,8 @@ content.put = (request: Request, response: Response) =>
         input = 
         {
             reviewId: reviewId,
-            mime: reader.requireString ("Mime"),
-            link: reader.requireString ("Link"),
+            mime: reader.optionalString ("Mime"),
+            link: reader.optionalString ("Link"),
         };
     }
     catch
@@ -153,10 +154,11 @@ content.post = (request: Request, response: Response) =>
     void model.create (input).then ((x) =>
     {
         response.status (http.STATUS_CREATED);
-        response.end ({
+        response.json ({
             "Id": x,
             "Created": new Date ().getTime ()
         });
+        response.end ();
         return;
     })
     .catch ((e: unknown) =>

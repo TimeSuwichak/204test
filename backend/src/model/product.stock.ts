@@ -27,7 +27,7 @@ export interface DataUpdate
     /**
      * จำนวนสินค้า
     */
-    quantity ?: number;
+    quantity ?: number | undefined;
 }
 /**
  * ส่วนเชื่อมต่อกับฐานข้อมูล

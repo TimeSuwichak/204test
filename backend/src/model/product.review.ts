@@ -44,11 +44,11 @@ export interface DataUpdate
     /**
      * รหัส MIME
     */
-    mime ?: string;
+    mime ?: string | undefined;
     /**
      * ลิงค์ที่อยู่ของทรัพยากร
     */
-    link ?: string;
+    link ?: string | undefined;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลลงในฐานข้อมูล

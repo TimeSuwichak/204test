@@ -58,15 +58,15 @@ export interface DataUpdate
     /**
      * หัวเรื่อง
     */
-    title ?: string;
+    title ?: string | undefined;
     /**
      * ข้อความ
     */
-    text ?: string;
+    text ?: string | undefined;
     /**
      * คะแนน
     */
-    rating ?: number;
+    rating ?: number | undefined;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลลงในฐานข้อมูล
