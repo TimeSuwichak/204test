@@ -44,6 +44,7 @@ const ContextAuth = react.createContext (defAuth ());
 const ContextLanguage = react.createContext (defLanguage ());
 
 Content.ProviderAuth = ContextAuth.Provider;
+Content.ProviderLanguage = ContextLanguage.Provider;
 Content.defAuth = defAuth;
 Content.defLanguage = defLanguage;
 Content.useAuth = useAuth;

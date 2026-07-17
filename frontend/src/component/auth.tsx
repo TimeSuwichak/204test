@@ -2,6 +2,7 @@ import react    from "react";
 import styled   from "styled-components";
 import api      from "#util/api.auth.ts";
 import error    from "#util/common.error.ts";
+import context  from "#context/common.ts";
 
 import { Activity }  from "react";
 import { keyframes } from "styled-components";
@@ -268,7 +269,7 @@ const content = function Auth (prop: PropContent)
       setFeedback (emptyFeedback ());
       setPending (true);
     }
-    api.signIn (value).then (([se, ch]) =>
+    api.challengeId (value).then (([se, ch]) =>
     {
       id.current = value;
       session.current = se;
@@ -299,7 +300,7 @@ const content = function Auth (prop: PropContent)
       setFeedback (emptyFeedback ());
       setPending (true);
     }
-    api.signInPwd (session.current.secret, value).then (([se, ch]) =>
+    api.challengePassword (session.current.secret, value).then (([se, ch]) =>
     {
       session.current = se;
 
@@ -410,6 +411,34 @@ content.FEEDBACK_WARNING = 1;
  * ข้อความตอบกลับ: ข้อผิดพลาด
 */
 content.FEEDBACK_ERROR = 2;
+
+content.Provider = function AuthProvider ()
+{
+  const ctx = context.useAuth ();
+
+  react.useEffect (() =>
+  {
+    const saved = api.saveGetItemPrefered ();
+
+    if (saved)
+    {
+      ctx.name = saved.name;
+      ctx.session = saved.secret;
+      ctx.sessionIssued = saved.issued;
+      ctx.sessionExpire = saved.expired;
+    }
+    return () =>
+    {
+      ctx.name = "";
+      ctx.session = "";
+      ctx.sessionIssued = new Date (NaN);
+      ctx.sessionExpire = new Date (NaN);
+    }
+  },
+  []);
+
+  return (<></>);
+}
 
 content.View = function AuthView (prop: PropView)
 {

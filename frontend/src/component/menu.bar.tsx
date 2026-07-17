@@ -1,45 +1,110 @@
-import react from "react";
-import styled from "styled-components";
-import context from "#context/common.ui.ts";
-import
-{
-  type IrMenuBar
-}
-from "#context/common.ui.ts";
+import react              from "react";
+import styled             from "styled-components";
+import context            from "#context/common.ui.ts";
+import { type IrMenuBar } from "#context/common.ui.ts";
 
+type PropDirection = "row" | "column";
+type PropAlign = "start" | "center" | "end";
+
+/**
+ * โครงสร้างคุณสมบัติของส่วนประกอบหลัก
+*/
 interface PropRoot
 {
+  /**
+   * ระบุการแสดงผล
+  */
   visible ?: boolean;
-  direction ?: "row" | "column";
-  align ?: "start" | "center" | "end";
+  /**
+   * ระบุทิศทางการแสดงผล
+  */
+  direction ?: PropDirection;
+  /**
+   * ระบุการวางองค์ประกอบ
+  */
+  align ?: PropAlign;
+  /**
+   * ระบุความกว้างของเมนู
+  */
   width ?: string;
+  /**
+   * ระบุความกว้างที่สุดของเมนู
+  */
   widthMax ?: string;
+  /**
+   * ระบุความสูงของเมนู
+  */
   height ?: string;
+  /**
+   * ระบุความสูงที่สุดของเมนู
+  */
   heightMax ?: string;
+  /**
+   * ระบุการวางของเมนู
+  */
   margin ?: string;
+  /**
+   * ระบุความกว้างของแต่ละไอเท็ม
+  */
   gap ?: string;
+  /**
+   * รายการของเมนู
+  */
   children ?: react.ReactNode;
+  /**
+   * ค่าเริ่มต้นที่เลือกไว้
+  */
   selected ?: unknown;
-
+  /**
+   * ทำงานเมื่อผู้ใช้กดเลือกเมนูใด ๆ 
+  */
   onClick ?: (value: unknown, handled: boolean) => void;
 }
+/**
+ * โครงสร้างคุณสมบัติของส่วนประกอบหัวเรื่อง
+*/
 interface PropHeading
 {
+  /**
+   * ขนาดของข้อความ
+  */
   size ?: string;
+  /**
+   * ข้อความที่แสดงผล
+  */
   text ?: string;
 }
+/**
+ * โครงสร้างคุณสมบัติของส่วนประกอบเมนู
+*/
 interface PropItem
 {
+  /**
+   * ระบุความกว้างของเมนู
+  */
   width ?: string;
+  /**
+   * ระบุความสูงของเมนู
+  */
   height ?: string;
+  /**
+   * ระบุไอคอนให้กับเมนู
+  */
   icon ?: string | React.ComponentType<unknown> | React.ReactElement;
+  /**
+   * ระบุข้อความ
+  */
   text ?: string;
+  /**
+   * ระบุค่าข้อมูลเอกลักษณ์
+  */
   value ?: unknown;
 
   onClick ?: () => boolean | undefined;
 }
-
-
+/**
+ * ส่วนประกอบแสดงผลสำหรับรายการของแต่ละเมนู
+*/
 const content = function MenuBar (prop: PropRoot)
 {
   return (

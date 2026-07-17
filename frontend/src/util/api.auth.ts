@@ -295,7 +295,8 @@ content.saveWrite = () =>
 /**
  * เริ่มต้นดำเนินการลงชื่อเข้าใช้งานด้วยรหัสประจำตัว
 */
-content.signIn = async (input: string) : Promise<[Session, SessionChallenge]> =>
+content.challengeId = async (input: string) 
+    : Promise<[Session, SessionChallenge]> =>
 {
     const endpoint = `${content.NET_URL}/challenge`;
     const init: RequestInit =
@@ -357,7 +358,7 @@ content.signIn = async (input: string) : Promise<[Session, SessionChallenge]> =>
     }
 }
 
-content.signInPwd = async (session: string, password: string) 
+content.challengePassword = async (session: string, password: string) 
     : Promise<[Session, SessionChallenge]> =>
 {
     const endpoint = `${content.NET_URL}/challenge`;
@@ -420,16 +421,10 @@ content.signInPwd = async (session: string, password: string)
         throw new error.BadData (e);
     }
 }
-content.signInVerifyTotp = async function (session: string, input: string)
+content.challengeTotp = async function (session: string, input: string)
 {
     void session;
     void input;
-
-    return Promise.resolve ();
-}
-content.signInFinish = async function (session: string)
-{
-    void session;
 
     return Promise.resolve ();
 }

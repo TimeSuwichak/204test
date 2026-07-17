@@ -3,6 +3,7 @@ import styled from "styled-components";
 import ctx from "#context/common.ui.ts";
 
 import { type IrNavBar } from "#context/common.ui.ts";
+import { CircleUser } from "lucide-react";
 
 /**
  * โครงสร้างคุณสมบัติของส่วนประกอบหลัก
@@ -87,6 +88,20 @@ interface PropMenuItem
 */
 interface PropSignIn
 {
+  /**
+   * คำสั่งที่ทำงานเมื่อผู้ใช้กด
+  */
+  onClick ?: () => void;
+}
+/**
+ * โครงสร้างคุณสมบัติของส่วนประกอบ Profile
+*/
+interface PropProfile
+{
+  /**
+   * รูปโปรไฟล์
+  */
+  icon ?:  string | React.ComponentType<unknown> | React.ReactElement;
   /**
    * คำสั่งที่ทำงานเมื่อผู้ใช้กด
   */
@@ -219,11 +234,41 @@ content.Search = function NavBarSearch (prop: PropSearch)
 /**
  * ส่วนประกอบแสดงผลรูปโปรไฟล์
 */
-content.Profile = function NavBarProfile ()
+content.Profile = function NavBarProfile (prop: PropProfile)
 {
+  const source = prop.icon ?? <CircleUser/>;
+
+  const Image = () =>
+  {
+    if (typeof source === 'string') 
+    {
+      return <img src={source} alt={""}/>;
+    }
+    if (react.isValidElement(source)) 
+    {
+      return source;
+    }
+
+    if (typeof source === 'function' || typeof source === 'object') 
+    {
+      const Component = source as React.ComponentType;
+      return <Component />;
+    }
+    return null;
+  }
+  const onClick = (event: react.MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    if (prop.onClick) {
+      prop.onClick ();
+    }
+  }
+
   return (
-    <Profile>
-      <ProfileImg/>
+    <Profile onClick={onClick}>
+      <Image/>
     </Profile>
   );
 }
@@ -389,19 +434,41 @@ const Search = styled.input`
     color: #9ad3cb; 
   }
 `;
-const Profile = styled.div`
+const Profile = styled.button`
+  display: block;
+  margin: 0px;
+  padding: 0px;
   width: 32px;
   min-height: 32px;
-`;
-const ProfileImg = styled.img`
-  display: block;
-  width: 32px;
-  height: 32px;
-  border: 0px solid var(--bg-primary-border);
-  border-radius: 100%;
-  transition: border-width 66ms cubic-bezier(0.22, 1, 0.36, 1);
 
-  &:hover
+  background-color: transparent;
+  color: var(--text-primary);
+
+  &:hover, &:focus
+  {
+    background-color: transparent;
+    color: var(--text-primary);
+  }
+  &:active
+  {
+    background-color: transparent;
+    color: var(--text-primary);
+  }
+
+  & > img,
+  & > svg
+  {
+    display: block;
+    width: 32px;
+    height: 32px;
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    border: 0px solid var(--bg-primary-border);
+    border-radius: 100%;
+    transition: border-width 66ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  & > img:hover,
+  & > svg:hover
   {
     border-width: 2px;
   }

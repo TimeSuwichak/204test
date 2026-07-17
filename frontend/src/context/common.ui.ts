@@ -1,5 +1,13 @@
 import react from "react";
 
+export interface MenuContext
+{
+    setVisible: (value: boolean) => void;
+    setChildren: (value: react.ReactNode) => void;
+    setInset: (value ?: string) => void;
+    setCancel: (value ?: () => void) => void;
+}
+
 export interface IrMenuBar
 {
   direction: "row" | "column";
@@ -29,11 +37,25 @@ const defIrMenuBar = () : IrMenuBar =>
         onClick: () => { return; }
     }
 }
+const defMenuContext = () : MenuContext =>
+{
+    return {
+        setVisible: () => { return; },
+        setChildren: () => { return; },
+        setInset: () => { return; },
+        setCancel: () => { return; }
+    }
+}
 const defIrNavBar = () : IrNavBar =>
 {
     return {
         width: 0
     }
+}
+
+const useMenuContext = () =>
+{
+    return react.useContext (ContextMenuContext);
 }
 const useIrMenuBar = () =>
 {
@@ -45,11 +67,18 @@ const useIrNavBar = () =>
 }
 
 const Content = () => { return; }
+const ContextMenuContext = react.createContext (defMenuContext ());
 const ContextIrMenuBar = react.createContext (defIrMenuBar ());
 const ContextIrNavBar = react.createContext (defIrNavBar ());
 
+Content.ProviderMenuContext = ContextMenuContext;
+
+Content.defMenuContext = defMenuContext;
+Content.useMenuContext = useMenuContext;
+
 Content.ProviderIrMenuBar = ContextIrMenuBar.Provider;
 Content.ProviderIrNavBar = ContextIrNavBar.Provider;
+
 Content.defIrMenuBar = defIrMenuBar;
 Content.defIrNavBar = defIrNavBar;
 Content.useIrMenuBar = useIrMenuBar;
