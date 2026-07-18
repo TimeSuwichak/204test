@@ -3,6 +3,7 @@ import sql          from "#core/sql.ts";
 import error        from "#core/error.ts";
 import objectReader from "#core/object.reader.ts";
 import { type DataId as DataAuthId } from "#model/auth.ts";
+import { type DataIdFb as DataAuthIdFb } from "#model/auth.ts";
 import { type DataId as DataAccountId } from "#model/account.ts"
 
 /**
@@ -14,7 +15,14 @@ export interface DataFetch
     password: string;
     link: DataAccountId;
 }
-
+/**
+ * โครงสร้างข้อมูลที่ได้รับจากการดึงข้อมูลการลงชื่อเข้าใช้จากฐานข้อมูล
+*/
+export interface DataFetchFb
+{
+    id: DataAuthIdFb;
+    link: DataAccountId;
+}
 /**
  * ระบบจัดการวิธีการสร้างบัญชีใหม่
 */
@@ -65,6 +73,33 @@ content.get = async (id: DataAuthId) =>
     });
 }
 /**
+ * รับข้อมูลการลงชื่อเข้าใช้งานระบบด้วย Facebook
+*/
+content.getFacebook = async (id: DataAuthIdFb) =>
+{
+    const cmd = "SELECT Id, Link FROM AuthFacebook WHERE Id = ?";
+    const param = [id];
+    
+    return sql.select (cmd, param).then ((x) =>
+    {
+        if (x.length === 0)
+        {
+            throw new error.NotFound ();
+        }
+        if (x.length !== 1)
+        {
+            throw new error.Conflict ();
+        }
+        const reader = objectReader (x.at (0));
+        const result: DataFetchFb =
+        {
+            id: reader.requireInteger ("Id"),
+            link: reader.requireInteger ("Link"),
+        };
+        return result;
+    });
+}
+/**
  * สร้างวิธีการลงชื่อเข้าใช้งานระบบด้วย: รหัสประจำตัวและรหัสผ่าน
 */
 content.create = async (id: DataAuthId, pwd: string, link: DataAccountId) =>
@@ -77,7 +112,17 @@ content.create = async (id: DataAuthId, pwd: string, link: DataAccountId) =>
     await sql.insert (cmd, param);
     return id;
 }
+/**
+ * สร้างวิธีการลงชื่อเข้าใช้งานระบบด้วย: Facebook
+*/
+content.createFacebook = async (id: DataAuthIdFb, link: DataAccountId) =>
+{
+    const cmd = "INSERT INTO AuthFacebook (Id, Link) VALUES (?, ?)";
+    const param = [id, link];
 
+    await sql.insert (cmd, param);
+    return id;
+}
 /**
  * แข็งวัตถุ (ความปลอดภัย)
 */

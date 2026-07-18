@@ -39,7 +39,7 @@ const content = function InitSystemRouter (
         <Route Component={VCustomer} caseSensitive>
           <Route index Component={CHome}/>
           <Route path="/about" Component={CAbout}/>
-          <Route path="/product/:id" Component={CProd}/>
+          <Route path="/product" Component={CProd}/>
           <Route path="/product-browser" Component={CProdBrowse}/>
           <Route path="/shipping" Component={CShipping}/>
         </Route>

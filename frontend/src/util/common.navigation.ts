@@ -47,9 +47,18 @@ content.toProduct = (id: number) =>
 {
     return router (content.PATH_PRODUCT + `?id=${String (id)}`);
 }
-content.toProductBrowser = () =>
+content.toProductBrowser = (search ?: string) =>
 {
-    return router (content.PATH_PRODUCT_BROWSER);
+    const param = new URLSearchParams ();
+
+    if (search) {
+        param.append ("search", search);
+    }
+    const paramOut = param.toString ();
+    const paramFormatted = paramOut.length !== 0 ? `?${paramOut}` : ``;
+
+
+    return router (content.PATH_PRODUCT_BROWSER + paramFormatted);
 }
 content.toShipping = () =>
 {

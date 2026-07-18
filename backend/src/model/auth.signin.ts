@@ -2,9 +2,16 @@ import bcrypt       from "bcrypt";
 import sql          from "#core/sql.ts";
 import error        from "#core/error.ts";
 import objectReader from "#core/object.reader.ts";
-import model from "#model/auth.ts";
+import model        from "#model/auth.ts";
+import modelAccount from "#model/account.ts";
+import modelSignup  from "#model/auth.signup.ts";
+
 import { type Session } from "#model/auth.ts";
-import { type DataId as DataAuthId } from "#model/auth.ts";
+import { 
+    type DataId as DataAuthId ,
+    type DataIdFb as DataAuthIdFb
+} 
+from "#model/auth.ts";
 import { type DataId as DataAccountId } from "#model/account.ts"
 
 /**
@@ -38,6 +45,14 @@ content.STEP_MFA = 4;
  * ขั้นตอนการลงชื่อเข้าใช้: เสร็จสิ้น
 */
 content.STEP_COMPLETE = 5;
+/**
+ * ขั้นตอนการลงชื่อเข้าใช้: Facebook
+*/
+content.STEP_FACEBOOK = 101;
+/**
+ * ขั้นตอนการลงชื่อเข้าใช้: Facebook
+*/
+content.STEP_GOOGLE = 102;
 /**
  * เริ่มต้นการทำงานของระบบ
 */
@@ -183,6 +198,79 @@ content.challengeFinalize = async (authLink: DataAccountId) =>
         query.id, query.role, 
         model.RESTRICTION_NONE
     );
+}
+
+content.challengeFacebook = async (
+    userId: DataAuthIdFb, 
+    accessToken: string, 
+    name: string,
+    email: string,
+    icon: string
+) =>
+{
+    const search = new URLSearchParams ();
+    const endpoint = `https://graph.facebook.com/v25.0/debug_token`;
+
+    search.append ("input_token", accessToken);
+    search.append ("access_token", accessToken);
+
+    const url = `${endpoint}?${search.toString ()}`;
+    const request: RequestInit =
+    {
+        method: "GET",
+        mode: "no-cors",
+        referrerPolicy: "no-referrer",
+        cache: "default",
+    };
+    const response = await fetch (url, request).catch ((e: unknown) =>
+    {
+        throw new error.NotAuthorized (undefined, { cause: e });
+    });
+    const json = await response.json ().catch ((e: unknown) =>
+    {
+        throw new error.NotAuthorized (undefined, { cause: e });
+    });
+    console.log (json);
+    const reader = objectReader (json);
+    const readData = objectReader (reader.requireObject ("data"));
+    const readApp = readData.requireString ("app_id");
+    const readUser = readData.requireString ("user_id");
+    const readValid = Boolean (reader.requireObject ("data")["is_valid"]);
+
+    if (readApp != model.fbGetAppId () || 
+        readUser != String (userId) ||
+        !readValid)
+    {
+        throw new error.NotAuthorized (undefined);
+    }
+    return await modelSignup.getFacebook (userId).then ((x) =>
+    {
+        return content.challengeFinalize (x.link);
+    })
+    .catch (async (e: unknown) =>
+    {
+        if (!(e instanceof error.NotFound))
+        {
+            throw new error.NotAvailable ();
+        }
+        try
+        {
+            void email;
+            void icon;
+
+            const accountId = await modelAccount.create ({
+                name: name,
+                role: modelAccount.ROLE_USER
+            });
+            await modelSignup.createFacebook (userId, accountId);
+
+            return await content.challengeFinalize (accountId);
+        }
+        catch (e: unknown)
+        {
+            throw new error.NotAvailable (undefined, { cause: e });
+        }
+    });
 }
 
 /**

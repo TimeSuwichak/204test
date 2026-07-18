@@ -1,14 +1,29 @@
 import react from "react";
 import styled from "styled-components";
+import navigation from "#util/common.navigation.ts";
+
+import { useSearchParams } from "react-router";
+
 import testArtwork from "#asset/image/test.artwork.jpg";
 
 interface PropItem
 {
+  id: number;
   src: string;
+  onClick: (id: number) => void;
 }
 
 const content = function ProductBrowser ()
 {
+  const [serachParam] = useSearchParams ();
+  const search = serachParam.get ("search");
+
+  react.useEffect (() =>
+  {
+    console.log ("SEARCH");
+  },
+  [search]);
+
   return (<>
     <content.List/>
     <content.Filter/>
@@ -16,49 +31,63 @@ const content = function ProductBrowser ()
 }
 content.List = function ProductBrowserList ()
 {
+  const onClick = (id: number) =>
+  {
+    void navigation.toProduct (id);
+    return;
+  }
+
   return (
     <SyledList>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
-      <content.ListItem src={testArtwork}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
+      <content.ListItem id={1} src={testArtwork} onClick={onClick}/>
     </SyledList>
   );
 }
 content.ListItem = function ProductBrowserListItem (prop: PropItem)
 {
+  const onClick = (event: react.MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    prop.onClick (prop.id);
+  }
+
   return (
-    <StyledListItemContainer>
+    <StyledListItemContainer onClick={onClick}>
       <StyledListItem src={prop.src}/>
     </StyledListItemContainer>
   )
@@ -157,6 +186,7 @@ const StyledFilter = styled.div`
   inset: 64px 144px auto auto;
   width: 324px;
   background-color: var(--bg-primary);
+  border-radius: 4px;
   padding: 8px 16px;
 
   @media (max-width: 1920px)

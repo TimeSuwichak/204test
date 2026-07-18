@@ -110,7 +110,10 @@ content.NavBar = function PresetNavBar ()
       <NavBar.Spacing/>
       <NavBar.Search 
         placeholder="ค้นหา เกมสุดที่รัก ..."
-        onClick={toProductBrowser}/>
+        onClick={toProductBrowser}
+        onChange={(v) => {
+          void navigation.toProductBrowser (v);
+        }}/>
       <NavBar.Menu hideOnWidth={512}>
         <NavBar.MenuItem 
           icon={<ShoppingCart/>}

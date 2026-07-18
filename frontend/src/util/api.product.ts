@@ -1,4 +1,15 @@
 
+export type BasicId = number;
+
+export interface BasicFetch
+{
+    id: BasicId;
+    name: string;
+    description: string;
+    price: number;
+    priceCode: number;
+}
+
 const content = () => 
 {
     //
@@ -6,6 +17,15 @@ const content = () =>
     //
     return;
 };
+
+content.get = () =>
+{
+    return;
+}
+content.getList = () =>
+{
+    return;
+}
 
 content.create = () =>
 {

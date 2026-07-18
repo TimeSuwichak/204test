@@ -44,14 +44,25 @@ content.challenge = (
     let identifier: string;
     let password: string;
 
+    let access: string;
+    let name: string;
+    let email: string;
+    let icon: string;
+
     try
     {
         const reader = objectReader (request.body);
 
         key = reader.requireInteger ("Key");
         value = reader.optionalString ("Value") ?? "";
+        
         identifier = reader.optionalString ("Id") ?? "";
         password = reader.optionalString ("Password") ?? "";
+
+        access = reader.optionalString ("Access") ?? "";
+        name = reader.optionalString ("Name") ?? "";
+        email = reader.optionalString ("Email") ?? "";
+        icon = reader.optionalString ("Icon") ?? "";
     }
     catch
     {
@@ -97,6 +108,35 @@ content.challenge = (
     if (key === model.STEP_IDENTIFIER)
     {
         void model.challengeId (value).then ((x) =>
+        {
+            response.status (http.STATUS_OK);
+            response.json ({
+                "Session": x.session,
+                "SessionIssued": x.sessionIssued.getTime (),
+                "SessionExpire": x.sessionExpire.getTime (),
+                "Step": x.authStep ?? model.STEP_COMPLETE
+            });
+            response.end ();
+        })
+        .catch ((e: unknown) =>
+        {
+            if (e instanceof error.NotFound)
+            {
+                response.status (http.STATUS_UNAUTHORIZED);
+                response.end ();
+                return;
+            }
+
+            log.error (e);
+            response.status (http.STATUS_SERVICE_UNAVAILABLE);
+            response.end ();
+        });
+        return;
+    }
+    if (key === model.STEP_FACEBOOK)
+    {
+        void model.challengeFacebook (Number (value), access, name, email, icon)
+            .then ((x) =>
         {
             response.status (http.STATUS_OK);
             response.json ({

@@ -108,6 +108,10 @@ content.Constraint = class extends content.Base {};
 */
 content.Command = class extends content.Base {};
 /**
+ * คลาสข้อผิดพลาด ในกรณีที่ระบบถูกยกเลิก
+*/
+content.Cancelled = class extends content.Base {};
+/**
  * แข็งวัตถุ (ความปลอดภัย)
 */
 Object.freeze (content);

@@ -69,12 +69,25 @@ CREATE TABLE IF NOT EXISTS `project`.`Auth`
     CONSTRAINT UC_Auth_Link
         UNIQUE (`Link`)
 ) 
--- CREATE TABLE IF NOT EXISTS `project`.`AuthFacebook`
--- (
+ENGINE = InnoDB 
+COMMENT = 'ข้อมูลการเข้าสู่ระบบ';
 
--- )
+CREATE TABLE IF NOT EXISTS `project`.`AuthFacebook`
+(
+    `Id` BIGINT NOT NULL COMMENT 'รหัสประจำตัว' , 
+    `Link` BIGINT NOT NULL COMMENT 'รหัสบัญชี' , 
+    
+    CONSTRAINT PK_AuthFacebook_Id PRIMARY KEY (`Id`) , 
+    CONSTRAINT UK_AuthFacebook_Id UNIQUE (`Id`) ,
+    CONSTRAINT FK_AuthFacebook_Link 
+        FOREIGN KEY (`Link`) 
+        REFERENCES Account (`Id`) ,
+    CONSTRAINT UC_AuthFacebook_Link
+        UNIQUE (`Link`)
+)
+ENGINE = InnoDB 
+COMMENT = 'ข้อมูลการเข้าสู่ระบบด้วย Facebook';
 
-ENGINE = InnoDB COMMENT = 'ข้อมูลการเข้าสู่ระบบ';
 -- #
 -- # ข้อมูลสินค้า
 -- # 

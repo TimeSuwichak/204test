@@ -120,6 +120,14 @@ content.STEP_MFA = 4;
 */
 content.STEP_COMPLETE = 5;
 /**
+ * ขั้นตอนการลงชื่อเข้าใช้: Facebook
+*/
+content.STEP_FACEBOOK = 101;
+/**
+ * ขั้นตอนการลงชื่อเข้าใช้: Facebook
+*/
+content.STEP_GOOGLE = 102;
+/**
  * โปรโตอลที่ใช้ในการสื่อสารระหว่างเซิร์ฟเวอร์
 */
 content.NET_PROTOCOL = "http";
@@ -292,6 +300,205 @@ content.saveWrite = () =>
         localStorage.setItem (STORAGE_KEY, JSON.stringify (object, null, 2));
     }
 }
+
+declare const FB: undefined |
+{
+    init: ({ appId, xfbml, version }: {
+        appId: string;
+        xfbml: boolean;
+        version: string;
+    })  => void;
+
+    login: (cb: (response: {
+        status: "connected" | "not_authorized" | "unknown"
+        authResponse:
+        {
+            accessToken: string;
+            expiresIn: number;
+            reauthorize_required_in: number;
+            userID: number;
+        }
+
+    }) => void) => void;
+
+    api: (
+        endpoint: string, 
+        method: "get" | "post" | "delete" ,
+        params: Record<string, unknown>,
+        cb: (response: Record<string, unknown>) => void) 
+    => void;
+};
+
+content.fbLoad = () =>
+{
+    const key = import.meta.env.F_API_KEY_FACEBOOK as string;
+
+    Object.defineProperty (window, "fbAsyncInit", 
+    {
+        configurable: true,
+        enumerable: true,
+        writable: true,
+        value: function ()
+        {
+            if (!FB) {
+                return;
+            }
+            FB.init({
+                appId            : key,
+                xfbml            : true,
+                version          : 'v25.0'
+            });
+        }
+    });
+    const script = document.createElement ("script");
+
+    script.async = true;
+    script.defer = true;
+    script.crossOrigin = "anonymous";
+    script.src = "https://connect.facebook.net/en_US/sdk.js";
+
+    document.head.appendChild (script);
+}
+content.fbLogin = async () : Promise<[Session, SessionChallenge, {
+    name: string;
+}]> =>
+{
+    if (!FB) 
+    {
+        throw new error.NotAvailable ();
+    }
+    interface DataPassthrough
+    {
+        userId: number;
+        accessToken: string;
+        name: string;
+        email: string;
+        icon: string;
+    }
+
+    const onApi = () =>
+    {
+        return new Promise<DataPassthrough> ((resolve, reject) =>
+        {
+            FB.login ((response) =>
+            {
+                if (response.status != "connected")
+                {
+                    reject (new error.Cancelled ());
+                    return;
+                }
+                resolve ({
+                    userId: response.authResponse.userID,
+                    accessToken: response.authResponse.accessToken,
+                    name: "",
+                    email: "",
+                    icon: "",
+                });
+            });
+        });
+    }
+    const onApiMe = (x: DataPassthrough) =>
+    {
+        return new Promise<DataPassthrough> ((resolve, reject) =>
+        {
+            FB.api ("/me", "get", {
+                fields: "id,name,email,picture"
+            },
+            (response) =>
+            {
+                if (!response.error) 
+                {
+                    const pic =  response.picture as Record<string, unknown>;
+                    const picData = pic.data as Record<string, unknown>;
+                    const picURL = picData.url as string;
+
+                    resolve ({
+                        userId: x.userId,
+                        accessToken: x.accessToken,
+                        name: response .name as string,
+                        email: response .email as string,
+                        icon: picURL
+                    })
+                }
+                else
+                {
+                    reject (new error.NotAvailable ());
+                    return;
+                }
+            });
+        });
+    }
+    const onChallenge = async (info: DataPassthrough) :
+        Promise<[Session, SessionChallenge, { name: string; }]> =>
+    {
+        const endpoint = `${content.NET_URL}/challenge`;
+        const init: RequestInit =
+        {
+            method: "POST",
+            mode: "cors",
+            referrerPolicy: "strict-origin",
+            headers: 
+            [ 
+                ["Content-Type", "application/json"]
+            ],
+            cache: "default",
+            body: JSON.stringify (
+            {
+                "Key": content.STEP_FACEBOOK,
+                "Value": String (info.userId),
+                "Access": info.accessToken,
+                "Name": info.name,
+                "Email" : info.email,
+                "Icon": info.icon
+            }),
+            signal: AbortSignal.timeout (content.NET_TIMEOUT)
+        }
+        const response = await fetch (endpoint, init).catch ((e: unknown) =>
+        {
+            throw new error.Network (e);
+        });
+        switch (response.status)
+        {
+            case 200: break;
+            case 401: throw new error.NotAuthorized ();
+            case 404: throw new error.NotFound ();
+            case 429: throw new error.NetworkLimit ();
+            case 500: throw new error.NotAvailable ();
+            case 503: throw new error.NotAvailable ();
+            default: throw new error.Unknown ();
+        }
+        const data = await response.json ()
+            .then ((x) => reader (x))
+            .catch ((e: unknown) =>
+        {
+            throw new error.BadFormat (e);
+        });
+
+        try
+        {
+            const result: Session =
+            {
+                secret: data.requireString ("Session"),
+                issued: data.requireDate ("SessionIssued"),
+                expire: data.requireDate ("SessionExpire"),
+            }
+            const challenge: SessionChallenge =
+            {
+                step: data.requireInteger ("Step")
+            }
+            return [result, challenge, { name: info.name }];
+        }
+        catch (e: unknown)
+        {
+            throw new error.BadData (e);
+        }
+    }
+    const api = await onApi ().then (onApiMe);
+    const challenge = await onChallenge (api);
+
+    return challenge;
+}
+
 /**
  * เริ่มต้นดำเนินการลงชื่อเข้าใช้งานด้วยรหัสประจำตัว
 */

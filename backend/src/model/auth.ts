@@ -13,6 +13,10 @@ from "#model/account.ts";
 */
 export type DataId = string;
 /**
+ * รหัสของชุดรหัสข้อมูลสำหรับ Facebook (หรือเรียกอีกอย่างว่า PRIMARY KEY)
+*/
+export type DataIdFb = number;
+/**
  * รหัสบัญชี (หรือเรียกอีกอย่างว่า FOREIGN KEY)
 */
 export type DataLink = DataAccountId;
@@ -60,6 +64,7 @@ let EXPIRE_SESSION: number;
 let EXPIRE_CHALLENGE: number;
 let JWT_ISSUER: string;
 let JWT_SECRET: Uint8Array;
+let FB_APP_ID: string;
 
 /**
  * ระบบจัดการระบบยืนยันตัวตนผู้ใช้
@@ -68,30 +73,6 @@ const content = () =>
 {
     return;
 }
-/**
- * ขั้นตอนการลงชื่อเข้าใช้: ไม่ทราบ
-*/
-content.STEP_UNKNOWN = 0;
-/**
- * ขั้นตอนการลงชื่อเข้าใช้: ระบุรหัสประจำตัวและรหัสผ่าน
-*/
-content.STEP_SIMPLE = 1;
-/**
- * ขั้นตอนการลงชื่อเข้าใช้: ระบุรหัสประจำตัว
-*/
-content.STEP_IDENTIFIER = 2;
-/**
- * ขั้นตอนการลงชื่อเข้าใช้: ระบุรหัสผ่าน
-*/
-content.STEP_PASSWORD = 3;
-/**
- * ขั้นตอนการลงชื่อเข้าใช้: ยืนยันตัวตนแบบสองชั้น
-*/
-content.STEP_MFA = 4;
-/**
- * ขั้นตอนการลงชื่อเข้าใช้: เสร็จสิ้น
-*/
-content.STEP_COMPLETE = 5;
 /**
  * ไม่มีข้อจำกัดใด ๆ ในการใช้งานระบบ
 */
@@ -122,9 +103,14 @@ content.init = async () =>
     JWT_SECRET = new TextEncoder ()
         .encode (env.getString ("B_AUTH_SECRET", "WebProject"));
 
+    FB_APP_ID = env.getString ("B_AUTH_FACEBOOK", "");
+
+    console.log (FB_APP_ID);
+
     Object.freeze (EXPIRE_SESSION);
     Object.freeze (EXPIRE_CHALLENGE);
     Object.freeze (JWT_ISSUER);
+    Object.freeze (FB_APP_ID);
 
     return Promise.resolve ();
 }
@@ -245,6 +231,13 @@ content.jwtGetIssuer = () =>
 content.jwtGetSecret = () => 
 { 
     return JWT_SECRET; 
+}
+/**
+ * รับรหัสแอปของ Facebook
+*/
+content.fbGetAppId = () =>
+{
+    return FB_APP_ID;
 }
 /**
  * ลงชื่อให้กับชุดข้อมูลดังกล่าวโดยใช้รูปแบบ JWT

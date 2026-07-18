@@ -1,372 +1,157 @@
 import react    from "react";
 import styled   from "styled-components";
-import api      from "#util/api.auth.ts";
-import error    from "#util/common.error.ts";
 import bg       from "#asset/image/auth.bg.jpg";
 
 import { type Session } from "#util/api.auth.ts";
-import { Activity }  from "react";
+import { ArrowLeft, ShieldAlert } from "lucide-react";
 import { keyframes } from "styled-components";
-import 
-{ 
-  ArrowLeft, RotateCcw, UserRoundPlus, ShieldAlert, KeyRound,
-  ShieldUserIcon
-} 
-from "lucide-react";
 
-type ActivityMode = "visible" | "hidden" | undefined;
 
-interface PropContent
+const SignIn = react.lazy (() => import ("#component/auth.signin.tsx"));
+const SignUp = react.lazy (() => import ("#component/auth.signup.tsx"));
+
+export type ActivityMode = "visible" | "hidden" | undefined;
+
+/**
+ * โครงสร้างคุณสมบัติของส่วนประกอบหลัก
+*/
+export interface PropContent
 {
+  /**
+   * ระบุสถานะการแสดงผล (แสดง/ซ่อน)
+  */
   visible ?: boolean;
-  visibleAnimation ?: number;
+  /**
+   * ระบุหน้าเริ่มต้น
+  */
   page ?: number;
+  /**
+   * ระบุว่าพื้นหลังควรโปร่งใส่หรือไม่
+  */
   transparent ?: boolean;
+  /**
+   * ข้อความหัวเรื่อง
+  */
   title ?: string;
+  /**
+   * ข้อความอธิบาย
+  */
   description ?: string;
-
+  /**
+   * ทำงานเมื่อผู้ใช้ทำการลงชื่อเข้าใช้สำเร็จ
+  */
   onSignedIn ?: () => void;
+  /**
+   * ทำงานเมื่อผู้ใช้ทำการสร้างบัญชีสำเร็จ
+  */
   onSignedUp ?: () => void;
+  /**
+   * ทำงานเมื่อผู้ใช้ทำการกดปุ่มยกเลิกการทำงาน
+  */
   onCancel ?: () => void;
 }
-interface PropView
+export interface PropView
 {
+  /**
+   * องค์ประกอบย่อยที่อยู่ในภายแท็กดังกล่าว (ถ้ามี)
+  */
   children ?: react.ReactNode;
 }
-interface PropViewForm
+export interface PropViewForm
 {
-  children ?: react.ReactNode;
   transparent ?: boolean;
+  /**
+   * องค์ประกอบย่อยที่อยู่ในภายแท็กดังกล่าว (ถ้ามี)
+  */
+  children ?: react.ReactNode;
 }
-interface PropViewFormPending
+export interface PropViewFormPending
 {
+  /**
+   * ระบุสถานะการแสดงผล (แสดง/ซ่อน)
+  */
   visible ?: boolean;
 }
-interface PropFormSignInId
+export interface PropTemplateDiv
 {
+  /**
+   * ระบุสถานะการแสดงผล (แสดง/ซ่อน)
+  */
   visible ?: boolean;
-  visibleAnimation ?: number;
-  title ?: string;
-  description ?: string;
-  pending ?: boolean;
-  feedback ?: PropTemplateFeedback;
-  onSubmit ?: (value: string) => void;
-  onBack ?: (last: string) => void;
+  /**
+   * องค์ประกอบย่อยที่อยู่ในภายแท็กดังกล่าว (ถ้ามี)
+  */
+  children ?: react.ReactNode;
 }
-interface PropFormSignInPwd
-{
-  visible ?: boolean;
-  visibleAnimation ?: number;
-  title ?: string;
-  description ?: string;
-  pending ?: boolean;
-  feedback ?: PropTemplateFeedback;
-  onSubmit ?: (value: string) => void;
-  onBack ?: (last: string) => void;
-}
-interface PropTemplateHeader
+export interface PropTemplateHeader
 {
   title ?: string;
   description ?: string;
   onBack ?: () => void;
 }
-interface PropTemplateMain
+export interface PropTemplateMain
 {
+  /**
+   * องค์ประกอบย่อยที่อยู่ในภายแท็กดังกล่าว (ถ้ามี)
+  */
   children ?: react.ReactNode;
 }
-interface PropTemplateFooter
+export interface PropTemplateFooter
 {
+  /**
+   * องค์ประกอบย่อยที่อยู่ในภายแท็กดังกล่าว (ถ้ามี)
+  */
   children ?: react.ReactNode;
 }
-interface PropTemplateOption
+export interface PropTemplateOption
 {
   icon ?: string | react.JSX.Element;
   text ?: string;
   disabled ?: boolean;
+  onClick ?: () => void;
 }
-interface PropTemplateFeedback
+export interface PropTemplateFeedback
 {
   type ?: number;
   text ?: string;
 }
 
-const checkInputSignInId = (input: string) : PropTemplateFeedback | null =>
-{
-  const compliant = api.checkCompliantId (input);
 
-  if (!compliant.lengthEmpty)
-  {
-    return {
-      type: content.FEEDBACK_WARNING,
-      text: "รหัสประจำตัวต้องไม่เว้นว่าง"
-    }
-  }
-  if (!compliant.lengthMin) 
-  {
-    return {
-      type: content.FEEDBACK_WARNING, 
-      text: "รหัสประจำตัวต้องยาวอย่างน้อย 2 ตัวอักษร"
-    }
-  }
-  if (!compliant.lengthMax)
-  {
-    return {
-      type: content.FEEDBACK_WARNING, 
-      text: "รหัสประจำตัวต้องยาวไม่เกิน 32 ตัวอักษร"
-    }
-  }
-  return null;
-}
-const checkInputSignInPwd = (input: string) : PropTemplateFeedback | null =>
-{
-  const compliant = api.checkCompliantPwd (input);
-
-  if (!compliant.lengthEmpty)
-  {
-    return { 
-      type: content.FEEDBACK_WARNING, 
-      text: "รหัสผ่านต้องไม่เว้นว่าง" 
-    };
-  }
-  if (!compliant.lengthMin) 
-  {
-    return { 
-      type: content.FEEDBACK_WARNING, 
-      text: "รหัสผ่านต้องยาวอย่างน้อย 8 ตัวอักษร" 
-    };
-  }
-  if (!compliant.lengthMax)
-  {
-    return { 
-      type: content.FEEDBACK_WARNING, 
-      text: "รหัสผ่านต้องยาวไม่เกิน 32 ตัวอักษร" 
-    };
-  }
-  return null;
-}
-const checkResSignInId = (input: unknown) : PropTemplateFeedback =>
-{
-  if (input instanceof error.Network) 
-  {
-    return { 
-      type: content.FEEDBACK_ERROR, 
-      text: 
-      `เกิดข้อผิดพลาดทางด้านเครือข่าย โปรดตรวจสอบการเชื่อมต่อเครือข่ายของคุณ` 
-    };
-  }
-  if (input instanceof error.NotAuthorized) 
-  {
-    return { 
-      type: content.FEEDBACK_ERROR, 
-      text: "ไม่พบบัญชีผู้ใช้งาน โปรดตรวจสอบรหัสประจำตัวของคุณอีกครั้ง" 
-    };
-  }
-  if (input instanceof error.NetworkLimit) 
-  {
-    return { 
-      type: content.FEEDBACK_ERROR, 
-      text: "ระบบปฏิเสธคำขอของคุณ โปรดรอสักครู่แล้วลองใหม่อีกครั้ง" 
-    };
-  }
-  if (input instanceof error.NotAvailable) 
-  {
-    return { 
-      type: content.FEEDBACK_ERROR, 
-      text: "ระบบไม่สามารถทำงานได้ในเวลานี้ โปรดลองใหม่อีกครั้งในภายหลัง" 
-    };
-  }
-  return { 
-    type: content.FEEDBACK_ERROR, 
-    text: "เกิดข้อผิดพลาดบางอย่าง โปรดลองใหม่อีกครั้ง" 
-  };
-}
-const checkResSignInPwd = (input: unknown) : PropTemplateFeedback =>
-{
-  if (input instanceof error.Network) 
-  {
-    return { 
-      type: content.FEEDBACK_ERROR, 
-      text: 
-      `เกิดข้อผิดพลาดทางด้านเครือข่าย โปรดตรวจสอบการเชื่อมต่อเครือข่ายของคุณ` 
-    };
-  }
-  if (input instanceof error.NotFound) 
-  {
-    return { 
-      type: content.FEEDBACK_ERROR, 
-      text: "ไม่พบบัญชีผู้ใช้งาน โปรดตรวจสอบรหัสประจำตัวของคุณอีกครั้ง" 
-    };
-  }
-  if (input instanceof error.NetworkLimit) 
-  {
-    return { 
-      type: content.FEEDBACK_ERROR, 
-      text: "ระบบปฏิเสธคำขอของคุณ โปรดรอสักครู่แล้วลองใหม่อีกครั้ง" 
-    };
-  }
-  if (input instanceof error.NotAuthorized)
-  {
-    return { 
-      type: content.FEEDBACK_ERROR, 
-      text: "รหัสผ่านของคุณไม่ถูกต้อง โปรดตรวจสอบแล้วลองใหม่อีกครั้ง" 
-    };
-  }
-  if (input instanceof error.NotAvailable) 
-  {
-    return { 
-      type: content.FEEDBACK_ERROR, 
-      text: "ระบบไม่สามารถทำงานได้ในเวลานี้ โปรดลองใหม่อีกครั้งในภายหลัง" 
-    };
-  }
-  return { 
-    type: content.FEEDBACK_ERROR, 
-    text: "เกิดข้อผิดพลาดบางอย่าง โปรดลองใหม่อีกครั้ง" 
-  };
-}
-
-const emptyFeedback = () : PropTemplateFeedback =>
-{
-  return {
-    type: content.FEEDBACK_UNDEFINED,
-    text: ""
-  }
-}
-const emptySession = () : Session =>
-{
-  return {
-    secret: "",
-    issued: Date.prototype,
-    expire: Date.prototype
-  }
-}
 
 /**
  * ส่วนประกอบแสดงผลแบบหน้าต่าง
 */
 const content = function Auth (prop: PropContent)
 {
-  const [page, setPage] = react.useState (content.PAGE_SIGN_IN_ID);
-  const [pending, setPending] = react.useState (false);
-  const [feedback, setFeedback] = react.useState (emptyFeedback ());
+  const page = react.useState (content.PAGE_SIGN_IN_ID);
+  const pending = react.useState (false);
+  const feedback = react.useState (content.createEmptyFeedback ());
+  const session = react.useRef (content.createEmptySession ());
   const id = react.useRef ("");
-  const session = react.useRef (emptySession ()); 
-
-  const onSignedIn = () =>
-  {
-    const saved = api.saveAdd ({
-      name: id.current,
-      secret: session.current.secret,
-      issued: session.current.issued,
-      expired: session.current.expire,
-    });
-    api.saveSetPrefered (saved);
-    api.saveWrite ();
-
-    if (prop.onSignedIn) {
-      prop.onSignedIn ();
-    }
-  }
-  const onSubmitId = (value: string) =>
-  {
-    const invalid = checkInputSignInId (value);
-
-    if (invalid)
-    {
-      setFeedback (invalid);
-      return;
-    }
-    else
-    {
-      setFeedback (emptyFeedback ());
-      setPending (true);
-    }
-    api.challengeId (value).then (([se, ch]) =>
-    {
-      id.current = value;
-      session.current = se;
-
-      switch (ch.step)
-      {
-        case api.STEP_PASSWORD: setPage (content.PAGE_SIGN_IN_PWD); break;
-      }
-      setPending (false);
-    })
-    .catch ((e: unknown) =>
-    {
-      setFeedback (checkResSignInId (e));
-      setPending (false);
-    });
-  }
-  const onSubmitPwd = (value: string) =>
-  {
-    const invalid = checkInputSignInPwd (value);
-
-    if (invalid)
-    {
-      setFeedback (invalid);
-      return;
-    }
-    else
-    {
-      setFeedback (emptyFeedback ());
-      setPending (true);
-    }
-    api.challengePassword (session.current.secret, value).then (([se, ch]) =>
-    {
-      session.current = se;
-
-      switch (ch.step)
-      {
-        case api.STEP_COMPLETE:
-          onSignedIn ();
-          return;
-      }
-      setPending (false);
-    })
-    .catch ((e: unknown) =>
-    {
-      setFeedback (checkResSignInPwd (e));
-      setPending (false);
-    });
-  }
-  const onBackPwd = () =>
-  {
-    id.current = "";
-    session.current = emptySession ();
-
-    setFeedback (emptyFeedback ());
-    setPage (content.PAGE_SIGN_IN_ID);
-  }
 
   return (
     <content.View>
       <content.ViewBackground/>
       <content.ViewForm transparent={prop.transparent ?? false}>
         <content.FormHome/>
-        <content.FormSignInId
-          visible={page === content.PAGE_SIGN_IN_ID} 
-          visibleAnimation={content.ANIM_NONE}
-          title={prop.title} 
-          description={prop.description}
-          feedback={feedback}
-          pending={pending}
-          onSubmit={onSubmitId}/>
-        <content.FormSignInPwd
-          visible={page === content.PAGE_SIGN_IN_PWD} 
-          visibleAnimation={content.ANIM_NONE}
+        <SignIn
+          staPage={page}
+          staPending={pending}
+          staFeedback={feedback}
+          refSession={session}
+          refId={id}
           title={prop.title}
           description={prop.description}
-          feedback={feedback}
-          pending={pending}
-          onSubmit={onSubmitPwd}
-          onBack={onBackPwd}/>
-        <content.FormSignInTotp/>
-        <content.FormSignUpEmail/>
-        <content.FormSignUpPwd/>
-        <content.FormSignUpId/>
-        <content.FormSigned/>
-        <content.FormSuspended/>
-        <content.ViewPending visible={pending}/>
+          onComplete={prop.onSignedIn}/>
+        <SignUp
+          staPage={page}
+          staPending={pending}
+          staFeedback={feedback}
+          refSession={session}
+          refId={id}
+          title={prop.title}
+          description={prop.description}/>
+        <content.ViewPending visible={pending [0]}/>
       </content.ViewForm>
     </content.View>
   );
@@ -415,6 +200,10 @@ content.PAGE_SIGN_IN_PWD = 3;
 content.PAGE_SIGN_IN_TOTP = 4;
 
 /**
+ * การแสดงผล: หน้าใส่ข้อมูลสร้างบัญชี
+*/
+content.PAGE_SIGN_UP = 101;
+/**
  * ข้อความตอบกลับ: ไม่ระบุ
 */
 content.FEEDBACK_UNDEFINED = 0;
@@ -427,6 +216,21 @@ content.FEEDBACK_WARNING = 1;
 */
 content.FEEDBACK_ERROR = 2;
 
+content.createEmptyFeedback = () : PropTemplateFeedback =>
+{
+  return {
+    type: content.FEEDBACK_UNDEFINED,
+    text: ""
+  }
+}
+content.createEmptySession = () : Session =>
+{
+  return {
+    secret: "",
+    issued: Date.prototype,
+    expire: Date.prototype
+  }
+}
 content.View = function AuthView (prop: PropView)
 {
   return (
@@ -459,224 +263,13 @@ content.FormHome = function AuthFormHome ()
 {
   return (<></>);
 }
-content.FormSignInId = function AuthFormSignInId (prop: PropFormSignInId)
+content.TemplateDiv = function AuthTempDiv (prop: PropTemplateDiv)
 {
-  const field = react.useRef (HTMLInputElement.prototype);
-  const [mode, setMode] = react.useState<ActivityMode> ("hidden");
-
-  const onSubmit = () =>
-  {
-    if (prop.onSubmit) {
-      prop.onSubmit (field.current.value);
-    }
-  }
-  const onSubmitButton = (event: react.MouseEvent) =>
-  {
-    event.preventDefault ();
-    event.stopPropagation ();
-
-    onSubmit ();
-  }
-  const onSubmitInput = (event: react.KeyboardEvent<HTMLInputElement>) =>
-  {
-    if (event.key === "Enter")
-    {
-      onSubmit ();
-    }
-  }
-  const onBack = () =>
-  {
-    if (prop.onBack) {
-      prop.onBack (field.current.value);
-    }
-  }
-
-  react.useEffect (() =>
-  {
-    if (prop.visibleAnimation == content.ANIM_NONE)
-    {
-      setMode (prop.visible ? "visible" : "hidden");
-      return;
-    }
-    if (prop.visible) {
-      field.current.focus ();
-    }
-  },
-  [prop.visible]);
-
   return (
-    <Activity mode={mode}>
-      <content.TemplateHeader
-        title={prop.title}
-        description={prop.description}
-        onBack={prop.onBack ? onBack : undefined}
-      />
-      <content.TemplateMain>
-        <label htmlFor="auth-signin-id" style={{
-          marginBottom: "16px"
-        }}>
-          <ShieldUserIcon size={24} style={{
-            display: "inline-block",
-            verticalAlign: "middle",
-            marginRight: "16px"
-          }}/>
-          <span>รหัสประจำตัว</span>
-        </label>
-        <input id="auth-signin-id" ref={field} autoFocus
-          type="text" autoComplete="username webauthn"
-          placeholder="อย่างน้อย 2 ตัวอักษร"
-          disabled={prop.pending ?? false}
-          onKeyUp={onSubmitInput}
-        />
-        <content.TemplateFeedback
-          type={prop.feedback?.type}
-          text={prop.feedback?.text}/>
-        <button 
-          disabled={prop.pending ?? false}
-          onClick={onSubmitButton}>ดำเนินการต่อ</button>
-        <content.TemplateOption text="ลืมรหัสผ่าน" icon={<RotateCcw/>}/>
-        <content.TemplateOption text="สร้างบัญชีใหม่" icon={<UserRoundPlus/>}/>
-      </content.TemplateMain>
-      <content.TemplateFooter>
-        <StyleTempTextBox>
-          <ShieldAlert/>
-          หากนี้ไม่ใช่อุปกรณ์ของคุณ 
-          <span>ให้ใช้งานโหมดไม่ระบุตัวตนของเบราว์เซอร์</span>
-          <span>เพื่อเลี่ยงความเสี่ยงการรั่วไหลของข้อมูลของคุณ</span>
-        </StyleTempTextBox>
-      </content.TemplateFooter>
-    </Activity>
+    <StyleTempDiv $visible={prop.visible ?? true}>
+      {prop.children}
+    </StyleTempDiv>
   );
-}
-content.FormSignInPwd = function AuthFormSignInPwd (prop: PropFormSignInPwd)
-{
-  const field = react.useRef (HTMLInputElement.prototype);
-  const [mode, setMode] = react.useState<ActivityMode> ("hidden");
-
-  const onSubmit = () =>
-  {
-    if (prop.onSubmit && 
-        field.current instanceof HTMLInputElement &&
-        field.current != HTMLInputElement.prototype) 
-    {
-      prop.onSubmit (field.current.value);
-    }
-  }
-  const onSubmitButton = (event: react.MouseEvent) =>
-  {
-    event.preventDefault ();
-    event.stopPropagation ();
-
-    onSubmit ();
-  }
-  const onSubmitInput = (event: react.KeyboardEvent<HTMLInputElement>) =>
-  {
-    if (event.key === "Enter")
-    {
-      onSubmit ();
-    }
-  }
-  const onBack = () =>
-  {
-    if (prop.onBack && 
-        field.current instanceof HTMLInputElement &&
-        field.current != HTMLInputElement.prototype) 
-    {
-      prop.onBack (field.current.value);
-    }
-  }
-
-  react.useEffect (() =>
-  {
-    if (prop.visible && 
-        field.current instanceof HTMLInputElement &&
-        field.current != HTMLInputElement.prototype) 
-    {
-      field.current.focus ();
-    }
-  },
-  [mode]);
-
-  react.useEffect (() =>
-  {
-    if (prop.visibleAnimation == content.ANIM_NONE)
-    {
-      setMode (prop.visible ? "visible" : "hidden");
-    }
-  },
-  [prop.visible]);
-
-  return (
-    <Activity mode={mode}>
-      <content.TemplateHeader
-        title={prop.title}
-        description={prop.description}
-        onBack={prop.onBack ? onBack : undefined}
-      />
-      <content.TemplateMain>
-
-        <label htmlFor="auth-signin-pwd" style={{
-          marginBottom: "16px"
-        }}>
-          <KeyRound size={24} style={{
-            display: "inline-block",
-            verticalAlign: "middle",
-            marginRight: "16px"
-          }}/>
-          <span>รหัสผ่าน</span>
-        </label>
-        <input id="auth-signin-pwd" ref={field} autoFocus
-          type="password" autoComplete="current-password webauthn"
-          placeholder="อย่างน้อย 8 ตัวอักษร"
-          disabled={prop.pending ?? false}
-          onKeyUp={onSubmitInput}
-        />
-        {/* <div>
-          <input id="auth-signin-pwd-show" type="checkbox"/>
-          <label htmlFor="auth-signin-pwd-show">แสดงรหัสผ่าน</label>
-        </div> */}
-
-        <content.TemplateFeedback
-          type={prop.feedback?.type}
-          text={prop.feedback?.text}/>
-        <button 
-          disabled={prop.pending ?? false}
-          onClick={onSubmitButton}>ดำเนินการต่อ</button>
-      </content.TemplateMain>
-      <content.TemplateFooter>
-        <StyleTempTextBox>
-          <ShieldAlert size={24}/>
-          หากนี้ไม่ใช่อุปกรณ์ของคุณ 
-          <span>ให้ใช้งานโหมดไม่ระบุตัวตนของเบราว์เซอร์</span>
-          <span>เพื่อเลี่ยงความเสี่ยงการรั่วไหลของข้อมูลของคุณ</span>
-        </StyleTempTextBox>
-      </content.TemplateFooter>
-    </Activity>
-  );
-}
-content.FormSignInTotp = function AuthFormSignInTotp ()
-{
-  return (<></>);
-}
-content.FormSignUpEmail = function AuthFormSignUpEmail ()
-{
-  return (<></>);
-}
-content.FormSignUpPwd = function AuthFormSignUpPwd ()
-{
-  return (<></>);
-}
-content.FormSignUpId = function AuthFormSignUpId ()
-{
-  return (<></>);
-}
-content.FormSigned = function AuthFormSigned ()
-{
-  return (<></>);
-}
-content.FormSuspended = function AuthFormSuspended ()
-{
-  return (<></>);
 }
 content.TemplateHeader = function AuthTempHeader (prop: PropTemplateHeader)
 {
@@ -720,8 +313,18 @@ content.TemplateFooter = function AuthTempFooter (prop: PropTemplateFooter)
 }
 content.TemplateOption = function AuthTempOption (prop: PropTemplateOption)
 {
+  const onClick = (event: react.MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    if (prop.onClick) {
+      prop.onClick ();
+    }
+  }
+
   return (
-    <StyleTempOption disabled={prop.disabled ?? false}>
+    <StyleTempOption disabled={prop.disabled ?? false} onClick={onClick}>
       {
         typeof prop.icon === "string" ? 
           <img src={prop.icon}/> 
@@ -740,6 +343,17 @@ content.TemplateFeedback = function AuthTempFeedback (
     <StyleTempFeedback $color={prop.type ?? content.FEEDBACK_UNDEFINED}>
       {prop.text}
     </StyleTempFeedback>
+  );
+}
+content.TemplatePrivacyNotice = function AuthTempPrivacyText ()
+{
+  return (
+    <StyleTempPrivacyNotice>
+      <ShieldAlert size={24}/>
+      หากนี้ไม่ใช่อุปกรณ์ของคุณ 
+      <span>ให้ใช้งานโหมดไม่ระบุตัวตนของเบราว์เซอร์</span>
+      <span>เพื่อเลี่ยงความเสี่ยงการรั่วไหลของข้อมูลของคุณ</span>
+    </StyleTempPrivacyNotice>
   );
 }
 
@@ -775,6 +389,7 @@ const AnimFormOpen = keyframes`
   from { scale: 1.25;}
   to { scale: 1.0; }
 `;
+
 const AnimFormPending = keyframes`
   /* 0% { background-position: 0% 50%; }
   50% { background-position:100% 50%; }
@@ -784,7 +399,7 @@ const AnimFormPending = keyframes`
   100% { background-position: 0% 100%; }
 `;
 
-const StyleForm = styled.div<{ $transparent ?: boolean; }>`
+const StyleForm = styled.form<{ $transparent ?: boolean; }>`
 
   width: 512px;
   height: 572px;
@@ -799,6 +414,9 @@ const StyleForm = styled.div<{ $transparent ?: boolean; }>`
   animation-name: ${AnimFormOpen};
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-duration: 500ms;
+  display: block;
+  position: relative;
+  overflow: hidden;
 
   @media (max-width: 512px)
   {
@@ -808,12 +426,6 @@ const StyleForm = styled.div<{ $transparent ?: boolean; }>`
     background-color: transparent;
     border-radius: 0px;
   }
-
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  gap: 16px;
 `;
 const StyleFormPending = styled.div<{ $visible: boolean; }>`
   pointer-events: none;
@@ -845,7 +457,18 @@ const StyleFormPending = styled.div<{ $visible: boolean; }>`
   animation: ${AnimFormPending} 1000ms 
     cubic-bezier(0.85, 0, 0.15, 1) infinite;
 `;
+const StyleTempDiv = styled.div<{ $visible: boolean; }>`
 
+  pointer-events: ${prop => prop.$visible ? "all" : "none"};
+  position: absolute;
+  inset: 0px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 16px;
+  opacity: ${prop => prop.$visible ? "1.0" : "0.0"};
+  transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1);
+`;
 const StyleTempHeader = styled.header`
   width: 100%;
   height: 128px;
@@ -895,7 +518,7 @@ const StyleTempFooter = styled.footer`
   padding: 0px 16px 16px 16px;
 `;
 
-const StyleTempTextBox = styled.p`
+const StyleTempPrivacyNotice = styled.p`
   font-size: 1rem;
   margin: 0px 16px 16px 16px;
 

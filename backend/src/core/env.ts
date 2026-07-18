@@ -20,27 +20,29 @@ const content = function ()
 */
 content.init = async function ()
 {
-    if (fs.existsSync ("../env.local"))
-    {
-        const local = dotenv.configDotenv (
-        {
-            path: "../.env.local",
-            debug: false,
-            encoding: "utf8",
-        });
-        collection = local.parsed ?? {};
-    }
-    if (fs.existsSync ("../.env"))
+    collection = {};
+
+    if (fs.existsSync ("./../.env"))
     {
         const global = dotenv.configDotenv  (
         {
-            path: "../.env",
+            path: "./../.env",
             debug: false,
             encoding: "utf8",
         });
-        collection = global.parsed ?? {};
+        collection = { ... collection, ... global.parsed };
     }
 
+    if (fs.existsSync ("./../.env.local"))
+    {
+        const local = dotenv.configDotenv (
+        {
+            path: "./../.env.local",
+            debug: false,
+            encoding: "utf8",
+        });
+        collection = { ... collection, ... local.parsed };
+    }
 
     return Promise.resolve ();
 }
