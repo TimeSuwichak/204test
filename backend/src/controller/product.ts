@@ -28,6 +28,38 @@ const content = function ()
     return;
 }
 /**
+ * ดึงข้อมูลรายการสินค้า
+ * 
+ * @param request คำขอ
+ * @param response คำตอบ
+*/
+content.list = (request: Request, response: Response) =>
+{
+    void model.list ().then ((x) =>
+    {
+        response.status (http.STATUS_OK);
+        response.json (x.map ((x) =>
+        {
+            return {
+                "Id": x.id,
+                "Name": x.name,
+                "Description": x.description,
+                "Price": x.price,
+                "PriceCode": x.priceCode,
+                "Platform": x.platform,
+            }
+        }));
+        response.end ();
+    })
+    .catch ((e: unknown) =>
+    {
+        log.error (e);
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
+        return;
+    });
+}
+/**
  * ดึงข้อมูลสินค้าดังกล่าว
  * 
  * @param request คำขอ

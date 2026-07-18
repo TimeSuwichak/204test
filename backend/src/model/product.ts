@@ -1,6 +1,7 @@
 import sql          from "#core/sql.ts";
 import error        from "#core/error.ts";
 import objectReader from "#core/object.reader.ts";
+
 /**
  * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
 */
@@ -34,6 +35,10 @@ export interface DataFetch
      * แพลตฟอร์ม
     */
     platform: number;
+    /**
+     * รูปปกเกม
+    */
+    artwork: string;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการเปลี่ยนแปลงข้อมูลในฐานข้อมูล
@@ -64,6 +69,10 @@ export interface DataUpdate
      * แพลตฟอร์ม
     */
     platform ?: number | undefined;
+    /**
+     * รูปปกเกม
+    */
+    artwork ?: string;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลลงในฐานข้อมูล
@@ -90,6 +99,10 @@ export interface DataCreate
      * แพลตฟอร์ม
     */
     platform: number;
+    /**
+     * รูปปกเกม
+    */
+    artwork: string;
 }
 
 /**
@@ -132,6 +145,19 @@ content.init = () =>
 content.terminate = () =>
 {
     return;
+}
+/**
+ * ดึงข้อมูลรายการสินค้า
+*/
+content.list = async () =>
+{
+    const cmd = `SELECT * FROM Product`;
+    const query = await sql.select (cmd);
+    const item: DataFetch [] = query.map ((x) =>
+    {
+        return content.getByData (x);
+    }); 
+    return item;
 }
 /**
  * ดึงข้อมูลพื้นฐานของสินค้า
@@ -211,7 +237,8 @@ content.getByData = (column: Record<string, unknown>) =>
         description: reader.requireString ("Description"),
         price: reader.requireFloat ("Price"),
         priceCode: reader.requireInteger ("PriceCode"),
-        platform: reader.requireInteger ("Platform")
+        platform: reader.requireInteger ("Platform"),
+        artwork: reader.requireString ("Artwork")
     };
     return result;
 }
@@ -223,12 +250,14 @@ content.getByData = (column: Record<string, unknown>) =>
 */
 content.update = async (info: DataUpdate) : Promise<number> =>
 {
-    const key = [
+    const key = 
+    [
         info.name ? "Name" : undefined,
         info.description ? "Description" : undefined,
         info.price ? "Price" : undefined,
         info.priceCode ? "PriceCode" : undefined,
-        info.platform ? "Platform" : undefined
+        info.platform ? "Platform" : undefined,
+        info.artwork ? "Artwork" : undefined
     ]
     .filter (x => x !== undefined)
     .join (" = ?, ")
@@ -241,6 +270,7 @@ content.update = async (info: DataUpdate) : Promise<number> =>
         info.price,
         info.priceCode,
         info.platform,
+        info.artwork,
         info.id
     ]
     .filter (x => x !== undefined);
@@ -259,14 +289,16 @@ content.create = async (info: DataCreate) : Promise<DataId> =>
     try
     {
         const id = await transaction.insert (`
-            INSERT INTO Product (Name, Description, Price, PriceCode, Platform) 
+            INSERT INTO Product 
+            (Name, Description, Price, PriceCode, Platform, Artwork) 
             VALUES (?, ?, ?, ?, ?)`,
             [
                 info.name, 
                 info.description, 
                 info.price, 
                 info.priceCode, 
-                info.platform
+                info.platform,
+                info.artwork
             ]
         ) as DataId;
 

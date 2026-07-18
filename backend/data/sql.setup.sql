@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS `project`.`Product`
     `Price`     FLOAT NOT NULL DEFAULT 0 COMMENT 'ราคา' ,
     `PriceCode` INT NOT NULL DEFAULT 1 COMMENT 'สกุลเงินราคา' ,
     `Platform`  INT NOT NULL DEFAULT 0 COMMENT 'แพลตฟอร์ม' ,
+    `Artwork`   CHAR(255) NOT NULL DEFAULT "" COMMENT 'รูปปกเกม' ,
 
     CONSTRAINT  PK_Product_Id PRIMARY KEY (`Id`),
     CONSTRAINT  UK_Product_Id UNIQUE (`Id`)
