@@ -1,5 +1,5 @@
-import react from "react";
-import styled from "styled-components";
+import react      from "react";
+import styled     from "styled-components";
 import navigation from "#util/common.navigation.ts";
 
 import { useSearchParams } from "react-router";

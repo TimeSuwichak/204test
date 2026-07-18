@@ -37,8 +37,7 @@ content.get = (request: Request, response: Response) =>
 {
     const productId = Number (request.params ["id"]);
     
-    if (!Number.isSafeInteger (productId) ||
-        !request.body)
+    if (!Number.isSafeInteger (productId))
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -52,6 +51,9 @@ content.get = (request: Request, response: Response) =>
             "Id": x.id,
             "Name": x.name,
             "Description": x.description,
+            "Price": x.price,
+            "PriceCode": x.priceCode,
+            "Platform": x.platform
         });
         response.end ();
     })
@@ -97,6 +99,7 @@ content.put = (request: Request, response: Response) =>
             description: reader.optionalString ("Description"),
             price: reader.optionalInteger ("Price"),
             priceCode: reader.optionalInteger ("PriceCode"),
+            platform: reader.optionalInteger ("Platform"),
         };
     }
     catch
@@ -145,6 +148,7 @@ content.post = (request: Request, response: Response) =>
             description: reader.requireString ("Description"),
             price: reader.requireInteger ("Price"),
             priceCode: reader.requireInteger ("PriceCode"),
+            platform: reader.requireInteger ("Platform")
         };
     }
     catch

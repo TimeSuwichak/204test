@@ -64,6 +64,7 @@ content.start = async () =>
     // Debugging Subsystem
     //
     await testMode.setupAccount ();
+    await testMode.setupProduct ();
 
     //
     // Finalize Stage ...

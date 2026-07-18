@@ -96,8 +96,9 @@ CREATE TABLE IF NOT EXISTS `project`.`Product`
     `Id`        BIGINT NOT NULL AUTO_INCREMENT COMMENT 'รหัสสินค้า' ,
     `Name`      CHAR(64) NOT NULL DEFAULT "" COMMENT 'ชื่อสินค้า' ,
     `Description` VARCHAR(4096) NOT NULL DEFAULT "" COMMENT 'คำอธิบาย' ,
-    `Price`     DECIMAL(19, 4) NOT NULL DEFAULT 0 COMMENT 'ราคา' ,
+    `Price`     FLOAT NOT NULL DEFAULT 0 COMMENT 'ราคา' ,
     `PriceCode` INT NOT NULL DEFAULT 1 COMMENT 'สกุลเงินราคา' ,
+    `Platform`  INT NOT NULL DEFAULT 0 COMMENT 'แพลตฟอร์ม' ,
 
     CONSTRAINT  PK_Product_Id PRIMARY KEY (`Id`),
     CONSTRAINT  UK_Product_Id UNIQUE (`Id`)
@@ -207,7 +208,7 @@ CREATE TABLE IF NOT EXISTS `project`.`OrderItem`
     `ItemId`  BIGINT NOT NULL AUTO_INCREMENT COMMENT 'รหัสไอเท็ม' ,
     `OrderId` BIGINT NOT NULL COMMENT 'รหัสคำสั่งซื้อ' ,
     `ProductId` BIGINT NOT NULL COMMENT 'รหัสสินค้า' ,
-    `Quanity` INT NOT NULL COMMENT 'จำนวน' ,
+    `Quantity` INT NOT NULL COMMENT 'จำนวน' ,
 
     CONSTRAINT PK_OrderItem_ItemId PRIMARY KEY (`ItemId`) ,
     CONSTRAINT UK_OrderItem_ItemId UNIQUE (`ItemId`) ,
