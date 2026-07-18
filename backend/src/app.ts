@@ -20,6 +20,7 @@ import routerProd           from "#router/product.ts";
 import modelAuth            from "#model/auth.ts";
 import modelAccount         from "#model/account.ts";
 import modelProduct         from "#model/product.ts";
+import modelStorage         from "#model/storage.ts";
 
 import testMode             from "./appTest.ts";
 
@@ -59,6 +60,7 @@ content.start = async () =>
     await modelAuth.init ();
     await modelAccount.init ();
     await modelProduct.init ();
+    await modelStorage.init ();
 
     //
     // Debugging Subsystem

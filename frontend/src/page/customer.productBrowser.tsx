@@ -1,7 +1,7 @@
 import react      from "react";
 import styled     from "styled-components";
 
-import ctx from "#context/common.ts";
+import cmmCtx from "#context/common.ts";
 import cmmNavigation from "#util/common.navigation.ts";
 import apiProduct from "#util/api.product.ts";
 
@@ -12,37 +12,51 @@ import type { ReactNode } from "react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { FetchBasic } from "#util/api.product.ts";
 
-import testArtwork from "#asset/image/test.artwork.jpg";
-
+/**
+ * โครงสร้างข้อมูลที่ส่วนประกอบต้องการใช้งาน: รายการสินค้า
+*/
 interface PropList
 {
+  /**
+   * ระบบดึงข้อมูลรายการสินค้า
+  */
   queryList: UseQueryResult<FetchBasic []>;
 }
-interface PropItem
+/**
+ * โครงสร้างข้อมูลที่ส่วนประกอบต้องการใช้งาน: ตัวสินค้า
+*/
+interface PropListItem
 {
+  /**
+   * รหัสสินค้า
+  */
   id: number;
+  /**
+   * ชื่อสินค้า
+  */
   name: string;
+  /**
+   * ปกสินค้า
+  */
   artwork: string | undefined;
-
+  /**
+   * ทำงานเมื่อผู้ใช้กดเลือกสินค้า
+  */
   onClick: (id: number) => void;
 }
-
+/**
+ * ส่วนประกอบหน้าต่างเลือกสินค้า
+*/
 const content = function ProductBrowser ()
 {
   const [serachParam] = useSearchParams ();
   const search = serachParam.get ("search");
-  const auth = ctx.useAuth ();
+  const auth = cmmCtx.useAuth ();
 
   const queryList = useQuery ({
     queryKey: ["Product", "GetBasicByList"],
     queryFn: () => apiProduct.getBasicByList (auth.session),
   });
-
-  react.useEffect (() =>
-  {
-    console.log ("SEARCH");
-  },
-  [search]);
 
   return (<>
     <content.List queryList={queryList}/>
@@ -93,7 +107,7 @@ content.List = function ProductBrowserList (prop: PropList)
     </SyledList>
   );
 }
-content.ListItem = function ProductBrowserListItem (prop: PropItem)
+content.ListItem = function ProductBrowserListItem (prop: PropListItem)
 {
   const onClick = (event: react.MouseEvent) =>
   {
@@ -151,8 +165,13 @@ const SyledList = styled.div`
   }
 `;
 const StyledListItemContainer = styled.button`
-  width: 200px;
-  height: 300px;
+
+  min-width: 200px;
+  min-height: 300px;
+
+  max-width: 200px;
+  max-height: 300px;
+
   display: block;
   margin: 0px;
   padding: 0px 0px 40px 0px;
@@ -165,7 +184,7 @@ const StyledListItemContainer = styled.button`
 
   &:hover, &:focus
   {
-    outline-width: 0px;
+    outline-width: 2px;
   }
   &:active
   {
@@ -174,18 +193,27 @@ const StyledListItemContainer = styled.button`
 
   @media (max-width: 960px)
   {
-    width: 150px;
-    height: 200px;
+    min-width: 150px;
+    min-height: 200px;
+
+    max-width: 150px;
+    max-height: 200px;
   }
   @media (max-width: 640px)
   {
-    width: 125px;
-    height: 175px;
+    min-width: 125px;
+    min-height: 175px;
+
+    max-width: 125px;
+    max-height: 175px;
   }
   @media (max-width: 512px)
   {
-    width: 100px;
-    height: 150px;
+    min-width: 100px;
+    min-height: 150px;
+
+    max-width: 100px;
+    max-height: 150px;
   }
 `;
 const StyledListItemText = styled.label`

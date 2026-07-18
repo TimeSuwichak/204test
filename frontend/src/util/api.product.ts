@@ -81,10 +81,40 @@ export interface UpdateBasic
      * แพลตฟอร์ม
     */
     platform ?: number | undefined;
+}
+export interface CreateBasic
+{
     /**
-     * รูปปกเกม
+     * ชื่อสินค้า
     */
-    artwork ?: string | undefined;
+    name: string;
+    /**
+     * ข้อความอธิบาย
+    */
+    description: string;
+    /**
+     * ราคา
+    */
+    price: number;
+    /**
+     * สกุลเงิน
+    */
+    priceCode: number;
+    /**
+     * แพลตฟอร์ม
+    */
+    platform: number;
+}
+export interface CreateResultBasic
+{
+    /**
+     * รหัสสินค้า
+    */
+    id: number;
+    /**
+     * วันที่สร้าง
+    */
+    created: Date;
 }
 
 const content = () => 
@@ -200,6 +230,16 @@ content.PLATFORM_XBOX_SERIES_S = 17;
 content.getBasic = async (session: string, key: MainId)
     : Promise<FetchBasic> =>
 {
+    const header = new Headers ();
+
+    header.append ("Accept", "application/json");
+    header.append ("Accept-Encoding", "*");
+
+    if (session.length > 0)
+    {
+        header.append ("Authorization", session);
+    }
+
     const id = String (key);
     const endpoint = `${content.NET_URL}/${id}`;
     const init: RequestInit =
@@ -209,11 +249,7 @@ content.getBasic = async (session: string, key: MainId)
         referrerPolicy: "strict-origin",
         cache: "default",
         signal: AbortSignal.timeout (content.NET_TIMEOUT),
-        headers: 
-        [ 
-            ["Accept", "application/json"],
-            ["Authorization", (session.length > 0) ? `Bearer ${session}` : ``]
-        ],
+        headers: header,
         body: undefined
     }
     const response = await fetch (endpoint, init).catch ((e: unknown) =>
@@ -233,7 +269,7 @@ content.getBasic = async (session: string, key: MainId)
         throw new error.BadFormat (x);
     }) as Record<string, unknown>;
 
-    return content.getBasicByData (json);
+    return content.processBasic (json);
 }
 /**
  * ทำการดึงรายการข้อมูลพื้นฐานของสินค้า
@@ -272,6 +308,7 @@ content.getBasicByList = async (session: string)
     {
         case 200: break;
         case 401: throw new error.NotAuthorized ();
+        case 404: throw new error.NotFound ();
         case 429: throw new error.NetworkLimit ();
         case 500: throw new error.NotAvailable ();
         case 503: throw new error.NotAvailable ();
@@ -281,9 +318,180 @@ content.getBasicByList = async (session: string)
         throw new error.BadFormat (x);
     }) as Record<string, unknown>[];
 
-    return json.map (x => content.getBasicByData (x));
+    return json.map (x => content.processBasic (x));
 }
-content.getBasicByData = (data: Record<string, unknown>) 
+content.processBasic = (data: Record<string, unknown>) 
+    : FetchBasic =>
+{
+    const reader = objectReader (data);
+    return {
+        id: reader.requireInteger ("Id"),
+        name: reader.requireString ("Name"),
+        description: reader.requireString ("Description"),
+        price: reader.requireFloat ("Price"),
+        priceCode: reader.requireInteger ("PriceCode"),
+        platform: reader.requireInteger ("Platform"),
+        artwork: reader.requireString ("Artwork"),
+    };
+}
+/**
+ * ทำการเปลี่ยนข้อมูลพื้นฐานของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param data ชุดข้อมูลประกอบการเปลี่ยนแปลง
+*/
+content.update = async (session: string, data: UpdateBasic) 
+    : Promise<void> =>
+{
+    const header = new Headers ();
+
+    header.append ("Content-Type", "application/json");
+
+    if (session.length > 0)
+    {
+        header.append ("Authorization", session);
+    }
+
+    const endpoint = `${content.NET_URL}/`;
+    const init: RequestInit =
+    {
+        method: "PUT",
+        mode: "cors",
+        referrerPolicy: "strict-origin",
+        cache: "default",
+        signal: AbortSignal.timeout (content.NET_TIMEOUT),
+        headers: header,
+        body: JSON.stringify ({
+            "Name": data.name,
+            "Description": data.description,
+            "Price": data.price,
+            "PriceCode": data.priceCode,
+        })
+    }
+    const response = await fetch (endpoint, init).catch ((e: unknown) =>
+    {
+        throw new error.Network (e);
+    });
+    switch (response.status)
+    {
+        case 204: break;
+        case 401: throw new error.NotAuthorized ();
+        case 403: throw new error.Forbidden ();
+        case 404: throw new error.NotFound ();
+        case 429: throw new error.NetworkLimit ();
+        case 500: throw new error.NotAvailable ();
+        case 503: throw new error.NotAvailable ();
+        default: throw new error.Unknown ();
+    }
+    return;
+}
+/**
+ * ทำการสร้างข้อมูลพื้นฐานของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param data ชุดข้อมูลประกอบการสร้าง
+*/
+content.create = async (session: string, data: CreateBasic) :
+    Promise<CreateResultBasic> =>
+{
+    const header = new Headers ();
+
+    header.append ("Content-Type", "application/json");
+    header.append ("Accept", "application/json");
+    header.append ("Accept-Encoding", "*");
+
+    if (session.length > 0)
+    {
+        header.append ("Authorization", session);
+    }
+
+    const endpoint = `${content.NET_URL}/`;
+    const init: RequestInit =
+    {
+        method: "POST",
+        mode: "cors",
+        referrerPolicy: "strict-origin",
+        cache: "default",
+        signal: AbortSignal.timeout (content.NET_TIMEOUT),
+        headers: header,
+        body: JSON.stringify ({
+            "Name": data.name,
+            "Description": data.description,
+            "Price": data.price,
+            "PriceCode": data.priceCode,
+        })
+    }
+    const response = await fetch (endpoint, init).catch ((e: unknown) =>
+    {
+        throw new error.Network (e);
+    });
+    switch (response.status)
+    {
+        case 201: break;
+        case 401: throw new error.NotAuthorized ();
+        case 403: throw new error.Forbidden ();
+        case 429: throw new error.NetworkLimit ();
+        case 500: throw new error.NotAvailable ();
+        case 503: throw new error.NotAvailable ();
+        default: throw new error.Unknown ();
+    }
+    const reader = await response.json ()
+        .then (x => objectReader (x))
+        .catch ((x: unknown) => 
+    {
+        throw new error.BadFormat (x);
+    });
+    return {
+        id: reader.requireInteger ("Id"),
+        created: reader.requireDate ("Created") 
+    };
+}
+/**
+ * ทำการลบข้อมูลพื้นฐานของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param key รหัสสินค้า
+*/
+content.delete = async (session: string, key: MainId) 
+    : Promise<void> =>
+{
+    const header = new Headers ();
+    const id = String (key);
+
+    if (session.length > 0)
+    {
+        header.append ("Authorization", session);
+    }
+
+    const endpoint = `${content.NET_URL}/${id}`;
+    const init: RequestInit =
+    {
+        method: "DELETE",
+        mode: "cors",
+        referrerPolicy: "strict-origin",
+        cache: "default",
+        signal: AbortSignal.timeout (content.NET_TIMEOUT),
+        headers: header,
+        body: undefined
+    }
+    const response = await fetch (endpoint, init).catch ((e: unknown) =>
+    {
+        throw new error.Network (e);
+    });
+    switch (response.status)
+    {
+        case 204: break;
+        case 401: throw new error.NotAuthorized ();
+        case 403: throw new error.Forbidden ();
+        case 404: throw new error.NotFound ();
+        case 429: throw new error.NetworkLimit ();
+        case 500: throw new error.NotAvailable ();
+        case 503: throw new error.NotAvailable ();
+        default: throw new error.Unknown ();
+    }
+    return;
+}
+content.processBasic = (data: Record<string, unknown>) 
     : FetchBasic =>
 {
     const reader = objectReader (data);

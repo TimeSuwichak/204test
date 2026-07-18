@@ -1,64 +1,78 @@
-import react        from "react";
-import styled       from "styled-components";
-import navigation   from "#util/common.navigation.ts";
-import testArtwork  from "#asset/image/test.artwork.jpg";
+import react            from "react";
+import styled           from "styled-components";
+
+import testArtwork      from "#asset/image/test.artwork.jpg";
+import cmmCtx           from "#context/common.ts";
+import apiProduct       from "#util/api.product.ts";
 
 import { useSearchParams } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+
+import type { UseQueryResult } from "@tanstack/react-query";
+import type { FetchBasic } from "#util/api.product.ts";
+
 import { Share2Icon } from "lucide-react";
+
+/**
+ * โครงสร้างข้อมูลที่ส่วนประกอบต้องการใช้งาน: เนื้อหาหลัก
+*/
+interface PropMain
+{
+  /**
+   * ระบบดึงข้อมูลพื้นฐานสินค้า
+  */
+  queryBasic: UseQueryResult<FetchBasic>;
+}
 
 const content = function Product ()
 {
-  const [serachParam] = useSearchParams ();
-  const id = serachParam.get ("id");
+  const [param] = useSearchParams ();
+  const id = param.get ("id");
+  const auth = cmmCtx.useAuth ();
 
-  react.useEffect (() =>
-  {
-    console.log ("ID", id);
-  },
-  [id]);
+  const queryBasic = useQuery ({
+    queryKey: ["Product", "GetBasicById", id],
+    queryFn: () => apiProduct.getBasic (auth.session, Number (id)),
+  });
 
   return <>
     <StyleRoot>
-      <content.Main/>
+      <content.Main 
+        queryBasic={queryBasic}/>
     </StyleRoot>
   </>;
 }
-content.Main = function ProductMainContent ()
+content.Main = function ProductMainContent (prop: PropMain)
 {
+  const [name, setName] = react.useState ("");
+  const [sub, setSub] = react.useState ("");
+  const [desc, setDesc] = react.useState ("");
+
+  react.useEffect (() =>
+  {
+    const query = prop.queryBasic;
+    const data = query.data;
+
+    if (!data) {
+      return;
+    }
+    setName (data.name);
+    setSub ("");
+    setDesc (data.description);
+  },
+  [prop.queryBasic]);
+
   return (
     <StyleMain>
       <StyleArtwork src={testArtwork}/>
       <StyleMainView>
         <header>
-          <StyleMainTitle>[ชื่อเกม]</StyleMainTitle>
-          <StyleMainTitleSub>[ข้อความย่อย]</StyleMainTitleSub>
+          <StyleMainTitle>{name}</StyleMainTitle>
+          <StyleMainTitleSub>{sub}</StyleMainTitleSub>
         </header>
         <main>
           <StyleMainDesc>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-            Nam eget lacus 
-            ultricies, finibus libero nec, mattis lorem. Nunc nec felis 
-            consectetur, lacinia risus vulputate, fringilla est. In hac habitasse 
-            platea dictumst. Sed a lectus non magna scelerisque mattis. Etiam 
-            laoreet id nulla et tristique. Nunc vehicula justo maximus erat 
-            lacinia, in pharetra massa sagittis. Phasellus id posuere velit, non 
-            vehicula odio. Lorem ipsum dolor sit amet, consectetur 
-            adipiscing elit. 
-            Praesent at elit lacinia, tincidunt quam a, faucibus nibh. Cras lacus 
-            felis, ultrices ac bibendum a, semper in dui. Proin porttitor 
-            metus eu 
-            quam tempus blandit. Sed sit amet volutpat leo.
-
-            Class aptent taciti sociosqu ad litora torquent per conubia nostra, 
-            per inceptos himenaeos. Sed erat lectus, ullamcorper at lectus eget, 
-            dictum imperdiet neque. Nullam a egestas eros. Pellentesque eu ipsum 
-            sed libero hendrerit gravida varius ut nulla. Cras vulputate 
-            ligula id urna maximus gravida. Fusce lectus nunc, blandit lacinia 
-            mauris ac, ultricies porta mi. Aenean dictum massa id mattis interdum.
-
-            Vivamus molestie ac nulla ac commodo. Aliquam erat volutpat. Morbi 
-            vitae malesuada elit. Nulla non dolor dolor. Aliquam suscipit metus 
-            quis ligula varius, in molestie felis sollicitudin. 
+            {desc}
           </StyleMainDesc>
           <StyleMainReview>
             <iframe src="https://www.youtube.com/embed/Ux0YNqhaw0I?si=cDRJRNh5VdQ27VLX" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>

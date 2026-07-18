@@ -15,7 +15,7 @@ content.getRouter = function ()
     const router = http.router ();
     const authManager = controlAuth.validateOnlyManager ();
 
-    router.get ("/", control.list);
+    router.get ("/", control.getList);
     router.get ("/:id", control.get);
     router.put ("/:id", authManager, control.put);
     router.post ("/", authManager, control.post);

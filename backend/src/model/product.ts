@@ -99,10 +99,6 @@ export interface DataCreate
      * แพลตฟอร์ม
     */
     platform: number;
-    /**
-     * รูปปกเกม
-    */
-    artwork: string;
 }
 
 /**
@@ -290,15 +286,14 @@ content.create = async (info: DataCreate) : Promise<DataId> =>
     {
         const id = await transaction.insert (`
             INSERT INTO Product 
-            (Name, Description, Price, PriceCode, Platform, Artwork) 
-            VALUES (?, ?, ?, ?, ?, ?)`,
+            (Name, Description, Price, PriceCode, Platform) 
+            VALUES (?, ?, ?, ?, ?)`,
             [
                 info.name, 
                 info.description, 
                 info.price, 
                 info.priceCode, 
                 info.platform,
-                info.artwork
             ]
         ) as DataId;
 
