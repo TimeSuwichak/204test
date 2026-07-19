@@ -1,9 +1,11 @@
+import formidable   from "formidable";
 import error        from "#core/error.ts";
 import http         from "#core/http.ts";
 import logging      from "#core/log.ts";
 import objectReader from "#core/object.reader.ts";
 import auth         from "#controller/auth.ts";
 import model        from "#model/product.ts";
+import modelStorage from "#model/storage.ts";
 import
 {
     type Request,
@@ -577,13 +579,26 @@ content.putStock = (request: Request, response: Response) =>
  * @param request คำขอ
  * @param response คำตอบ
 */
-content.postBasic = (request: Request, response: Response) =>
+content.postBasic = async (request: Request, response: Response) =>
 {
+    const coverId = await modelStorage.createWriterId ();
+    const form = formidable ({
+        uploadDir: modelStorage.getPath (),
+        filename: (name, ext, part, form) =>
+        {
+            void name; void ext;
+            void part; void form;
+            return coverId;
+        },
+    });
     let input: BasicCreate;
-
+    
     try
     {
-        const reader = objectReader (request.body);
+        const [field] = await form.parse (request);
+        const metadata = JSON.stringify (field ["Metadata"]?.at (0));
+        const reader = objectReader (metadata);
+
         input = 
         {
             name: reader.requireString ("Name"),
@@ -591,6 +606,7 @@ content.postBasic = (request: Request, response: Response) =>
             price: reader.requireInteger ("Price"),
             priceCode: reader.requireInteger ("PriceCode"),
             platform: reader.requireInteger ("Platform"),
+            cover: coverId
         };
     }
     catch

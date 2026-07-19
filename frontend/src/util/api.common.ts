@@ -154,6 +154,56 @@ content.postJson = async (
     return response;
 }
 /**
+ * ส่งคำสั่ง POST ไปยังระบบปลายทางพร้อมชุดข้อมูลฟอร์มที่กำหนดไว้
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param endpoint ที่อยู่ของปลายทาง
+*/
+content.postForm = async (
+    session: string, 
+    endpoint: string, 
+    body: FormData
+) : Promise<Response> =>
+{
+    const header = new Headers ();
+
+    header.append ("Content-Type", "multipart/form-data");
+    header.append ("Accept-Encoding", "*");
+
+    if (session.length > 0)
+    {
+        header.append ("Authorization", `Bearer ${session}`);
+    }
+
+    const path = endpoint;
+    const init: RequestInit =
+    {
+        method: "POST",
+        mode: "cors",
+        cache: "default",
+        referrerPolicy: "strict-origin",
+        headers: header,
+        body: body
+    };
+    const response = await fetch (path, init).catch ((e: unknown) =>
+    {
+        throw new error.Network (e);
+    });
+    switch (response.status)
+    {
+        case 200: break;
+        case 201: break;
+        case 401: throw new error.NotAuthorized ();
+        case 403: throw new error.Forbidden ();
+        case 404: throw new error.NotFound ();
+        case 429: throw new error.NetworkLimit ();
+        case 500: throw new error.NotAvailable ();
+        case 503: throw new error.NotAvailable ();
+        default: throw new error.Unknown ();
+    }
+    return response;
+}
+/**
  * ส่งคำสั่ง DELETE ไปยังระบบปลายทางพร้อมชุดข้อมูล JSON ที่กำหนดไว้
  * 
  * @param session ชุดรหัสยืนยันตัวตน

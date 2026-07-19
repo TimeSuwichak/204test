@@ -1,6 +1,7 @@
 import sql              from "#core/sql.ts";
 import error            from "#core/error.ts";
 import objectReader     from "#core/object.reader.ts";
+
 import { type BasicId as AccountId } from "#model/account.ts";
 import { type InputValue, type InputCommand } from "#core/sql.ts";
 
@@ -430,14 +431,15 @@ content.create = async (info: BasicCreate) : Promise<BasicId> =>
     {
         const id = await transaction.insert (`
             INSERT INTO Product 
-            (Name, Description, Price, PriceCode, Platform) 
-            VALUES (?, ?, ?, ?, ?)`,
+            (Name, Description, Price, PriceCode, Platform, Cover) 
+            VALUES (?, ?, ?, ?, ?, ?)`,
             [
                 info.name, 
                 info.description, 
                 info.price, 
                 info.priceCode, 
                 info.platform,
+                info.cover,
             ]
         ) as BasicId;
 
@@ -806,6 +808,10 @@ export interface BasicCreate
      * แพลตฟอร์ม
     */
     platform: number;
+    /**
+     * รูปปกสินค้า
+    */
+    cover: string;
 }
 
 /**

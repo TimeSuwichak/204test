@@ -6,6 +6,7 @@ import ctxCustomer from "#context/customer.ts";
 import cmmNavigation from "#util/common.navigation.ts";
 import apiAccount from "#util/api.account.ts";
 import apiProduct from "#util/api.product.ts";
+import apiStorage from "#util/api.storage.ts";
 
 import { useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -73,7 +74,8 @@ content.List = function ProductBrowserList (prop: PropList)
       const key = String (x.id);
       const id = x.id;
       const name = x.name;
-      const artwork = (x.cover.length > 0) ? x.cover : undefined;
+      const artwork = (x.cover.length > 0) ? 
+        apiStorage.getUrlStream (x.cover) : undefined;
 
       return <content.ListItem 
         key={key}

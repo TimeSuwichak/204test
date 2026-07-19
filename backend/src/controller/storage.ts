@@ -39,7 +39,9 @@ content.getStream = async function (request: Request, response: Response)
         const paramId = param.requireString ("id");
 
         //
-        // ใน HTTP จะมีส่วนหัวหนึ่งที่เรียกว่า Content-Range ซึ่งใช้ในการระบุส่วนข้อมูลที่ต้องการจะอ่าน
+        // ใน HTTP จะมีส่วนหัวหนึ่งที่เรียกว่า 
+        // Content-Range ซึ่งใช้ในการระบุส่วนข้อมูลที่ต้องการจะอ่าน
+        //
         // อย่างไรก็ตาม ตัวแปรนี้ไม่ใช่ข้อบังคับดังนั้นมันอาจจะมีหรือไม่มีก็ได้
         //        
         const range = request.range (Number.POSITIVE_INFINITY);
@@ -79,11 +81,13 @@ content.getStream = async function (request: Request, response: Response)
             response.end ();
             return;
         }
-        const result = await model.createStream (paramId, start, end);
+        const result = await model.createReader (paramId, start, end);
 
         if (rangeAvailable)
         {
+            //
             // 200: OK
+            //
             response.writeHead (http.STATUS_OK, {
                 "content-type": model.getMime (paramId),
                 "content-length": result.totalSize,
@@ -92,7 +96,9 @@ content.getStream = async function (request: Request, response: Response)
         }
         else
         {
+            //
             // 206: Partial Content
+            //
             response.writeHead (http.STATUS_PARTIAL_CONTENT, {
                 "content-type": model.getMime (paramId),
                 "content-range": `bytes ${String (result.start)}-${String (result.end)}/${String (result.totalOffset)}`,

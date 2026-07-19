@@ -94,12 +94,17 @@ content.createBasic = async (session: string, data: BasicCreate) :
     Promise<BasicCreateResult> =>
 {
     const endpoint = content.NET_URL;
-    const response = await common.postJson (session, endpoint, {
+    const form = new FormData ();
+
+    form.append ("Metadata", JSON.stringify ({
         "Name": data.name,
         "Description": data.description,
         "Price": data.price,
         "PriceCode": data.priceCode,
-    });
+    }));
+    form.append ("Cover", data.cover);
+
+    const response = await common.postForm (session, endpoint, form);
     const reader = await common.toJson (response);
     const result = content.readCreateResult (reader);
 
@@ -386,6 +391,10 @@ export interface BasicCreate
      * แพลตฟอร์ม
     */
     platform: number;
+    /**
+     * ปกสินค้า
+    */
+    cover: Blob | File;
 }
 /**
  * โครงสร้างประกอบที่ได้รับหลังจากสร้างสินค้าแล้ว

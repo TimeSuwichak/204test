@@ -3,16 +3,12 @@ import dotenv       from "#core/env.ts";
 
 import nodePath     from "node:path";
 import nodeFs       from "node:fs";
-import nodeFsa       from "node:fs/promises";
+import nodeFsa      from "node:fs/promises";
 
 /**
  * เส้นทางที่อยู่จัดเก็บไฟล์
 */
 let PATH: string;
-/**
- * ที่จัดเก็บข้อมูลชั่วคราวก่อนนำไปเก็บยังถาวร
-*/
-let PATH_TEMP: string;
 /**
  * ระบบจัดการข้อมูลจัดเก็บ
 */
@@ -27,15 +23,11 @@ content.init = async () =>
 {
     const root = process.cwd ();
     const rel = dotenv.getString ("B_STORAGE_PATH", "/data/storage");
-    const relTemp = dotenv.getString ("B_STORAGE_PATH_TEMP", "/data/temp");
     const resolved = nodePath.resolve (nodePath.join (root, rel));
-    const resolvedTemp = nodePath.resolve (nodePath.join (root, relTemp));
 
     PATH = resolved;
-    PATH_TEMP = resolvedTemp;
 
     await nodeFsa.mkdir (PATH).catch (() => { return; })
-    await nodeFsa.mkdir (PATH_TEMP).catch (() => { return; })
     return Promise.resolve ();
 }
 /**
@@ -46,19 +38,22 @@ content.terminate = () =>
     return;
 }
 /**
+ * รับเส้นทางที่อยู่ของทรัพยากรทั้งหมด
+*/
+content.getPath = () =>
+{
+    return PATH;
+}
+/**
  * เชื่อมต่อเส้นทางที่อยู่ของทรัพยากร
 */
-content.getJoin = (other: string) =>
+content.getJoin = (other: ResourcePath) =>
 {
     return nodePath.resolve (nodePath.join (PATH, other));
 }
-content.createId = () =>
+content.createReader = async (id: ResourceId, start: number, end: number) =>
 {
-    return;
-}
-content.createStream = async (path: string, start: number, end: number) =>
-{
-    const resId = path;
+    const resId = id;
     const resPath = content.getJoin (resId);
 
     if (!resPath.startsWith (PATH))
@@ -93,6 +88,67 @@ content.createStream = async (path: string, start: number, end: number) =>
         totalSize: stat.size, 
     }
 }
+content.createWriter = async (data: Uint8Array) : Promise<ResourceId> =>
+{
+    let filepath: string;
+    let filename: string;
+
+    for (;;)
+    {
+        const uuid = crypto.randomUUID ();
+        const path = content.getJoin (uuid);
+        const available = await nodeFsa.stat (path).then (() =>
+        {
+            return false;
+        })
+        .catch (() =>
+        {
+            return true;
+        });
+
+        if (available) 
+        {
+            filepath = path;
+            filename = uuid;
+            break;
+        }
+    }
+
+    await nodeFsa.writeFile (filepath, data, {
+        encoding: "binary",
+    });
+    return filename;
+}
+content.createWriterId = async () =>
+{
+    for (;;)
+    {
+        const uuid = crypto.randomUUID ();
+        const path = content.getJoin (uuid);
+        const available = await nodeFsa.stat (path).then (() =>
+        {
+            return false;
+        })
+        .catch (() =>
+        {
+            return true;
+        });
+
+        if (available) 
+        {
+            return uuid;
+        }
+    }
+}
+content.createWriterPath = async () : Promise<ResourcePath> =>
+{
+    return content.getJoin (await content.createWriterId ());
+}
+content.delete = (id: ResourceId) =>
+{
+    return nodeFsa.rm (content.getJoin (id));
+}
+
 content.getMime = function (path: string)
 {
     const resId = path;
@@ -179,10 +235,8 @@ content.delete = async (path: string) =>
     await nodeFsa.rm (resPath);
     return;
 }
-/**
- * แข็งวัตถุ (ความปลอดภัย)
-*/
-Object.freeze (content);
+export type ResourcePath = string;
+export type ResourceId = string;
 /**
  * ส่งออกตัวแปร
 */

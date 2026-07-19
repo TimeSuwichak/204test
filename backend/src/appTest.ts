@@ -3,6 +3,7 @@ import objectReader     from "#core/object.reader.ts";
 import modelAuth        from "#model/auth.ts";
 import modelAccount     from "#model/account.ts";
 import modelProd        from "#model/product.ts";
+import modelStorage     from "#model/storage.ts";
 
 import path from "node:path";
 import fs from "node:fs";
@@ -51,7 +52,8 @@ content.setupProduct = async () =>
 
     const cwd = process.cwd ();
     const filename = "product.json";
-    const location = path.resolve (path.join (cwd, "data", "sample", filename));
+    const folder = path.resolve (path.join (cwd, "data", "sample"));
+    const location = path.resolve (path.join (folder, filename));
     const json = objectReader (JSON.parse (fs.readFileSync (location, "utf8")));
     const item = json.requireArrayRecord ("Item");
 
@@ -61,9 +63,38 @@ content.setupProduct = async () =>
         const name = read.requireString ("Name");
         const desc = read.requireString ("Description");
         const price = read.requireFloat ("Price");
-        // const priceCode = read.requireInteger ("PriceCode");
+        const priceCode = read.requireInteger ("PriceCode");
+        const platform = read.requireInteger ("Platform");
+        const cover = read.requireString ("Cover");
+        const coverBin = fs.readFileSync (path.join (folder, cover));
 
-        await content.setupProductFor (name, desc, price);
+        try
+        {
+            await modelProd.getBasicByName (name);
+            log.info (`Skipped: ${name}`);
+        }
+        catch
+        {
+            try
+            {
+                const coverId = await modelStorage.createWriter (coverBin);
+                await modelProd.create ({
+                    name: name,
+                    description: desc,
+                    price: price,
+                    priceCode: priceCode,
+                    platform: platform,
+                    cover: coverId
+                });
+            }
+            catch (e: unknown)
+            {
+                log.error (`Product cannot be created, ignored: ${name}`);
+                log.error (e);
+                return;
+            }
+            log.info (`Created: ${name}`);
+        }
     }
 
     log.info ("Setting up test products completed");
@@ -109,39 +140,6 @@ content.setupAccountFor = async (
 
     log.info (`Name: ${accountName}`);
     log.info (`Session: ${session.raw}`);
-}
-content.setupProductFor = async (
-    productName: string,
-    productDesc: string,
-    price: number
-) =>
-{
-    try
-    {
-        await modelProd.getBasicByName (productName);
-        log.info (`Skipped: ${productName}`);
-    }
-    catch
-    {
-        try
-        {
-            await modelProd.create ({
-                name: productName,
-                description: productDesc,
-                price: price,
-                priceCode: 1,
-                platform: modelProd.PLATFORM_WINDOWS,
-            });
-        }
-        catch (e: unknown)
-        {
-            log.error (`Product cannot be created, ignored: ${productName}`);
-            log.error (e);
-            return;
-        }
-        log.info (`Created: ${productName}`);
-    }
-    return;
 }
 /**
  * แข็งวัตถุ (ความปลอดภัย)

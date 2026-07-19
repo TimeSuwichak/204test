@@ -1,9 +1,9 @@
 import react            from "react";
 import styled           from "styled-components";
 
-import testArtwork      from "#asset/image/test.artwork.jpg";
 import cmmCtx           from "#context/common.ts";
 import apiProduct       from "#util/api.product.ts";
+import apiStorage       from "#util/api.storage.ts";
 
 import { useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -48,6 +48,7 @@ content.Main = function ProductMainContent (prop: PropMain)
   const [sub, setSub] = react.useState ("");
   const [desc, setDesc] = react.useState ("");
   const [price, setPrice] = react.useState ("");
+  const [icon, setIcon] = react.useState ("");
 
   react.useEffect (() =>
   {
@@ -61,12 +62,13 @@ content.Main = function ProductMainContent (prop: PropMain)
     setSub ("");
     setDesc (data.description);
     setPrice (`${String (data.price)} ฿`);
+    setIcon (apiStorage.getUrlStream (data.cover));
   },
   [prop.queryBasic]);
 
   return (
     <StyleMain>
-      <StyleArtwork src={testArtwork}/>
+      <StyleArtwork src={icon}/>
       <StyleMainView>
         <header>
           <StyleMainTitle>{name}</StyleMainTitle>

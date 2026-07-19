@@ -5,6 +5,7 @@ backend/build
 backend/dist
 backend/data/log
 backend/data/sql
+backend/data/storage
 backend/node_modules
 
 #

@@ -11,6 +11,7 @@ import sql                  from "#core/sql.ts";
 import routerAuth           from "#router/auth.ts";
 import routerAccount        from "#router/account.ts";
 import routerProduct        from "#router/product.ts";
+import routerStorage        from "#router/storage.ts";
 
 import modelAuth            from "#model/auth.ts";
 import modelAccount         from "#model/account.ts";
@@ -45,6 +46,7 @@ content.start = async () =>
         http.routeTo ("/product-comment", routerProduct.getRouteComment ());
         http.routeTo ("/product-review", routerProduct.getRouteReview ());
         http.routeTo ("/product-stock", routerProduct.getRouteStock ());
+        http.routeTo ("/storage", routerStorage.getRoute ());
         return;
     });
     await webSocket.init ();
