@@ -14,6 +14,7 @@ const CShipping = lazy (() => import ("#page/customer.shipping.tsx"));
 
 const SMain = lazy (() => import ("#page/staff.tsx"));
 
+const AConsole = lazy (() => import ("#page/console.tsx"));
 const ADashboard = lazy (() => import ("#page/admin.dashboard.tsx"));
 
 const VCustomer = lazy (() => import ("#page/customer.tsx"));
@@ -47,6 +48,7 @@ const content = function InitSystemRouter (
         <Route caseSensitive>
           <Route path="/staff" Component={SMain}/>
           <Route path="/admin" Component={ADashboard}/>
+          <Route path="/console" Component={AConsole}/>
         </Route>
         <Route>
           <Route path="/*" Component={G404}/>

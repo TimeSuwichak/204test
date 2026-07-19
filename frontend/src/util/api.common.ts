@@ -153,6 +153,53 @@ content.postJson = async (
     }
     return response;
 }
+/**
+ * ส่งคำสั่ง DELETE ไปยังระบบปลายทางพร้อมชุดข้อมูล JSON ที่กำหนดไว้
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param endpoint ที่อยู่ของปลายทาง
+*/
+content.delete = async (
+    session: string, 
+    endpoint: string
+) : Promise<Response> =>
+{
+    const header = new Headers ();
+
+    if (session.length > 0)
+    {
+        header.append ("Authorization", `Bearer ${session}`);
+    }
+
+    const path = endpoint;
+    const init: RequestInit =
+    {
+        method: "DELETE",
+        mode: "cors",
+        cache: "default",
+        referrerPolicy: "strict-origin",
+        headers: header,
+        body: undefined
+    };
+    const response = await fetch (path, init).catch ((e: unknown) =>
+    {
+        throw new error.Network (e);
+    });
+    switch (response.status)
+    {
+        case 200: break;
+        case 201: break;
+        case 204: break;
+        case 401: throw new error.NotAuthorized ();
+        case 403: throw new error.Forbidden ();
+        case 404: throw new error.NotFound ();
+        case 429: throw new error.NetworkLimit ();
+        case 500: throw new error.NotAvailable ();
+        case 503: throw new error.NotAvailable ();
+        default: throw new error.Unknown ();
+    }
+    return response;
+}
 content.toJson = (response: Response) =>
 {
     return response.json ().then ((x) =>

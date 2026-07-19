@@ -3,10 +3,7 @@ import auth     from "#util/api.auth.ts";
 import common   from "#util/api.common.ts";
 
 import { type Challenge } from "#util/api.auth.ts";
-/**
- * สคริปแทรกสำหรับระบบ Facebook
-*/
-let script: HTMLScriptElement;
+
 /**
  * โมดูลหลักที่ใช้ในการสื่อสารระหว่างส่วนติดต่อผู้ใช้และเซิร์ฟเวอร์
  * ที่เกี่ยวข้องกับระบบเชื่อมต่อกับ Facebook
@@ -178,6 +175,10 @@ export interface SessionFacebook extends Challenge
 }
 
 /**
+ * สคริปแทรกสำหรับระบบ Facebook
+*/
+let script: HTMLScriptElement;
+/**
  * ส่งออกตัวแปร
 */
 export default content;
@@ -259,7 +260,7 @@ declare const FB: undefined |
             accessToken: string;
             expiresIn: number;
             reauthorize_required_in: number;
-            userID: number;
+            userID: string;
         }
 
     }) => void) => void;

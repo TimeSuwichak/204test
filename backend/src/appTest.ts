@@ -127,7 +127,7 @@ content.setupProductFor = async (
 {
     try
     {
-        await modelProd.getByName (productName);
+        await modelProd.getBasicByName (productName);
         log.info (`Skipped: ${productName}`);
     }
     catch

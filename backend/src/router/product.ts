@@ -2,25 +2,67 @@ import http from "#core/http.ts";
 import control from "#controller/product.ts"
 import controlAuth from "#controller/auth.ts";
 
-const content = function ()
+const content = () =>
 {
     return;
 }
-content.getController = function ()
-{
-    return control;
-}
-content.getRouter = function ()
+content.getRoute = () =>
 {
     const router = http.router ();
     const authManager = controlAuth.validateOnlyManager ();
 
-    router.get ("/", control.getList);
-    router.get ("/:id", control.get);
-    router.put ("/:id", authManager, control.put);
-    router.post ("/", authManager, control.post);
-    router.post ("/:id", authManager, control.delete);
+    router.get ("/", control.getBasicList);
+    router.get ("/:id", control.getBasic);
+    router.put ("/:id", authManager, control.putBasic);
+    router.post ("/", authManager, control.postBasic);
+    router.post ("/:id", authManager, control.deleteBasic);
    
+    return router;
+}
+content.getRouteCategory = () =>
+{
+    const router = http.router ();
+    const authManager = controlAuth.validateOnlyManager ();
+
+    router.get ("/:id", control.getCategory);
+    router.put ("/:id", authManager, control.putCategory);
+    router.post ("/", authManager, control.postCategory);
+    router.delete ("/:id", authManager, control.deleteCategory);
+
+    return router;
+}
+content.getRouteComment = () =>
+{
+    const router = http.router ();
+    const auth = controlAuth.validateLeastUser ();
+
+    router.get ("/:id", control.getComment);
+    router.put ("/:id", auth, control.putComment);
+    router.post ("/", auth, control.postComment);
+    router.delete ("/:id", auth, control.deleteComment);
+
+    return router;
+}
+content.getRouteReview = () =>
+{
+    const router = http.router ();
+    const authManager = controlAuth.validateOnlyManager ();
+
+    router.get ("/:id", control.getReview);
+    router.put ("/:id", authManager, control.putReview);
+    router.post ("/", authManager, control.postReview);
+    router.delete ("/:id", authManager, control.deleteReview);
+
+    return router;
+}
+content.getRouteStock = () =>
+{
+    const router = http.router ();
+    const authStaff = controlAuth.validateLeastStaff ();
+
+    router.get ("/:id", authStaff, control.getStock);
+    router.put ("/:id", authStaff, control.putStock);
+
     return router;
 }
 /**

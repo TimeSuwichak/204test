@@ -47,11 +47,13 @@ CREATE TABLE IF NOT EXISTS `project`.`AccountContact`
     `Email`     CHAR(32) DEFAULT "" COMMENT 'อีเมล' ,
 
     CONSTRAINT  PK_AccountContact_Id PRIMARY KEY (`Id`),
+    CONSTRAINT  UK_AccountContact_Id UNIQUE (`Id`) ,
     CONSTRAINT  FK_AccountContact_Id FOREIGN KEY (`Id`) 
         REFERENCES Account (`Id`)
 )
 ENGINE = InnoDB 
 COMMENT = 'ข้อมูลบัญชีผู้ใช้ (ติดต่อ)';
+
 --
 -- สร้างข้อมูลการเข้าสู่ระบบ (ชื่อ/รหัสผ่าน)
 --
@@ -99,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `project`.`Product`
     `Price`     FLOAT NOT NULL DEFAULT 0 COMMENT 'ราคา' ,
     `PriceCode` INT NOT NULL DEFAULT 1 COMMENT 'สกุลเงินราคา' ,
     `Platform`  INT NOT NULL DEFAULT 0 COMMENT 'แพลตฟอร์ม' ,
-    `Artwork`   CHAR(255) NOT NULL DEFAULT "" COMMENT 'รูปปกเกม' ,
+    `Artwork`   CHAR(255) NOT NULL DEFAULT "" COMMENT 'รูปสินค้า' ,
 
     CONSTRAINT  PK_Product_Id PRIMARY KEY (`Id`),
     CONSTRAINT  UK_Product_Id UNIQUE (`Id`)
@@ -222,36 +224,25 @@ CREATE TABLE IF NOT EXISTS `project`.`OrderItem`
 )
 ENGINE = InnoDB 
 COMMENT = 'สินค้าที่อยู่ในคำสั่งซื้อสินค้า';
+
 -- #
 -- # ข้อมูลตะกร้าสินค้าของผู้ใช้
 -- #
--- CREATE TABLE IF NOT EXISTS `project`.`AccountCart`
--- (
---     `CartId` BIGINT NOT NULL COMMENT 'รหัสเอกลักษณ์' ,
---     `AccountId` BIGINT NOT NULL COMMENT 'รหัสบัญชี' ,
---     `ProductId` BIGINT NOT NULL COMMENT ''
--- )
--- ENGINE = InnoDB 
--- COMMENT = 'ข้อมูลตะกร้าสินค้าของผู้ใช้'
--- # 
--- # สินค้าที่กำลังอยู่ในตะกร้า
--- # 
--- CREATE TABLE IF NOT EXISTS `project`.`AccountCartItem`
--- (
---     `ItemId` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'รหัสเอกลักษณ์' ,
---     `CartId` BIGINT NOT NULL COMMENT 'รหัสตะกร้า' ,
---     `ProductId` BIGINT NOT NULL COMMENT 'รหัสสินค้า' ,
---     `Quantity` INT NOT NULL DEFAULT 1 COMMENT 'จำนวน' ,
--- 
---     CONSTRAINT PK_AccountCartItem_ItemId PRIMARY KEY (`ItemId`) ,
---     CONSTRAINT UK_AccountCartItem_ItemId UNIQUE (`ItemId`)
---     CONSTRAINT FK_AccountCartItem_CartId
---         FOREIGN KEY (`CartId`)
---         REFERENCES AccountCart (`CartId`) ,
---     CONSTRAINT FK_AccountCartItem_ProductId
---         FOREIGN KEY (`ProductId`)
---         REFERENCES Product (`Id`)
--- 
--- )
--- ENGINE = InnoDB 
--- COMMENT = 'ข้อมูลตะกร้าสินค้าของผู้ใช้'
+CREATE TABLE IF NOT EXISTS `project`.`AccountCart`
+(
+    `ItemId`    BIGINT NOT NULL AUTO_INCREMENT COMMENT 'รหัสเอกลักษณ์' ,
+    `AccountId` BIGINT NOT NULL COMMENT 'เจ้าของตะกร้า' ,
+    `ProductId` BIGINT NOT NULL COMMENT 'สินค้าที่เลือก' ,
+    `Quantity`  INT NOT NULL COMMENT 'จำนวนที่เลือก' ,
+
+    CONSTRAINT  PK_AccountCart_ItemId PRIMARY KEY (`ItemId`),
+    CONSTRAINT  UK_AccountCart_ItemId UNIQUE (`ItemId`) ,
+    CONSTRAINT  FK_AccountCart_AccountId 
+        FOREIGN KEY (`AccountId`) 
+        REFERENCES Account (`Id`) ,
+    CONSTRAINT  FK_AccountCart_ProductId
+        FOREIGN KEY (`ProductId`) 
+        REFERENCES Product (`Id`)
+)
+ENGINE = InnoDB 
+COMMENT = 'ข้อมูลตะกร้าสินค้า';

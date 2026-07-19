@@ -2,12 +2,16 @@ import sql          from "#core/sql.ts";
 import error        from "#core/error.ts";
 import objectReader from "#core/object.reader.ts";
 import { type ObjectReader } from "#core/object.reader.ts";
+import { type BasicId as ProductId } from "#model/product.ts";
 
 /**
  * ส่วนเชื่อมต่อกับฐานข้อมูล
 */
 const content = () =>
 {
+    //
+    // ไม่มีคุณสมบัติดังนั้นอย่าเรียกใช้งาน
+    //
     return;
 }
 /**
@@ -55,12 +59,37 @@ content.getBasicList = () : Promise<BasicFetch []> =>
         });
     });
 }
+content.getCart = async (key: CartId) 
+    : Promise<CartFetch> =>
+{
+    const cmd = `SELECT * FROM AccountCart WHERE Item = ?`;
+    const param = [key];
+    const query = await sql.select (cmd, param);
+
+    if (query.length === 0) {
+        throw new error.NotFound (`ไม่พบข้อมูลตะกร้า: ${String (key)}`);
+    }
+    return content.readCart (objectReader (query [0]));
+}
+content.getCartByAccount = async (key: BasicId) 
+    : Promise<CartFetch[]> =>
+{
+    const cmd = `SELECT * FROM AccountCart WHERE AccountId = ?`;
+    const param = [key];
+    const query = await sql.select (cmd, param);
+
+    return query.map ((x) =>
+    {
+        return content.readCart (objectReader (x));
+    });
+}
+
 /**
  * แก้ไขข้อมูลบัญชีดังกล่าว
  * 
  * @param info ข้อมูลที่ต้องการแก้ไข
  */
-content.updateBasic = (key: BasicId, info: BasicUpdate) : Promise<void> =>
+content.updateBasic = (info: BasicUpdate) : Promise<void> =>
 {
     const cmd = 
     [
@@ -70,20 +99,20 @@ content.updateBasic = (key: BasicId, info: BasicUpdate) : Promise<void> =>
     .filter (x => x !== undefined)
     .join (" = ?, ")
     .concat (" = ? ")
-    .concat ("WHERE CategoryId = ?");
+    .concat ("WHERE Id = ?");
 
     const param = 
     [
         info.name,
         info.role,
-        key
+        info.id
     ]
     .filter (x => x !== undefined);
 
     return sql.update (`UPDATE Account SET ${cmd}`, param).then ((x) =>
     {
         if (x === 0) { 
-            throw new error.NotFound (`ไม่พบข้อมูลบัญชี: ${String (key)}`); 
+            throw new error.NotFound (`ไม่พบข้อมูลบัญชี: ${String (info.id)}`); 
         }
     });
 }
@@ -97,6 +126,34 @@ content.updateIcon = async (key: BasicId, data: string | Uint8Array) =>
 
     return Promise.resolve ();
 }
+content.updateCart = async (info: CartUpdate)
+    : Promise<void> =>
+{
+    const key = 
+    [
+        info.quantity ? "Quantity" : undefined,
+    ]
+    .filter (x => x !== undefined)
+    .join (" = ?, ")
+    .concat (" = ? ")
+    .concat ("WHERE ItemId = ? AND AccountId = ?");
+
+    const value = 
+    [
+        info.quantity,
+        info.itemId,
+        info.accountId
+    ]
+    .filter (x => x !== undefined);
+
+    const result = await sql.update (`UPDATE AccountCart SET ${key}`, value);
+
+    if (result === 0) 
+    {
+        throw new error.NotFound (`ไม่พบข้อมูลตะกร้า: ${String (info.itemId)}`);
+    }
+}
+
 /**
  * สร้างบัญชีใหม่ขึ้นมาในระบบ 
  * คำสั่งนี้จะไม่สร้างวิธีลงชื่อเข้าใช้งานระบบคุณจะต้องสร้างมันโดยตนเอง
@@ -130,6 +187,16 @@ content.create = async (info: BasicCreate) : Promise<BasicId> =>
         ctx.release ();
     }
 }
+content.createCart = (info: CartCreate) 
+    : Promise<CartId> =>
+{
+    return sql.insert (`
+        INSERT INTO AccountCart (AccountId, ProductId, Quantity)
+        VALUES (?, ?, ?)`,
+        [info.accountId, info.productId, info.quantity]
+    ) as Promise<CartId>;
+}
+
 /**
  * ลบบัญชีดังกล่าวออกจากระบบ 
  * กระบวนการนี้จะไม่สามารถทำงานได้ถ้าข้อมูลที่กล่าวถึงบัญชี
@@ -149,6 +216,21 @@ content.delete = (key: BasicId) =>
         }
     });
 }
+content.deleteCart = (itemId: CartId, accountId: BasicId) =>
+{
+    return sql.delete (`
+        DELETE FROM AccountCart 
+        WHERE ItemId = ? AND AccountId = ?`,
+        [itemId, accountId]
+    )
+    .then ((x) =>
+    {
+        if (x === 0)
+        {
+            throw new error.NotFound (`ไม่พบข้อมูลตะกร้า: ${String (itemId)}`);
+        }
+    });
+}
 
 content.readBasic = (reader: ObjectReader) : BasicFetch =>
 {
@@ -159,6 +241,15 @@ content.readBasic = (reader: ObjectReader) : BasicFetch =>
         role: reader.requireInteger ("Role"),
         created: reader.requireDate ("Created"),
         modified: reader.requireDateOrNull ("Modified")
+    }
+}
+content.readCart = (reader: ObjectReader) : CartFetch =>
+{
+    return {
+        itemId: reader.requireInteger ("ItemId"),
+        accountId: reader.requireInteger ("AccountId"),
+        productId: reader.requireInteger ("ProductId"),
+        quantity: reader.requireInteger ("Quantity")
     }
 }
 
@@ -208,10 +299,7 @@ content.RESTRICTION_LIST =
     content.RESTRICTION_NONE,
     content.RESTRICTION_SUSPENDED
 ];
-/**
- * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
-*/
-export type BasicId = number;
+
 /**
  * โครงสร้างข้อมูลที่ได้รับจากการดึงข้อมูลในฐานข้อมูล
 */
@@ -220,33 +308,34 @@ export interface BasicFetch
     /**
      * รหัสบัญชี
     */
-    id: BasicId;
+    readonly id: BasicId;
     /**
      * ชื่อผู้ใช้
     */
-    name: string;
+    readonly name: string;
     /**
      * ไอคอนของผู้ใช้
     */
-    icon: string;
+    readonly icon: string;
     /**
      * บทบาทของผู้ใช้
     */
-    role: number;
+    readonly role: number;
     /**
      * วันที่สร้างบัญชี
     */
-    created: Date;
+    readonly created: Date;
     /**
      * วันที่ปรับเปลี่ยนข้อมูลบัญชี
     */
-    modified: Date | null; 
+    readonly modified: Date | null; 
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการเปลี่ยนแปลงข้อมูลในฐานข้อมูล
 */
 export interface BasicUpdate
 {
+    id: BasicId;
     /**
      * ชื่อผู้ใช้
     */
@@ -270,6 +359,36 @@ export interface BasicCreate
     */
     role: number;
 }
+
+export interface CartFetch
+{
+    itemId: CartId;
+    accountId: BasicId;
+    productId: ProductId;
+    quantity: number;
+}
+export interface CartUpdate
+{
+    itemId: CartId;
+    accountId: BasicId;
+    quantity ?: number | undefined;
+}
+export interface CartCreate
+{
+    accountId: BasicId;
+    productId: ProductId;
+    quantity: number;
+}
+
+/**
+ * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
+*/
+export type BasicId = number;
+/**
+ * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
+*/
+export type CartId = number;
+
 /**
  * ส่งออกตัวแปร
 */

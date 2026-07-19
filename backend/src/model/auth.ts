@@ -13,6 +13,9 @@ import { type BasicId as AccountId } from "#model/account.ts"
 */
 const content = () =>
 {
+    //
+    // ไม่มีคุณสมบัติดังนั้นอย่าเรียกใช้งาน
+    //
     return;
 }
 /**
@@ -573,22 +576,6 @@ content.RESTRICTION_DISABLED = 2;
 content.RESTRICTION_SUSPENDED = 4;
 
 /**
- * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
-*/
-export type BasicId = string;
-/**
- * รหัสผ่าน
-*/
-export type BasicPassword = string;
-/**
- * รหัสบัญชี (หรือเรียกอีกอย่างว่า FOREIGN KEY)
-*/
-export type BasicLink = AccountId;
-/**
- * รหัสของชุดรหัสข้อมูลสำหรับ Facebook (หรือเรียกอีกอย่างว่า PRIMARY KEY)
-*/
-export type FacebookId = number;
-/**
  * ชุดข้อมูลที่ได้รับจากการลงชื่อเข้าใช้
 */
 export interface Session
@@ -650,6 +637,22 @@ export interface FacebookFetch
     id: FacebookId;
     link: AccountId;
 }
+/**
+ * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
+*/
+export type BasicId = string;
+/**
+ * รหัสผ่าน
+*/
+export type BasicPassword = string;
+/**
+ * รหัสบัญชี (หรือเรียกอีกอย่างว่า FOREIGN KEY)
+*/
+export type BasicLink = AccountId;
+/**
+ * รหัสของชุดรหัสข้อมูลสำหรับ Facebook (หรือเรียกอีกอย่างว่า PRIMARY KEY)
+*/
+export type FacebookId = number;
 
 let EXPIRE_SESSION: number;
 let EXPIRE_CHALLENGE: number;

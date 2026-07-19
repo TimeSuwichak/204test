@@ -3,6 +3,7 @@ import styled     from "styled-components";
 
 import cmmCtx from "#context/common.ts";
 import cmmNavigation from "#util/common.navigation.ts";
+import apiAccount from "#util/api.account.ts";
 import apiProduct from "#util/api.product.ts";
 
 import { useSearchParams } from "react-router";
@@ -10,40 +11,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { ReactNode } from "react";
 import type { UseQueryResult } from "@tanstack/react-query";
-import type { BasicFetch } from "#util/api.product.ts";
+import type { BasicFetch as ProductBasicFetch } from "#util/api.product.ts";
+import type { CartFetch } from "#util/api.account.ts";
 
-/**
- * โครงสร้างข้อมูลที่ส่วนประกอบต้องการใช้งาน: รายการสินค้า
-*/
-interface PropList
-{
-  /**
-   * ระบบดึงข้อมูลรายการสินค้า
-  */
-  queryList: UseQueryResult<BasicFetch []>;
-}
-/**
- * โครงสร้างข้อมูลที่ส่วนประกอบต้องการใช้งาน: ตัวสินค้า
-*/
-interface PropListItem
-{
-  /**
-   * รหัสสินค้า
-  */
-  id: number;
-  /**
-   * ชื่อสินค้า
-  */
-  name: string;
-  /**
-   * ปกสินค้า
-  */
-  artwork: string | undefined;
-  /**
-   * ทำงานเมื่อผู้ใช้กดเลือกสินค้า
-  */
-  onClick: (id: number) => void;
-}
+import { ShoppingBasket } from "lucide-react";
+
 /**
  * ส่วนประกอบหน้าต่างเลือกสินค้า
 */
@@ -55,12 +27,25 @@ const content = function ProductBrowser ()
 
   const queryList = useQuery ({
     queryKey: ["Product", "GetBasicByList"],
-    queryFn: () => apiProduct.getBasicList (auth.session),
+    queryFn: () => apiProduct.getBasicList (auth.session, {
+      search: search ?? undefined
+    }),
   });
+  const queryCart = useQuery ({
+    queryKey: ["Cart"],
+    queryFn: () => apiAccount.getCartList (auth.session)
+  });
+
+  react.useEffect (() =>
+  {
+    void queryList.refetch ();
+  },
+  [search]);
 
   return (<>
     <content.List queryList={queryList}/>
     <content.Filter/>
+    <content.Cart queryCart={queryCart}/>
   </>);
 }
 content.List = function ProductBrowserList (prop: PropList)
@@ -134,6 +119,71 @@ content.Filter = function ProductBrowserFilter ()
       <StyledFilterLabel>ตัวเลือก</StyledFilterLabel>
     </StyledFilter>
   );
+}
+content.Cart = function ProductBrowserCart (prop: PropCart)
+{
+  const [count, setCount] = react.useState ("");
+
+  react.useEffect (() =>
+  {
+    const query = prop.queryCart;
+    const data = query.data;
+
+    if (!data) {
+      setCount ("0");
+      return;
+    }
+    setCount (String (data.length));
+  },
+  [prop.queryCart]);
+
+  return (
+    <StyledCart>
+      <StyledCartLabel>{count}</StyledCartLabel>
+      <ShoppingBasket/>
+    </StyledCart>
+  );
+}
+
+
+/**
+ * โครงสร้างข้อมูลที่ส่วนประกอบต้องการใช้งาน: รายการสินค้า
+*/
+interface PropList
+{
+  /**
+   * ระบบดึงข้อมูลรายการสินค้า
+  */
+  queryList: UseQueryResult<ProductBasicFetch []>;
+}
+/**
+ * โครงสร้างข้อมูลที่ส่วนประกอบต้องการใช้งาน: ตัวสินค้า
+*/
+interface PropListItem
+{
+  /**
+   * รหัสสินค้า
+  */
+  id: number;
+  /**
+   * ชื่อสินค้า
+  */
+  name: string;
+  /**
+   * ปกสินค้า
+  */
+  artwork: string | undefined;
+  /**
+   * ทำงานเมื่อผู้ใช้กดเลือกสินค้า
+  */
+  onClick: (id: number) => void;
+}
+interface PropCart
+{
+  /**
+   * ระบบดึงข้อมูลตะกร้าสินค้า
+  */
+  queryCart: UseQueryResult<CartFetch []>;
 }
 
 const SyledList = styled.div`
@@ -262,6 +312,36 @@ const StyledFilterLabel = styled.label`
   display: block;
   font-size: 1.25rem;
   font-weight: normal;
+`;
+const StyledCart = styled.button`
+  position: absolute;
+  inset: auto 64px 64px auto;
+  width: 64px;
+  height: 64px;
+  padding: 0px;
+  margin: 0px;
+  border-radius: 100%;
+
+  & > img,
+  & > svg
+  {
+    display: inline-block;
+    min-width: 32px;
+    min-height: 32px;
+    vertical-align: middle;
+  }
+`;
+const StyledCartLabel = styled.label`
+  position: absolute;
+  inset: auto -8px 0px auto;
+  font-size: 1rem;
+
+  width: 24px;
+  height: 24px;
+  text-align: center;
+
+  background-color: #FF7373;
+  border-radius: 100%;
 `;
 
 /**

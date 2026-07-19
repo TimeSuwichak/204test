@@ -20,7 +20,7 @@ content.getController = () =>
 /**
  * 
 */
-content.getRouter = () =>
+content.getRoute = () =>
 {
     const router = http.router ();
     const authUser = controlAuth.validate ({
@@ -32,10 +32,22 @@ content.getRouter = () =>
     });
     const authManager = controlAuth.validateOnlyManager ();
 
-    router.get ("/:id", control.get);
-    router.put ("/:id", authUser, control.put);
-    router.post ("/", authManager, control.post);
-    router.delete ("/:id", authManager, control.delete);
+    router.get ("/:id", control.getBasic);
+    router.put ("/:id", authUser, control.putBasic);
+    router.post ("/", authManager, control.postBasic);
+    router.delete ("/:id", authManager, control.deleteBasic);
+
+    return router;
+}
+content.getRouteCart = () =>
+{
+    const router = http.router ();
+    const authUser = controlAuth.validateLeastUser ();
+
+    router.get ("/", authUser, control.getCart);
+    router.put ("/:id", authUser, control.putCart);
+    router.post ("/", authUser, control.postCart);
+    router.delete ("/:id", authUser, control.deleteCart);
 
     return router;
 }

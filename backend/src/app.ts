@@ -10,11 +10,7 @@ import sql                  from "#core/sql.ts";
 
 import routerAuth           from "#router/auth.ts";
 import routerAccount        from "#router/account.ts";
-import routerProdCategory   from "#router/product.category.ts";
-import routerProdComment    from "#router/product.comment.ts";
-import routerProdReview     from "#router/product.review.ts";
-import routerProdStock      from "#router/product.stock.ts";
-import routerProd           from "#router/product.ts";
+import routerProduct        from "#router/product.ts";
 
 import modelAuth            from "#model/auth.ts";
 import modelAccount         from "#model/account.ts";
@@ -42,12 +38,13 @@ content.start = async () =>
     await http.init (() =>
     {
         http.routeTo ("/auth", routerAuth.getRouteChallenge ());
-        http.routeTo ("/account", routerAccount.getRouter ());
-        http.routeTo ("/product-category", routerProdCategory.getRouter ());
-        http.routeTo ("/product-comment", routerProdComment.getRouter ());
-        http.routeTo ("/product-review", routerProdReview.getRouter ());
-        http.routeTo ("/product-stock", routerProdStock.getRouter ());
-        http.routeTo ("/product", routerProd.getRouter ());
+        http.routeTo ("/account", routerAccount.getRoute ());
+        http.routeTo ("/account-cart", routerAccount.getRouteCart ());
+        http.routeTo ("/product", routerProduct.getRoute ());
+        http.routeTo ("/product-category", routerProduct.getRouteCategory ());
+        http.routeTo ("/product-comment", routerProduct.getRouteComment ());
+        http.routeTo ("/product-review", routerProduct.getRouteReview ());
+        http.routeTo ("/product-stock", routerProduct.getRouteStock ());
         return;
     });
     await webSocket.init ();
