@@ -1,3 +1,17 @@
+
+import ctx          from "#context/common.ts";
+import ctxUI        from "#context/common.ui.ts";
+import ctxCustomer  from "#context/customer.ts";
+import apiAuth      from "#util/api.auth.ts";
+import navigation   from "#util/common.navigation.ts";
+import branding     from "#asset/image/favicon.ico";
+
+import MenuContext  from "#component/menu.context.tsx";
+import Settings     from "#component/settings.tsx";
+import NavBar       from "#component/navbar.tsx";
+import Cart         from "#component/customer.cart";
+
+import { useRef } from "react";
 import { Outlet } from "react-router";
 import 
 { 
@@ -6,36 +20,31 @@ import
 } 
 from "lucide-react";
 
-import ctx        from "#context/common.ts";
-import ctxUI      from "#context/common.ui.ts";
-import apiAuth    from "#util/api.auth.ts";
-import navigation from "#util/common.navigation.ts";
-import branding   from "#asset/image/favicon.ico";
-
-import MenuContext from "#component/menu.context.tsx";
-import Settings from "#component/settings.tsx";
-import NavBar from "#component/navbar.tsx";
-
 
 /**
  * ส่วนประกอบแสดงผลเส้นทางของลูกค้า
 */
-const content = function ()
+const content = function Customer ()
 {
+  const cart = useRef (ctxCustomer.defCart ());
+
   return (
   <>
+    <ctxCustomer.ProviderCart value={cart.current}>
+      <Outlet/>
+      <content.NavBar/>
 
-    <Outlet/>
-    <content.NavBar/>
-
-    <MenuContext.Provider/>
-    <Settings.Provider/>
+      <Cart.Provider/>
+      <Settings.Provider/>
+      <MenuContext.Provider/>
+    </ctxCustomer.ProviderCart>
   </>
   );
 }
 content.NavBar = function PresetNavBar ()
 {
   const menuCtx = ctxUI.useMenuContext ();
+  const cartCtx = ctxCustomer.useCart ();
   const settings = ctxUI.useSettings ();
   const auth = ctx.useAuth ();
   const authSigned = ctx.authSigned (auth);
@@ -49,6 +58,9 @@ content.NavBar = function PresetNavBar ()
   {
     const onCart = () =>
     {
+      menuCtx.setVisible (false);
+      cartCtx.setVisible (true);
+      cartCtx.setClose (() => { cartCtx.setVisible (false); });
       return;
     }
     const onShipping = () =>

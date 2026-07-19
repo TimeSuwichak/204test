@@ -79,7 +79,7 @@ content.getStream = async function (request: Request, response: Response)
             response.end ();
             return;
         }
-        const result = await model.getStream (paramId, start, end);
+        const result = await model.createStream (paramId, start, end);
 
         if (rangeAvailable)
         {

@@ -1,7 +1,11 @@
 import logging          from "#core/log.ts";
+import objectReader     from "#core/object.reader.ts";
 import modelAuth        from "#model/auth.ts";
 import modelAccount     from "#model/account.ts";
 import modelProd        from "#model/product.ts";
+
+import path from "node:path";
+import fs from "node:fs";
 
 import { type BasicId as DataAuthId } from "#model/auth.ts";
 import { type BasicId as DataAccountId } from "#model/account.ts";
@@ -22,27 +26,22 @@ content.setupAccount = async () =>
 {
     log.info ("Setting up test accounts ...");
 
-    await content.setupAccountFor (
-        "Admin", "12345678", 
-        "Administrator", modelAccount.ROLE_MANAGER
-    );
-    await content.setupAccountFor (
-        "Staff", "12345678", 
-        "Staff", modelAccount.ROLE_STAFF
-    );
-    await content.setupAccountFor (
-        "User", "12345678", 
-        "User", modelAccount.ROLE_USER
-    );
-    await content.setupAccountFor (
-        "ItsJeremie", "12345678", 
-        "ItsJeremie", modelAccount.ROLE_USER
-    );
-    await content.setupAccountFor (
-        "Tess", "12345678", 
-        "Tess Tester", modelAccount.ROLE_DEVELOPER
-    );
+    const cwd = process.cwd ();
+    const filename = "account.json";
+    const location = path.resolve (path.join (cwd, "data", "sample", filename));
+    const json = objectReader (JSON.parse (fs.readFileSync (location, "utf8")));
+    const item = json.requireArrayRecord ("Item");
 
+    for (const x of item)
+    {
+        const read = objectReader (x);
+        const id = read.requireString ("Id");
+        const pwd = read.requireString ("Password");
+        const name = read.requireString ("Name");
+        const role = read.requireInteger ("Role");
+
+        await content.setupAccountFor (id, pwd, name, role);
+    }
     log.info ("Setting up test accounts completed");
     return;
 }
@@ -50,31 +49,23 @@ content.setupProduct = async () =>
 {
     log.info ("Setting up test products ...");
 
-    await content.setupProductFor (
-        "Battlefield 1", 
-        `Battlefield 1 is a 2016 first-person shooter game developed by DICE 
-        and published by Electronic Arts. It is the fifteenth installment in 
-        the Battlefield series. It was released for PlayStation 4, 
-        Microsoft Windows, and Xbox One in October 2016.`,
-        1099
-    );
-    await content.setupProductFor (
-        "Dying Light",
-        `Dying Light is a 2015 survival horror video game developed 
-         by Techland and originally published by Warner Bros. Interactive 
-         Entertainment. The game's story follows undercover agent 
-         Kyle Crane who  is sent to infiltrate a quarantine zone in a 
-         fictional Middle Eastern city called Harran.`,
-        748
-    );
-    await content.setupProductFor (
-        "Dying Light 2",
-        `Dying Light 2 Stay Human is a 2022 action role-playing survival horror 
-        game developed and published by Techland. The game is a sequel to Dying 
-        Light, and was released for PlayStation 4, PlayStation 5, Windows, Xbox 
-        One, and Xbox Series X/S on February 4, 2022.`,
-        1899
-    );
+    const cwd = process.cwd ();
+    const filename = "product.json";
+    const location = path.resolve (path.join (cwd, "data", "sample", filename));
+    const json = objectReader (JSON.parse (fs.readFileSync (location, "utf8")));
+    const item = json.requireArrayRecord ("Item");
+
+    for (const x of item)
+    {
+        const read = objectReader (x);
+        const name = read.requireString ("Name");
+        const desc = read.requireString ("Description");
+        const price = read.requireFloat ("Price");
+        // const priceCode = read.requireInteger ("PriceCode");
+
+        await content.setupProductFor (name, desc, price);
+    }
+
     log.info ("Setting up test products completed");
     return;
 }

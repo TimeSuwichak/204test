@@ -83,8 +83,8 @@ content.getBasicList = async (option ?: BasicFetchOption) =>
     const param: InputValue = [
         ... whereParam
     ];
-    console.log (cmd);
-    console.log (param);
+    // console.log (cmd);
+    // console.log (param);
 
     const query = await sql.select (cmd, param);
     const item: BasicFetch [] = query.map ((x) =>
@@ -631,7 +631,7 @@ content.readBasic = (column: Record<string, unknown>) =>
         price: reader.requireFloat ("Price"),
         priceCode: reader.requireInteger ("PriceCode"),
         platform: reader.requireInteger ("Platform"),
-        artwork: reader.requireString ("Artwork")
+        cover: reader.requireString ("Cover")
     };
     return result;
 }
@@ -741,7 +741,7 @@ export interface BasicFetch
     /**
      * รูปปกเกม
     */
-    artwork: string;
+    cover: string;
 }
 export interface BasicFetchOption
 {

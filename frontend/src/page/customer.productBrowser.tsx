@@ -1,7 +1,8 @@
 import react      from "react";
 import styled     from "styled-components";
 
-import cmmCtx from "#context/common.ts";
+import ctx from "#context/common.ts";
+import ctxCustomer from "#context/customer.ts";
 import cmmNavigation from "#util/common.navigation.ts";
 import apiAccount from "#util/api.account.ts";
 import apiProduct from "#util/api.product.ts";
@@ -9,7 +10,7 @@ import apiProduct from "#util/api.product.ts";
 import { useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { BasicFetch as ProductBasicFetch } from "#util/api.product.ts";
 import type { CartFetch } from "#util/api.account.ts";
@@ -23,7 +24,7 @@ const content = function ProductBrowser ()
 {
   const [serachParam] = useSearchParams ();
   const search = serachParam.get ("search");
-  const auth = cmmCtx.useAuth ();
+  const auth = ctx.useAuth ();
 
   const queryList = useQuery ({
     queryKey: ["Product", "GetBasicByList"],
@@ -72,7 +73,7 @@ content.List = function ProductBrowserList (prop: PropList)
       const key = String (x.id);
       const id = x.id;
       const name = x.name;
-      const artwork = (x.artwork.length > 0) ? x.artwork : undefined;
+      const artwork = (x.cover.length > 0) ? x.cover : undefined;
 
       return <content.ListItem 
         key={key}
@@ -122,6 +123,7 @@ content.Filter = function ProductBrowserFilter ()
 }
 content.Cart = function ProductBrowserCart (prop: PropCart)
 {
+  const cart = ctxCustomer.useCart ();
   const [count, setCount] = react.useState ("");
 
   react.useEffect (() =>
@@ -137,8 +139,17 @@ content.Cart = function ProductBrowserCart (prop: PropCart)
   },
   [prop.queryCart]);
 
+  const onOpenCart = (event: MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    cart.setVisible (true);
+    cart.setClose (() => { cart.setVisible (false); });
+  }
+
   return (
-    <StyledCart>
+    <StyledCart onClick={onOpenCart}>
       <StyledCartLabel>{count}</StyledCartLabel>
       <ShoppingBasket/>
     </StyledCart>

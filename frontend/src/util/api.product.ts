@@ -128,7 +128,7 @@ content.readBasic = (reader: ObjectReader) : BasicFetch =>
         price: reader.requireFloat ("Price"),
         priceCode: reader.requireInteger ("PriceCode"),
         platform: reader.requireInteger ("Platform"),
-        artwork: reader.requireString ("Artwork"),
+        cover: reader.requireString ("Cover"),
     };
 }
 content.readBasicList = (reader: ObjectReader) : BasicFetch [] =>
@@ -325,7 +325,7 @@ export interface BasicFetch
     /**
      * รูปปกเกม
     */
-    artwork: string;
+    cover: string;
 }
 export interface BasicFetchOption
 {

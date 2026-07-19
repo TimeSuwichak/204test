@@ -10,6 +10,10 @@ import nodeFsa       from "node:fs/promises";
 */
 let PATH: string;
 /**
+ * ที่จัดเก็บข้อมูลชั่วคราวก่อนนำไปเก็บยังถาวร
+*/
+let PATH_TEMP: string;
+/**
  * ระบบจัดการข้อมูลจัดเก็บ
 */
 const content = () =>
@@ -22,12 +26,16 @@ const content = () =>
 content.init = async () =>
 {
     const root = process.cwd ();
-    const relative = dotenv.getString ("B_STORAGE_PATH", "/data/storage");
-    const resolved = nodePath.resolve (nodePath.join (root, relative));
+    const rel = dotenv.getString ("B_STORAGE_PATH", "/data/storage");
+    const relTemp = dotenv.getString ("B_STORAGE_PATH_TEMP", "/data/temp");
+    const resolved = nodePath.resolve (nodePath.join (root, rel));
+    const resolvedTemp = nodePath.resolve (nodePath.join (root, relTemp));
 
     PATH = resolved;
+    PATH_TEMP = resolvedTemp;
 
     await nodeFsa.mkdir (PATH).catch (() => { return; })
+    await nodeFsa.mkdir (PATH_TEMP).catch (() => { return; })
     return Promise.resolve ();
 }
 /**
@@ -44,7 +52,11 @@ content.getJoin = (other: string) =>
 {
     return nodePath.resolve (nodePath.join (PATH, other));
 }
-content.getStream = async (path: string, start: number, end: number) =>
+content.createId = () =>
+{
+    return;
+}
+content.createStream = async (path: string, start: number, end: number) =>
 {
     const resId = path;
     const resPath = content.getJoin (resId);
@@ -55,7 +67,7 @@ content.getStream = async (path: string, start: number, end: number) =>
     }
     const stat = await nodeFsa.stat (resPath).catch ((e: unknown) =>
     {
-        throw new error.NotFound (undefined, { cause: e });
+        throw new error.NotFound (e);
     })
     .then ((x) =>
     {

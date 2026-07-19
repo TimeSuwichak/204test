@@ -63,7 +63,7 @@ content.getBasic = (request: Request, response: Response) =>
             "Price": x.price,
             "PriceCode": x.priceCode,
             "Platform": x.platform,
-            "Artwork": x.artwork
+            "Cover": x.cover
         });
         response.end ();
     })
@@ -108,7 +108,7 @@ content.getBasicList = (request: Request, response: Response) =>
                     "Price": x.price,
                     "PriceCode": x.priceCode,
                     "Platform": x.platform,
-                    "Artwork": x.artwork
+                    "Cover": x.cover
                 }
             })
         });

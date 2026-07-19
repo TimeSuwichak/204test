@@ -2,16 +2,15 @@ import react from "react";
 
 interface ContextCart
 {
-  item: ContextCartItem [];
+    setVisible: (value: boolean) => void;
+    setClose: (callback: () => void) => void;
 }
-interface ContextCartItem
-{
-  product: number;
-}
-const initCart = () : ContextCart =>
+
+const defCart = () : ContextCart =>
 {
     return {
-      item: []
+      setVisible: () => { return; },
+      setClose: () => { return; }
     };
 }
 const useCart = () =>
@@ -20,11 +19,10 @@ const useCart = () =>
 }
 
 const Content = () => { return; }
-const ContextCart = react.createContext<ContextCart> (initCart ());
+const ContextCart = react.createContext<ContextCart> (defCart ());
 
-Content.Provider = ContextCart.Provider;
-Content.Consumer = ContextCart.Consumer;
+Content.ProviderCart = ContextCart.Provider;
+Content.defCart = defCart;
 Content.useCart = useCart;
-Content.initCart = initCart;
 
 export default Content;

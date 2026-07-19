@@ -1,0 +1,38 @@
+{
+    "Item": [{
+        "Name": "Battlefield 1",
+        "Description": "Battlefield 1 is a 2016 first-person shooter game developed by DICE and published by Electronic Arts. It is the fifteenth installment in the Battlefield series. It was released for PlayStation 4, Microsoft Windows, and Xbox One in October 2016.",
+        "Price": 1099,
+        "PriceCode": 1,
+        "Platform": 1,
+        "Cover": "./artwork.battlefield_1.jpg",
+        "Category": []
+    },
+    {
+        "Name": "Dying Light",
+        "Description": "Dying Light is a 2015 survival horror video game developed by Techland and originally published by Warner Bros. Interactive Entertainment. The game's story follows undercover agent Kyle Crane who  is sent to infiltrate a quarantine zone in a fictional Middle Eastern city called Harran.",
+        "Price": 1099,
+        "PriceCode": 1,
+        "Platform": 1,
+        "Cover": "./cover.dying_light.jpg",
+        "Category": []
+    },
+    {
+        "Name": "Dying Light 2",
+        "Description": "Dying Light 2 Stay Human is a 2022 action role-playing survival horror game developed and published by Techland. The game is a sequel to Dying Light, and was released for PlayStation 4, PlayStation 5, Windows, Xbox One, and Xbox Series X/S on February 4, 2022.",
+        "Price": 1899,
+        "PriceCode": 1,
+        "Platform": 1,
+        "Cover": "./cover.dying_light_2.jpg",
+        "Category": []
+    },
+    {
+        "Name": "Cyberpunk 2077",
+        "Description": "Cyberpunk 2077 is a 2020 action role-playing game developed by CD Projekt Red and published by CD Projekt. Based on Mike Pondsmith's Cyberpunk tabletop game series, the plot is set in the fictional metropolis of Night City in California, within the dystopian Cyberpunk universe. The player assumes the role of V (voiced by Gavin Drea or Cherami Leigh depending on the player character's gender), a mercenary who gets reluctantly imbued with a cybernetic \"biochip\" containing an engram of legendary rockstar and terrorist Johnny Silverhand (portrayed by Keanu Reeves). As Johnny's consciousness begins overwriting V's own, the two must work together to separate from each other and save V's life whilst confronting the Arasaka Corporation, a powerful megacorporation acting as the de facto ruler of the city.",
+        "Price": 1799,
+        "PriceCode": 1,
+        "Platform": 1,
+        "Cover": "./cover.cyberpunk_2077.jpg",
+        "Category": []
+    }]
+}

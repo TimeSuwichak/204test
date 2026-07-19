@@ -1,0 +1,32 @@
+{
+    "Item": [{
+        "Id": "Admin",
+        "Password": "12345678",
+        "Role": 4,
+        "Name": "Administrator"
+    },
+    {
+        "Id": "Staff",
+        "Password": "12345678",
+        "Role": 3,
+        "Name": "Manager"
+    },
+    {
+        "Id": "User",
+        "Password": "12345678",
+        "Role": 2,
+        "Name": "User"
+    },
+    {
+        "Id": "ItsJeremie",
+        "Password": "12345678",
+        "Role": 2,
+        "Name": "ItsJeremie"
+    },
+    {
+        "Id": "Tess",
+        "Password": "12345678",
+        "Role": 5,
+        "Name": "Tess Tester"
+    }]
+}
