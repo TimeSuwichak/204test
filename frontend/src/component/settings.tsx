@@ -1,15 +1,17 @@
-import react from "react";
-import styled from "styled-components";
-import context from "#context/common.ui.ts";
-import MenuBar from "#component/menu.bar.tsx";
+import react    from "react";
+import styled   from "styled-components";
+import ctx      from "#context/common.ts";
+import ctxUI    from "#context/common.ui.ts";
+import apiAccount from "#util/api.account.ts";
+
+import MenuBar  from "#component/menu.bar.tsx";
+
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import
 {
-  UserIcon,
-  UserLock,
-  Container,
-  Coins,
-  ArrowLeftCircleIcon,
-  XIcon
+  UserIcon, UserLock, Container, Coins,
+  ArrowLeftCircleIcon, XIcon
 }
 from "lucide-react";
 
@@ -262,6 +264,23 @@ content.Content = function SettingsContent (prop: PropContent)
 content.ContentGeneral = function SettingsContentGeneral
   (prop: PropContentGeneral) : react.ReactElement
 {
+  const [name, setName] = useState ("");
+
+  const auth = ctx.useAuth ();
+  const { data } = useQuery ({
+    queryKey: ["Account", "Basic"],
+    queryFn: () => apiAccount.getBasic (auth.session)
+  });
+
+  useEffect (() =>
+  {
+    if (data)
+    {
+      setName (data.name);
+    }
+  },
+  [data]);
+
   return (
     <react.Activity mode={prop.visible ? "visible" : "hidden"}>
       <content.TemplateBackButton 
@@ -273,7 +292,7 @@ content.ContentGeneral = function SettingsContentGeneral
           <label>ชื่อผู้ใช้</label>
         </div>
         <div>
-          <label>iKla47</label>
+          <label>{name}</label>
           <button>เปลี่ยนชื่อ</button>
         </div>
       </StyleTemplateField>
@@ -388,7 +407,7 @@ content.ContentPayment = function SettingsContentPayment
 }
 content.Provider = function SettingsProvider ()
 {
-  const ctx = context.useSettings ();
+  const ctx = ctxUI.useSettings ();
   const onClose = react.useRef<(() => void)> (undefined);
   const [visible, setVisible] = react.useState (false);
 

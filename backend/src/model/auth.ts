@@ -193,7 +193,8 @@ content.challengeFacebook = async (
 
         const accountId = await modelAccount.create ({
             name: name,
-            role: modelAccount.ROLE_USER
+            role: modelAccount.ROLE_USER,
+            icon: icon
         });
         await content.createDbFacebook (userId, accountId);
 

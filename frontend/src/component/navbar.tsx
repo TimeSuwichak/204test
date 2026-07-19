@@ -1,6 +1,12 @@
 import react from "react";
 import styled from "styled-components";
-import ctx from "#context/common.ui.ts";
+import ctx from "#context/common.ts";
+import ctxUI from "#context/common.ui.ts";
+
+import apiAccount from "#util/api.account.ts";
+import apiStorage from "#util/api.storage.ts";
+
+import { useQuery } from "@tanstack/react-query";
 
 import { type IrNavBar } from "#context/common.ui.ts";
 import { CircleUser } from "lucide-react";
@@ -105,7 +111,7 @@ interface PropProfile
   /**
    * รูปโปรไฟล์
   */
-  icon ?:  string | React.ComponentType<unknown> | React.ReactElement;
+  icon ?:  string | undefined;
   /**
    * คำสั่งที่ทำงานเมื่อผู้ใช้กด
   */
@@ -174,9 +180,9 @@ const content = function NavBar (prop: PropContent)
 
   return (
     <Root ref={reference}>
-      <ctx.ProviderIrNavBar value={context}>
+      <ctxUI.ProviderIrNavBar value={context}>
         {prop.children}
-      </ctx.ProviderIrNavBar>
+      </ctxUI.ProviderIrNavBar>
     </Root>
   );
 }
@@ -185,7 +191,7 @@ const content = function NavBar (prop: PropContent)
 */
 content.Branding = function NavBarBranding (prop: PropBranding)
 {
-  const context = ctx.useIrNavBar ();
+  const context = ctxUI.useIrNavBar ();
   const readable = context.width >= 1268;
 
   /**
@@ -240,26 +246,12 @@ content.Search = function NavBarSearch (prop: PropSearch)
 */
 content.Profile = function NavBarProfile (prop: PropProfile)
 {
-  const source = prop.icon ?? <CircleUser/>;
+  const auth = ctx.useAuth ();
+  const { data } = useQuery ({
+    queryKey: ["Account", "Basic"],
+    queryFn: () => apiAccount.getBasic (auth.session)
+  });
 
-  const Image = () =>
-  {
-    if (typeof source === 'string') 
-    {
-      return <img src={source} alt={""}/>;
-    }
-    if (react.isValidElement(source)) 
-    {
-      return source;
-    }
-
-    if (typeof source === 'function' || typeof source === 'object') 
-    {
-      const Component = source as React.ComponentType;
-      return <Component />;
-    }
-    return null;
-  }
   const onClick = (event: react.MouseEvent) =>
   {
     event.preventDefault ();
@@ -272,7 +264,11 @@ content.Profile = function NavBarProfile (prop: PropProfile)
 
   return (
     <Profile onClick={onClick}>
-      <Image/>
+      { !prop.icon && !data ? <CircleUser/> : <></>}
+      { !prop.icon && data ? 
+        <img src={apiStorage.getUrlStream (data.icon)}/> : <></>
+      }
+      {prop.icon ? <img src={prop.icon}/> : <></>}
     </Profile>
   );
 }
@@ -304,7 +300,7 @@ content.SignIn = function NavBarSignIn (prop: PropSignIn)
 */
 content.Menu = function NavBarMenu (prop: PropMenu)
 {
-  const context = ctx.useIrNavBar ();
+  const context = ctxUI.useIrNavBar ();
   const visible = prop.hideOnWidth ? (prop.hideOnWidth <= context.width) : true;
 
   return (
@@ -316,7 +312,7 @@ content.Menu = function NavBarMenu (prop: PropMenu)
 */
 content.MenuItem = function NavBarMenuItem (prop: PropMenuItem)
 {
-  const context = ctx.useIrNavBar ();
+  const context = ctxUI.useIrNavBar ();
   const visible = prop.hideOnWidth ? (prop.hideOnWidth <= context.width) : true;
   const source = prop.icon;
 

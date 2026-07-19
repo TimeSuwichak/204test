@@ -32,6 +32,9 @@ content.getRoute = () =>
     });
     const authManager = controlAuth.validateOnlyManager ();
 
+    router.get ("/", authUser, control.getBasic);
+    router.put ("/", authUser, control.putBasic);
+
     router.get ("/:id", control.getBasic);
     router.put ("/:id", authUser, control.putBasic);
     router.post ("/", authManager, control.postBasic);

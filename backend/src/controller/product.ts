@@ -583,7 +583,16 @@ content.postBasic = async (request: Request, response: Response) =>
 {
     const coverId = await modelStorage.createWriterId ();
     const form = formidable ({
+        multiples: false,
         uploadDir: modelStorage.getPath (),
+        filter: (part) =>
+        {
+            const isKey = part.name === "Cover";
+            const isImage = part.mimetype ? 
+                            part.mimetype.startsWith ("image/") : false;
+
+            return isKey && isImage;
+        },
         filename: (name, ext, part, form) =>
         {
             void name; void ext;
@@ -595,8 +604,9 @@ content.postBasic = async (request: Request, response: Response) =>
     
     try
     {
-        const [field] = await form.parse (request);
+        const [field, file] = await form.parse (request);
         const metadata = JSON.stringify (field ["Metadata"]?.at (0));
+        const cover = file ["Cover"]?.at (0);
         const reader = objectReader (metadata);
 
         input = 
@@ -606,7 +616,7 @@ content.postBasic = async (request: Request, response: Response) =>
             price: reader.requireInteger ("Price"),
             priceCode: reader.requireInteger ("PriceCode"),
             platform: reader.requireInteger ("Platform"),
-            cover: coverId
+            cover: cover?.newFilename ?? ""
         };
     }
     catch

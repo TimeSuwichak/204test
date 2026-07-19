@@ -95,6 +95,7 @@ content.updateBasic = (info: BasicUpdate) : Promise<void> =>
     [
         info.name ? "Name" : undefined,
         info.role ? "Role" : undefined,
+        info.icon ? "Icon" : undefined,
     ]
     .filter (x => x !== undefined)
     .join (" = ?, ")
@@ -105,6 +106,7 @@ content.updateBasic = (info: BasicUpdate) : Promise<void> =>
     [
         info.name,
         info.role,
+        info.icon,
         info.id
     ]
     .filter (x => x !== undefined);
@@ -115,16 +117,6 @@ content.updateBasic = (info: BasicUpdate) : Promise<void> =>
             throw new error.NotFound (`ไม่พบข้อมูลบัญชี: ${String (info.id)}`); 
         }
     });
-}
-/**
- * เปลี่ยนรูปโปรไฟล์ของบัญชีดังกล่าว
-*/
-content.updateIcon = async (key: BasicId, data: string | Uint8Array) =>
-{
-    void key;
-    void data;
-
-    return Promise.resolve ();
 }
 content.updateCart = async (info: CartUpdate)
     : Promise<void> =>
@@ -165,9 +157,9 @@ content.create = async (info: BasicCreate) : Promise<BasicId> =>
     try
     {
         const id = await ctx.insert (`
-            INSERT INTO Account (Name, Role)
-            VALUES (?, ?)`,
-            [info.name, info.role]
+            INSERT INTO Account (Name, Role, Icon)
+            VALUES (?, ?, ?)`,
+            [info.name, info.role, info.icon]
         ) as BasicId;
         await ctx.insert (`
             INSERT INTO AccountContact (Id)
@@ -344,6 +336,10 @@ export interface BasicUpdate
      * บทบาทของผู้ใช้
     */
     role ?: number | undefined;
+    /**
+     * รูปบัญชี
+    */
+    icon ?: string | undefined;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลลงในฐานข้อมูล
@@ -358,6 +354,10 @@ export interface BasicCreate
      * บทบาทของผู้ใช้
     */
     role: number;
+    /**
+     * ไอคอน
+    */
+    icon: string;
 }
 
 export interface CartFetch

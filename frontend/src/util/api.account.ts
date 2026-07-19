@@ -8,7 +8,6 @@
  * และการลงทะเบียนผู้ใช้โปรดดูที่โมดูล: api.auth.ts
  * 
 */
-import error        from "#util/common.error.ts";
 import objectReader from "#util/common.objectReader.ts";
 import common       from "#util/api.common.ts";
 
@@ -54,59 +53,21 @@ content.getCartList = async (session: string) =>
  * ปรับเปลี่ยนข้อมูลบัญชีของผู้ใช้ดังกล่าว
  * คำสั่งอาจต้องใช้บัญชีสิทธิ์ขั้นสูงในการปรับตัวแปรบางตัวแปร
 */
-content.setBasic = async (session: string, data: BasicUpdate) =>
+content.updateBasic = async (session: string, data: BasicUpdate) =>
 {
     const extension = data.id ? `/${String (data.id)}` : ``;
     const endpoint = `${content.NET_URL}/account${extension}`;
-
-    await common.postJson (session, endpoint, {
-        "Name": data.name,
-        "Role": data.role,
-    });
-}
-/**
- * สร้างอัพโหลดไอคอนให้กับบัญชี
-*/
-content.setBasicIcon = async (session: string, data: Blob, id ?: number) =>
-{
-    id = id ?? 0;
-
     const form = new FormData ();
 
-    form.append ("Source", data);
-
-    const endpoint = `${content.NET_URL}/account/${String (id)}/icon`;
-    const option: RequestInit = 
+    form.append ("Metadata", JSON.stringify ({
+        "Name": data.name,
+        "Role": data.role,
+    }));
+    if (data.icon)
     {
-        method: "PUT",
-        mode: "cors",
-        referrerPolicy: "strict-origin",
-        cache: "default",
-        headers:
-        [
-            ["Authorization", `Bearer ${session}`],
-        ],
-        body: form,
-        signal: AbortSignal.timeout (content.NET_TIMEOUT)
+        form.append ("Icon", data.icon);
     }
-    const response = await fetch (endpoint, option).catch ((e: unknown) =>
-    {
-        throw new error.Network (e);
-    });
-
-    switch (response.status)
-    {
-        case 200: break;
-        case 400: throw new error.BadData ();
-        case 401: throw new error.NotAuthorized ();
-        case 403: throw new error.Forbidden ();
-        case 404: throw new error.NotFound ();
-        case 429: throw new error.NetworkLimit ();
-        case 500: throw new error.NotAvailable ();
-        case 503: throw new error.NotAvailable ();
-        default:
-            throw new error.Unknown ();
-    }
+    await common.postForm (session, endpoint, form);
 }
 
 /**
@@ -155,7 +116,7 @@ content.NET_PREFIX = "/account";
 /**
  * เส้นทางนำหน้าหลังจากที่อยู่ของเซิร์ฟเวอร์ สำหรับระบบตะกร้า
 */
-content.NET_PREFIX = "/account-cart";
+content.NET_PREFIX_CART = "/account-cart";
 /**
  * ระหว่างเวลาการเชื่อมต่อกับเซิร์ฟเวอร์ก่อนที่จะตัดขาด
 */
@@ -167,7 +128,7 @@ content.NET_URL = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (co
 /**
  * ลิงค์เต็มของที่อยู่เซิร์ฟเวอร์ สำหรับระบบตะกร้า
 */
-content.NET_URL_CART = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (content.NET_PORT)}${content.NET_PREFIX}`;
+content.NET_URL_CART = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (content.NET_PORT)}${content.NET_PREFIX_CART}`;
 /**
  * บทบาทบัญชี: ผู้ใช้
 */
@@ -224,6 +185,10 @@ export interface BasicUpdate
      * ชื่อของผู้ใช้
     */
     name ?: string | undefined;
+    /**
+     * รูปโปรไฟล์
+    */
+    icon ?: File | undefined;
 }
 
 export interface CartFetch

@@ -1,9 +1,11 @@
+import formidable   from "formidable";
 import http         from "#core/http.ts";
 import logging      from "#core/log.ts"
 import error        from "#core/error.ts";
 import objectReader from "#core/object.reader.ts";
 import auth         from "#controller/auth.ts";
 import model        from "#model/account.ts";
+import modelStorage from "#model/storage.ts";
 import 
 { 
     type Request, 
@@ -38,10 +40,10 @@ const content = function ()
 */
 content.getBasic = (request: Request, response: Response) =>
 {
-    const accountId = Number (request.params ["id"]);
+    const authenticate = auth.validateResult (response);
+    const accountId = Number (request.params ["id"] ?? authenticate.id);
     
-    if (!Number.isSafeInteger (accountId) ||
-        !request.body)
+    if (!Number.isSafeInteger (accountId))
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -53,6 +55,7 @@ content.getBasic = (request: Request, response: Response) =>
         response.status (http.STATUS_OK);
         response.json ({
             "Id": x.id,
+            "Icon": x.icon,
             "Name": x.name,
             "Role": x.role,
             "Created": x.created,
@@ -101,9 +104,28 @@ content.getCart = (request: Request, response: Response) =>
  * @param request คำขอ
  * @param response คำตอบ
 */
-content.putBasic = (request: Request, response: Response) =>
+content.putBasic = async (request: Request, response: Response) =>
 {
     const accountId = Number (request.params ["id"]);
+    const iconId = await modelStorage.createWriterId ();
+    const form = formidable ({
+        multiples: false,
+        uploadDir: modelStorage.getPath (),
+        filter: (part) =>
+        {
+            const isKey = part.name === "Icon";
+            const isImage = part.mimetype ? 
+                            part.mimetype.startsWith ("image/") : false;
+
+            return isKey && isImage;
+        },
+        filename: (name, ext, part, form) =>
+        {
+            void name; void ext;
+            void part; void form;
+            return iconId;
+        },
+    });
     let input: BasicUpdate;
 
     if (!Number.isSafeInteger (accountId) ||
@@ -115,12 +137,17 @@ content.putBasic = (request: Request, response: Response) =>
     }
     try
     {
-        const reader = objectReader (request.body);
+        const [field, file] = await form.parse (request);
+        const metadata = JSON.stringify (field ["Metadata"]?.at (0));
+        const icon = file ["Icon"]?.at (0);
+        const reader = objectReader (metadata);
+        
         input = 
         {
             id: accountId,
             name: reader.optionalString ("Name"),
             role: reader.optionalInteger ("Role"),
+            icon: icon?.newFilename ?? ""
         };
     }
     catch

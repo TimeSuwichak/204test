@@ -101,8 +101,13 @@ content.createBasic = async (session: string, data: BasicCreate) :
         "Description": data.description,
         "Price": data.price,
         "PriceCode": data.priceCode,
+        "Platform": data.platform,
     }));
-    form.append ("Cover", data.cover);
+
+    if (data.cover)
+    {
+        form.append ("Cover", data.cover);
+    }
 
     const response = await common.postForm (session, endpoint, form);
     const reader = await common.toJson (response);
@@ -328,7 +333,7 @@ export interface BasicFetch
     */
     platform: number;
     /**
-     * รูปปกเกม
+     * รูปภาพปกสินค้า
     */
     cover: string;
 }
@@ -394,7 +399,7 @@ export interface BasicCreate
     /**
      * ปกสินค้า
     */
-    cover: Blob | File;
+    cover: Blob | File | undefined;
 }
 /**
  * โครงสร้างประกอบที่ได้รับหลังจากสร้างสินค้าแล้ว
