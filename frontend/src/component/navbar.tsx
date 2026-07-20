@@ -249,7 +249,8 @@ content.Profile = function NavBarProfile (prop: PropProfile)
   const auth = ctx.useAuth ();
   const { data } = useQuery ({
     queryKey: ["Account", "Basic"],
-    queryFn: () => apiAccount.getBasic (auth.session)
+    queryFn: () => apiAccount.getBasic (auth.session),
+    enabled: () =>  auth.session.length > 0
   });
 
   const onClick = (event: react.MouseEvent) =>
