@@ -300,13 +300,8 @@ content.ContentGeneral = function SettingsContentGeneral
         })
         .then (() => {
           void refetch ();
-        })
+        });
       }
-  }
-  const onIconRemove = (event: MouseEvent) =>
-  {
-    event.preventDefault ();
-    event.stopPropagation ();
   }
 
   useEffect (() =>
@@ -337,8 +332,6 @@ content.ContentGeneral = function SettingsContentGeneral
         }
         <StyleGeneralIconAction>
           <button onClick={onIconChange}>เปลี่ยนรูป</button>
-          <button onClick={onIconRemove} 
-            disabled={icon.length === 0}>นำรูปออก</button>
         </StyleGeneralIconAction>
       </StyleGeneralIcon>
       <StyleTemplateField>

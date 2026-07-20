@@ -176,10 +176,7 @@ content.NavBar = function PresetNavBar ()
     </NavBar>
   </>);
 }
-/**
- * แข็งวัตถุ (ความปลอดภัย)
-*/
-Object.freeze (content);
+
 /**
  * ส่งออกตัวแปร
 */

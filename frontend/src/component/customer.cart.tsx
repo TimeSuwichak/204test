@@ -7,7 +7,7 @@ import apiStorage   from "#util/api.storage.ts";
 
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { XIcon } from "lucide-react";
+import { XIcon, MinusIcon, PlusIcon } from "lucide-react";
 import type { MouseEvent, ReactNode } from "react";
 
 const content = function CustomerCart (prop: PropRoot)
@@ -38,21 +38,50 @@ content.Root = function CartRoot (prop: PropRoot)
           cover={apiStorage.getUrlStream (data?.cover ?? "")}/>
       );
   }
+  const Component2 = ({ productId }: {productId: number;}) =>
+  {
+      const { data } = useQuery ({
+        queryKey: ["Product", "Basic", productId],
+        queryFn: () => apiProduct.getBasic (auth.session, productId)
+      });
+
+      return (
+        <content.ReceiptItem name={data?.name ?? ""} quantity={
+          fetchItem?.find ((x) => x.productId === productId)?.quantity ?? 0
+        }/>
+      );
+  }
 
   const onRenderItem = () =>
   {
-    return (fetchItem ? fetchItem.map ((x) =>
+    return (!fetchItem ? [] : fetchItem.map ((x) =>
     {
       return <Component productId={x.productId} key={x.itemId}/>
-    }) : []);
+    }));
   }
+  const onRenderReceipt = () =>
+  {
+    return (!fetchItem ? [] : fetchItem.map ((x) =>
+    {
+      return <Component2 productId={x.productId} key={x.itemId}/>
+    }));
+  }
+
   return (
     <content.View visible={visible}>
       <content.ViewPanel>
         <content.Header onClose={prop.onClose}/>
-        <content.List>
-          {onRenderItem ()}
-        </content.List>
+        <content.Main>
+          <content.List>
+            {onRenderItem ()}
+          </content.List>
+          <content.MainSidebar>
+            <content.Receipt>
+              {onRenderReceipt ()}
+            </content.Receipt>
+            <button>สั่งซื้อสินค้า</button>
+          </content.MainSidebar>
+        </content.Main>
       </content.ViewPanel>
     </content.View>
   );
@@ -96,6 +125,22 @@ content.Header = function CartHeader (prop: PropHeader)
     </StyleHeader>
   )
 }
+content.Main = function CartMain (prop: PropMain)
+{
+  return (
+    <StyleMain>
+      {prop.children}
+    </StyleMain>
+  )
+}
+content.MainSidebar = function CartMainSidebar (prop: PropMainSidebar)
+{
+  return (
+    <StyleMainSidebar>
+      {prop.children}
+    </StyleMainSidebar>
+  )
+}
 content.List = function CartList (prop: PropList)
 {
   return (
@@ -109,6 +154,33 @@ content.ListItem = function CartListItem (prop: PropListItem)
       <StyleItemImg src={prop.cover}/>
       <StyleItemText>{prop.name}</StyleItemText>
     </StyleItem>
+  );
+}
+content.Receipt = function CartReceipt (prop: PropReceipt)
+{
+  return (
+    <StyleReceipt>
+      <StyleReceipLabel>รายการสินค้า</StyleReceipLabel>
+      <StyleReceiptItemContainer>
+        {prop.children}
+      </StyleReceiptItemContainer>
+    </StyleReceipt>
+  );
+}
+content.ReceiptItem = function CartReceiptItem (prop: PropReceiptItem)
+{
+  return (
+    <StyleReceiptItem>
+      <StyleReceiptItemText1>{prop.name}</StyleReceiptItemText1>
+      <StyleReceiptItemText2>{prop.quantity} จำนวน</StyleReceiptItemText2>
+      
+      <StyleReceiptItemBtn1>
+        <PlusIcon/>
+      </StyleReceiptItemBtn1>
+      <StyleReceiptItemBtn2>
+        <MinusIcon/>
+      </StyleReceiptItemBtn2>
+    </StyleReceiptItem>
   );
 }
 
@@ -182,6 +254,36 @@ const StyleHeader = styled.header`
   width: 100%;
   height: 64px;
 `;
+const StyleMain = styled.main`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+  height: 100%;
+
+  @media (max-width: 860px)
+  {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+`;
+const StyleMainSidebar = styled.div`
+  width: 25%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 8px;
+
+  @media (max-width: 1268px)
+  {
+    width: 324px;
+  }
+  @media (max-width: 860px)
+  {
+    width: 100%;
+  }
+`;
 const StyleHeaderText = styled.h1`
   font-size: 2rem;
   font-weight: normal;
@@ -204,10 +306,17 @@ const StyleHeaderClose = styled.button`
 `;
 
 const StyleItemContainer = styled.div`
+  width: 75%;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 8px;
+  padding: 0px 0px 8px 0px;
+
+  @media (max-width: 860px)
+  {
+    width: 100%;
+  }
 `;
 const StyleItem = styled.button`
 
@@ -277,6 +386,70 @@ const StyleItemImg = styled.img`
   -ms-user-select: none;
 `;
 
+const StyleReceipt = styled.div`
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-secondary);
+  border-radius: 4px;
+  padding: 8px 16px;
+`;
+const StyleReceipLabel = styled.label`
+  display: block;
+  font-size: 1.25rem;
+`;
+const StyleReceiptItemContainer = styled.div`
+  padding: 16px 0px;
+`;
+const StyleReceiptItem = styled.div`
+  width: 100%;
+  height: 48px;
+  position: relative;
+`;
+const StyleReceiptItemText1 = styled.label`
+  display: block;
+  width: 100%;
+  color: var(--text-primary);
+`;
+const StyleReceiptItemText2 = styled.label`
+  display: block;
+  width: 100%;
+  color: #adadad;
+`;
+const StyleReceiptItemBtn1 = styled.button`
+  position: absolute;
+  inset: 4px 4px 4px auto;
+  display: block;
+  width: 40px;
+  height: 40px;
+  padding: 0px;
+  margin: 0px;
+
+  & > img, & > svg
+  {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+`;
+const StyleReceiptItemBtn2 = styled.button`
+  position: absolute;
+  inset: 4px 48px 4px auto;
+  display: block;
+  width: 40px;
+  height: 40px;
+  padding: 0px;
+  margin: 0px;
+
+  & > img, & > svg
+  {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+`;
+
 interface PropRoot
 {
   visible ?: boolean;
@@ -295,6 +468,14 @@ interface PropHeader
 {
   onClose ?: () => void;
 }
+interface PropMain
+{
+  children ?: ReactNode;
+}
+interface PropMainSidebar
+{
+  children ?: ReactNode;
+}
 interface PropList
 {
   children ?: ReactNode;
@@ -304,7 +485,15 @@ interface PropListItem
   name: string;
   cover: string;
 }
-
+interface PropReceipt
+{
+  children ?: ReactNode;
+}
+interface PropReceiptItem
+{
+  name: string;
+  quantity: number;
+}
 /**
  * ส่งออกตัวแปร
 */
