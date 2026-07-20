@@ -46,7 +46,7 @@ content.getRouteList = () =>
 {
     const router = http.router ();
 
-    router.get ("/");
+    // router.get ("/");
 
     return router;
 }
