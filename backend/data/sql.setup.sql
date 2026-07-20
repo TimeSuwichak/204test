@@ -235,8 +235,8 @@ CREATE TABLE IF NOT EXISTS `project`.`AccountCart`
     `ProductId` BIGINT NOT NULL COMMENT 'สินค้าที่เลือก' ,
     `Quantity`  INT NOT NULL COMMENT 'จำนวนที่เลือก' ,
 
+    CONSTRAINT  UK_AccountCart UNIQUE (`AccountId`, `ProductId`) ,
     CONSTRAINT  PK_AccountCart_ItemId PRIMARY KEY (`ItemId`),
-    CONSTRAINT  UK_AccountCart_ItemId UNIQUE (`ItemId`) ,
     CONSTRAINT  FK_AccountCart_AccountId 
         FOREIGN KEY (`AccountId`) 
         REFERENCES Account (`Id`) ,
