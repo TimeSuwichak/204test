@@ -1,7 +1,9 @@
 import styled       from "styled-components";
 import ctx          from "#context/common.ts";
 import ctxCustomer  from "#context/customer.ts";
-import api          from "#util/api.account.ts";
+import apiAccount   from "#util/api.account.ts";
+import apiProduct   from "#util/api.product.ts";
+import apiStorage   from "#util/api.storage.ts";
 
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -19,19 +21,29 @@ content.Root = function CartRoot (prop: PropRoot)
 
   const { data: fetchItem } = useQuery ({
     queryKey: ["Cart"],
-    queryFn: () => api.getCartList (auth.session)
+    queryFn: () => apiAccount.getCartList (auth.session)
   });
+
+  const Component = ({ productId }: {productId: number;}) =>
+  {
+      const { data } = useQuery ({
+        queryKey: ["Product", "Basic", productId],
+        queryFn: () => apiProduct.getBasic (auth.session, productId)
+      });
+
+      return (
+        <content.ListItem 
+          key={productId} 
+          name={data?.name ?? ""}
+          cover={apiStorage.getUrlStream (data?.cover ?? "")}/>
+      );
+  }
 
   const onRenderItem = () =>
   {
     return (fetchItem ? fetchItem.map ((x) =>
     {
-      return (
-        <content.ListItem 
-          key={x.itemId} 
-          name={String (x.productId)}
-          cover=""/>
-      );
+      return <Component productId={x.productId} key={x.itemId}/>
     }) : []);
   }
   return (

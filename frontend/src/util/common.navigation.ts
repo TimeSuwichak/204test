@@ -11,6 +11,7 @@ const content = function ()
 content.PATH_INDEX = "/";
 content.PATH_ABOUT = "/about";
 content.PATH_AUTH = "/auth";
+content.PATH_CONSOLE = "/console";
 content.PATH_DOC = "/doc";
 content.PATH_PRODUCT = "/product";
 content.PATH_PRODUCT_BROWSER = "/product-browser";
@@ -38,6 +39,10 @@ content.toAbout = () =>
 content.toAuth = () =>
 {
     return router (content.PATH_AUTH);
+}
+content.toConsole = () =>
+{
+    return router (content.PATH_CONSOLE);
 }
 content.toDoc = () =>
 {

@@ -3,6 +3,7 @@ import ctx          from "#context/common.ts";
 import ctxUI        from "#context/common.ui.ts";
 import ctxCustomer  from "#context/customer.ts";
 import apiAuth      from "#util/api.auth.ts";
+import apiAccount   from "#util/api.account.ts";
 import navigation   from "#util/common.navigation.ts";
 import branding     from "#asset/image/favicon.ico";
 
@@ -12,11 +13,13 @@ import NavBar       from "#component/navbar.tsx";
 import Cart         from "#component/customer.cart";
 
 import { useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Outlet } from "react-router";
 import 
 { 
   ShoppingCart, BookMarked, Info, SettingsIcon, LogOut,
-  ShoppingBasket, Truck
+  ShoppingBasket, Truck,
+  SquareChevronRight
 } 
 from "lucide-react";
 
@@ -49,6 +52,11 @@ content.NavBar = function PresetNavBar ()
   const auth = ctx.useAuth ();
   const authSigned = ctx.authSigned (auth);
 
+  const { data: accountData } = useQuery ({
+    queryKey: ["Account", "Basic"],
+    queryFn: () => apiAccount.getBasic (auth.session)
+  });
+  
   const toHome = () => { void navigation.toIndex (); }
   const toProductBrowser = () => { void navigation.toProductBrowser (); }
   const toDoc = () => { navigation.toDoc (); }
@@ -67,6 +75,12 @@ content.NavBar = function PresetNavBar ()
     {
       menuCtx.setVisible (false);
       void navigation.toShipping ();
+      return;
+    }
+    const onConsole = () =>
+    {
+      menuCtx.setVisible (false);
+      void navigation.toConsole ();
       return;
     }
     const onSettings = () =>
@@ -88,6 +102,8 @@ content.NavBar = function PresetNavBar ()
       return;
     }
 
+    console.log (accountData);
+
     menuCtx.setChildren (<>
       <MenuContext.Item 
         text="ตะกร้าสินค้า" 
@@ -101,6 +117,17 @@ content.NavBar = function PresetNavBar ()
         text="การตั้งค่า" 
         icon={<SettingsIcon/>}
         onClick={onSettings}/>
+      { 
+      (accountData && 
+      (accountData.role == apiAccount.ROLE_STAFF ||
+        accountData.role == apiAccount.ROLE_MANAGER ||
+        accountData.role == apiAccount.ROLE_DEVELOPER)) ?
+        <MenuContext.Item 
+          text="คอนโซล" 
+          icon={<SquareChevronRight/>}
+          onClick={onConsole}/> :
+         <></>
+      }
       <MenuContext.Item 
         text="ลงชื่อออก" 
         icon={<LogOut/>}

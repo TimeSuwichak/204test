@@ -9,7 +9,7 @@
         "Id": "Staff",
         "Password": "12345678",
         "Role": 3,
-        "Name": "Manager"
+        "Name": "Staff"
     },
     {
         "Id": "User",

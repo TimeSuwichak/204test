@@ -23,13 +23,7 @@ content.getController = () =>
 content.getRoute = () =>
 {
     const router = http.router ();
-    const authUser = controlAuth.validate ({
-        allowedRole: [
-            modelAct.ROLE_USER,
-            modelAct.ROLE_MANAGER
-        ],
-        allowedRestriction: 0,
-    });
+    const authUser = controlAuth.validateLeastUser ();
     const authManager = controlAuth.validateOnlyManager ();
 
     router.get ("/", authUser, control.getBasic);

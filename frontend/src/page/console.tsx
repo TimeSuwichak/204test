@@ -9,10 +9,6 @@ import ContentOrder from "#component/staff.order.tsx";
 
 import
 {
-  UserIcon,
-  UserLock,
-  Container,
-  Coins,
   ArrowLeftCircleIcon,
   XIcon,
   Cuboid,
@@ -63,16 +59,6 @@ interface PropContentGeneral
   onBack ?: () => void;
 }
 interface PropContentSecurity
-{
-  visible ?: boolean;
-  onBack ?: () => void;
-}
-interface PropContentShipping
-{
-  visible ?: boolean;
-  onBack ?: () => void;
-}
-interface PropContentPayment
 {
   visible ?: boolean;
   onBack ?: () => void;
@@ -377,49 +363,6 @@ const StyleContent = styled.div`
   flex-grow: 1;
 `;
 
-const StyleTemplateHeader = styled.h1`
-  font-size: 2rem;
-  font-weight: normal;
-  margin: 0px 0px 16px 0px;
-`;
-const StyleTemplateHeader2 = styled.h2`
-  font-size: 1.25rem;
-  font-weight: normal;
-  margin: 16px 0px 16px 0px;
-`;
-const StyleTemplateField = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  height: 48px;
-
-  @media (max-width: 768px) 
-  {
-    min-height: 48px;
-    height: auto;
-  }
-
-  & > div:nth-child(1)
-  {
-    width: 100%;
-    flex-grow: 1;
-    /* background-color: var(--bg-secondary); */
-  }
-  & > div:nth-child(2)
-  {
-    display: inline-flex;
-    align-items: center;
-    justify-content: end;
-    width: 100%;
-    max-width: 324px;
-    gap: 16px;
-  }
-  & > div:nth-child(2) > button
-  {
-    width: 128px;
-  }
-`;
 const StyleTemplateBackButton = styled.button<{ $visible: boolean; }>`
   display: ${prop => prop.$visible ? "block" : "none"};
   width: 192px;

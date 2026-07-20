@@ -137,7 +137,7 @@ content.Cart = function ProductBrowserCart (prop: PropCart)
       setCount ("0");
       return;
     }
-    setCount (String (data.length));
+    setCount (String (data.reduce ((x, y) => x += y.quantity, 0)));
   },
   [prop.queryCart]);
 
@@ -346,15 +346,16 @@ const StyledCart = styled.button`
 `;
 const StyledCartLabel = styled.label`
   position: absolute;
-  inset: auto -8px 0px auto;
+  inset: auto -16px 0px auto;
   font-size: 1rem;
 
-  width: 24px;
-  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0px 4px;
   text-align: center;
 
   background-color: #FF7373;
-  border-radius: 100%;
+  border-radius: 4px;
 `;
 
 /**

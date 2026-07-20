@@ -17,6 +17,8 @@ import
     type BasicFetch,
     type BasicUpdate,
     type BasicCreate,
+
+    type CartFetch,
     type CartUpdate,
     type CartCreate
 }
@@ -86,16 +88,7 @@ content.getCart = (request: Request, response: Response) =>
     void model.getCartByAccount (accountId).then ((x) =>
     {
         response.status (http.STATUS_OK);
-        response.json ({
-            "Item": x.map ((y) =>
-            {
-                return {
-                    "ItemId": y.itemId,
-                    "ProductId": y.productId,
-                    "Quantity": y.quantity
-                }
-            })
-        });
+        response.json (content.writeCart (x));
         response.end ();
     });
 }
@@ -107,37 +100,31 @@ content.getCart = (request: Request, response: Response) =>
 */
 content.putBasic = async (request: Request, response: Response) =>
 {
-    const accountId = Number (request.params ["id"]);
-    const iconId = await modelStorage.createWriterId ();
-    const form = formidable ({
-        multiples: false,
-        uploadDir: modelStorage.getPath (),
-        filter: (part) =>
-        {
-            const isKey = part.name === "Icon";
-            const isImage = part.mimetype ? 
-                            part.mimetype.startsWith ("image/") : false;
-
-            return isKey && isImage;
-        },
-        filename: (name, ext, part, form) =>
-        {
-            void name; void ext;
-            void part; void form;
-            return iconId;
-        },
-    });
+    const authenticate = auth.validateResult (response);
+    const accountId = authenticate.id;
     let input: BasicUpdate;
-
-    if (!Number.isSafeInteger (accountId) ||
-        !request.body)
-    {
-        response.status (http.STATUS_BAD_REQUEST);
-        response.end ();
-        return;
-    }
+    
     try
     {
+        const iconId = await modelStorage.createWriterId ();
+        const form = formidable ({
+            multiples: false,
+            uploadDir: modelStorage.getPath (),
+            filter: (part) =>
+            {
+                const isKey = part.name === "Icon";
+                const isImage = part.mimetype ? 
+                                part.mimetype.startsWith ("image/") : false;
+    
+                return isKey && isImage;
+            },
+            filename: (name, ext, part, form) =>
+            {
+                void name; void ext;
+                void part; void form;
+                return iconId;
+            },
+        });
         const [field, file] = await form.parse (request);
         const metadata = JSON.stringify (field ["Metadata"]?.at (0));
         const icon = file ["Icon"]?.at (0);
@@ -175,7 +162,6 @@ content.putBasic = async (request: Request, response: Response) =>
         log.error (e);
         response.status (http.STATUS_SERVICE_UNAVAILABLE);
         response.end ();
-        return;
     });
 }
 content.putCart = (request: Request, response: Response) =>
@@ -386,7 +372,20 @@ content.writeBasic = (data: BasicFetch) =>
 content.writeBasicList = (data: BasicFetch []) =>
 {
     return {
-        "Item": data.map (x => content.writeBasic (x))
+        "Item": data.map ((x) => content.writeBasic (x))
+    }
+}
+content.writeCart = (data: CartFetch []) =>
+{
+    return {
+        "Item": data.map ((x) =>
+        {
+            return {
+                "ItemId": x.itemId,
+                "ProductId": x.productId,
+                "Quantity": x.quantity
+            }
+        })
     }
 }
 
