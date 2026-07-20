@@ -158,7 +158,8 @@ content.putBasicOf =  async (request: Request, response: Response) =>
         response.end ();
         return;
     }
-    if (Number.isSafeInteger (queryId) || queryId <= 0)
+
+    if (!Number.isSafeInteger (queryId) || queryId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -198,7 +199,7 @@ content.putCart = (request: Request, response: Response) =>
     const accountId = authenticate.id;
     const itemId = Number (request.params ["id"]);
 
-    if (Number.isSafeInteger (itemId) || itemId <= 0)
+    if (!Number.isSafeInteger (itemId) || itemId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -300,7 +301,7 @@ content.deleteCart = (request: Request, response: Response) =>
     const accountId = authenticate.id;
     const itemId =  Number (request.params ["id"]);
 
-    if (Number.isSafeInteger (itemId) || itemId <= 0)
+    if (!Number.isSafeInteger (itemId) || itemId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -343,14 +344,17 @@ content.inputPutBasic = async (
         },
     });
     const [field, file] = await form.parse (request);
-    const metadata = JSON.stringify (field ["Metadata"]?.at (0));
-    const icon = file ["Icon"]?.at (0);
-    const reader = objectReader (metadata);
+
+    const listMetadata = field ["Metadata"] ?? [];
+    const listFile = file ["Icon"] ?? [];
+
+    const meta = objectReader (JSON.parse (listMetadata.at (0) ?? ""));
+    const icon = listFile.at (0);
     
     return {
         id: accountId,
-        name: reader.optionalString ("Name"),
-        role: reader.optionalInteger ("Role"),
+        name: meta.optionalString ("Name"),
+        role: meta.optionalInteger ("Role"),
         icon: icon?.newFilename ?? ""
     };
 }

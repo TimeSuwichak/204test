@@ -16,6 +16,10 @@ content.getUrlStream = (id: string) =>
         id.startsWith ("https://")) {
         return id;
     }
+    if (id.length === 0)
+    {
+        return id;
+    }
     return `${content.NET_URL}/${id}`;
 }
 content.getMeta = async (id: string) =>

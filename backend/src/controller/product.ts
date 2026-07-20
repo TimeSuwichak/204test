@@ -1,11 +1,11 @@
-import formidable   from "formidable";
-import error        from "#core/error.ts";
-import http         from "#core/http.ts";
-import logging      from "#core/log.ts";
-import objectReader from "#core/object.reader.ts";
-import auth         from "#controller/auth.ts";
-import model        from "#model/product.ts";
-import modelStorage from "#model/storage.ts";
+import formidable       from "formidable";
+import error            from "#core/error.ts";
+import http             from "#core/http.ts";
+import logging          from "#core/log.ts";
+import objectReader     from "#core/object.reader.ts";
+import auth             from "#controller/auth.ts";
+import model            from "#model/product.ts";
+import modelStorage     from "#model/storage.ts";
 import
 {
     type Request,

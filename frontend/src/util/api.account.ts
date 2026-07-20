@@ -59,7 +59,7 @@ content.getCart = async (session: string) =>
 content.updateBasic = async (session: string, data: BasicUpdate) =>
 {
     const extension = data.id ? `/${String (data.id)}` : ``;
-    const endpoint = `${content.NET_URL}/account${extension}`;
+    const endpoint = `${content.NET_URL}${extension}`;
     const form = new FormData ();
 
     form.append ("Metadata", JSON.stringify ({
@@ -70,7 +70,7 @@ content.updateBasic = async (session: string, data: BasicUpdate) =>
     {
         form.append ("Icon", data.icon);
     }
-    await common.postForm (session, endpoint, form);
+    await common.putForm (session, endpoint, form);
 }
 /**
  * ปรับเปลี่ยนข้อมูลที่กำลังอยู่ในตะกร้าของบัญชีตนเอง

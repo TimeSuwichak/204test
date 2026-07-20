@@ -1,17 +1,19 @@
-import react    from "react";
-import styled   from "styled-components";
-import ctx      from "#context/common.ts";
-import ctxUI    from "#context/common.ui.ts";
+import react, { type ChangeEvent, type InputEvent, type MouseEvent, type SubmitEvent }      from "react";
+import styled     from "styled-components";
+import ctx        from "#context/common.ts";
+import ctxUI      from "#context/common.ui.ts";
 import apiAccount from "#util/api.account.ts";
+import apiStorage from "#util/api.storage.ts";
 
 import MenuBar  from "#component/menu.bar.tsx";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import
 {
   UserIcon, UserLock, Container, Coins,
-  ArrowLeftCircleIcon, XIcon
+  ArrowLeftCircleIcon, XIcon,
+  UserCircleIcon
 }
 from "lucide-react";
 
@@ -264,29 +266,81 @@ content.Content = function SettingsContent (prop: PropContent)
 content.ContentGeneral = function SettingsContentGeneral
   (prop: PropContentGeneral) : react.ReactElement
 {
+  const inputFile = useRef (HTMLInputElement.prototype);
   const [name, setName] = useState ("");
+  const [icon, setIcon] = useState ("");
 
   const auth = ctx.useAuth ();
-  const { data } = useQuery ({
+  const { data, refetch } = useQuery ({
     queryKey: ["Account", "Basic"],
     queryFn: () => apiAccount.getBasic (auth.session)
   });
+
+  const onIconChange = (event: MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    if (inputFile.current instanceof HTMLInputElement && 
+        inputFile.current != HTMLInputElement.prototype)
+    {
+      inputFile.current.click ();
+    }
+  }
+  const onIconChangeSubmit = (event: ChangeEvent<HTMLInputElement>) =>
+  {
+      event.preventDefault ();
+      event.stopPropagation ();
+
+      if (event.target.files)
+      {
+        const file = event.target.files [0];
+        void apiAccount.updateBasic (auth.session, {
+          icon: file
+        })
+        .then (() => {
+          void refetch ();
+        })
+      }
+  }
+  const onIconRemove = (event: MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+  }
 
   useEffect (() =>
   {
     if (data)
     {
       setName (data.name);
+      setIcon (apiStorage.getUrlStream (data.icon));
     }
   },
   [data]);
 
   return (
     <react.Activity mode={prop.visible ? "visible" : "hidden"}>
+      <input 
+        type="file" style={{ display: "none" }} ref={inputFile}
+        onChange={onIconChangeSubmit}
+        accept="image/png, image/jpeg"
+        multiple={false}/>
       <content.TemplateBackButton 
         visible={prop.onBack != undefined} 
         onClick={prop.onBack}/>
       <StyleTemplateHeader>ข้อมูลบัญชี</StyleTemplateHeader>
+      <StyleGeneralIcon>
+        {icon.length > 0 ? 
+         (<img src={icon}/>) :
+         (<UserCircleIcon/>)
+        }
+        <StyleGeneralIconAction>
+          <button onClick={onIconChange}>เปลี่ยนรูป</button>
+          <button onClick={onIconRemove} 
+            disabled={icon.length === 0}>นำรูปออก</button>
+        </StyleGeneralIconAction>
+      </StyleGeneralIcon>
       <StyleTemplateField>
         <div>
           <label>ชื่อผู้ใช้</label>
@@ -520,6 +574,42 @@ const StyleProvider = styled.div<{ $visible: boolean; }>`
   justify-content: center;
 `;
 
+const StyleGeneralIcon = styled.div`
+  width: 100%;
+  min-height: 160px;
+  max-height: 160px;
+  position: relative;
+
+  background-color: var(--bg-secondary);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 8px;
+
+  & > img,
+  & > svg
+  {
+    display: block;
+    min-width: 128px;
+    min-height: 128px;
+    max-width: 128px;
+    max-height: 128px;
+    border-radius: 100%;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+`;
+const StyleGeneralIconAction = styled.div`
+  position: absolute;
+  inset: 16px 16px 16px 192px;
+
+  & > button
+  {
+    display: block;
+    width: 128px;
+    margin-bottom: 4px;
+  }
+`;
+
 const StyleTemplateHeader = styled.h1`
   font-size: 2rem;
   font-weight: normal;
@@ -581,10 +671,6 @@ const StyleTemplateBackButton = styled.button<{ $visible: boolean; }>`
   }
 `;
 
-/**
- * แข็งวัตถุ (ความปลอดภัย)
-*/
-Object.freeze (content);
 /**
  * ส่งออกตัวแปร
 */

@@ -1,7 +1,7 @@
-import sql          from "#core/sql.ts";
-import error        from "#core/error.ts";
-import objectReader from "#core/object.reader.ts";
-import { type ObjectReader } from "#core/object.reader.ts";
+import sql                          from "#core/sql.ts";
+import error                        from "#core/error.ts";
+import objectReader                 from "#core/object.reader.ts";
+import { type ObjectReader }        from "#core/object.reader.ts";
 import { type BasicId as ProductId } from "#model/product.ts";
 
 /**
