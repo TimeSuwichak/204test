@@ -43,5 +43,14 @@
         "Platform": 1,
         "Cover": "./cover.elden_ring.jpg",
         "Category": []
+    },
+    {
+        "Name": "Icom",
+        "Description": "icom.",
+        "Price": 888,
+        "PriceCode": 1,
+        "Platform": 1,
+        "Cover": "./cover.icom.png",
+        "Category": []
     }]
 }
