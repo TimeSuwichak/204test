@@ -33,10 +33,6 @@ const content = function ProductBrowser ()
       search: search ?? undefined
     }),
   });
-  const queryCart = useQuery ({
-    queryKey: ["Cart"],
-    queryFn: () => apiAccount.getCart (auth.session)
-  });
 
   react.useEffect (() =>
   {
@@ -47,7 +43,7 @@ const content = function ProductBrowser ()
   return (<>
     <content.List queryList={queryList}/>
     <content.Filter/>
-    <content.Cart queryCart={queryCart}/>
+    <content.Cart/>
   </>);
 }
 content.List = function ProductBrowserList (prop: PropList)
@@ -117,13 +113,18 @@ content.List = function ProductBrowserList (prop: PropList)
     </SyledList>
   );
 }
+/**
+ * ส่วนประกอบแสดงชิ้นสินค้าในรายการสินค้า 
+*/
 content.ListItem = function ProductBrowserListItem (prop: PropListItem)
 {
-  const onClick = (event: react.MouseEvent) =>
+  /**
+   * ทำงานเมื่อผู้ใช้กดเลือกสินค้าดังกล่าว
+  */
+  const onClick = (event: MouseEvent) =>
   {
     event.preventDefault ();
     event.stopPropagation ();
-
     prop.onClick (prop.id);
   }
 
@@ -134,6 +135,9 @@ content.ListItem = function ProductBrowserListItem (prop: PropListItem)
     </StyledListItemContainer>
   )
 }
+/**
+ * ส่วนประกอบแสดงตัวเลือกการค้นหาสินค้า
+*/
 content.Filter = function ProductBrowserFilter ()
 {
   return (
@@ -142,25 +146,18 @@ content.Filter = function ProductBrowserFilter ()
     </StyledFilter>
   );
 }
-content.Cart = function ProductBrowserCart (prop: PropCart)
+/**
+ * ส่วนประกอบแสดงผลไอคอนตะกร้า
+*/
+content.Cart = function ProductBrowserCart ()
 {
   const cart = ctxCustomer.useCart ();
-  const [count, setCount] = react.useState ("");
+  const cartQuery = ctxCustomer.useCartQuery ();
 
-  react.useEffect (() =>
-  {
-    const query = prop.queryCart;
-    const data = query.data;
-
-    if (!data) {
-      setCount ("0");
-      return;
-    }
-    setCount (String (data.reduce ((x, y) => x += y.quantity, 0)));
-  },
-  [prop.queryCart]);
-
-  const onOpenCart = (event: MouseEvent) =>
+  /**
+   * ทำงานเมื่อผู้ใช้ต้องกดเปิดตะกร้าของตนเอง
+  */
+  const onClick = (event: MouseEvent) =>
   {
     event.preventDefault ();
     event.stopPropagation ();
@@ -169,8 +166,11 @@ content.Cart = function ProductBrowserCart (prop: PropCart)
     cart.setClose (() => { cart.setVisible (false); });
   }
 
+  const data = cartQuery.data;
+  const count = data ? data.reduce ((x, y) => x += y.quantity, 0) : 0;
+
   return (
-    <StyledCart onClick={onOpenCart}>
+    <StyledCart onClick={onClick}>
       <StyledCartLabel>{count}</StyledCartLabel>
       <ShoppingBasket/>
     </StyledCart>
@@ -209,13 +209,6 @@ interface PropListItem
    * ทำงานเมื่อผู้ใช้กดเลือกสินค้า
   */
   onClick: (id: number) => void;
-}
-interface PropCart
-{
-  /**
-   * ระบบดึงข้อมูลตะกร้าสินค้า
-  */
-  queryCart: UseQueryResult<CartFetch []>;
 }
 
 const SyledList = styled.div`
@@ -390,11 +383,6 @@ const StyledCartLabel = styled.label`
   background-color: #FF7373;
   border-radius: 4px;
 `;
-
-/**
- * แข็งวัตถุ (ความปลอดภัย)
-*/
-Object.freeze (content);
 /**
  * ส่งออกตัวแปร
 */

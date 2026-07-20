@@ -54,7 +54,12 @@ content.NavBar = function PresetNavBar ()
 
   const { data: accountData } = useQuery ({
     queryKey: ["Account", "Basic"],
-    queryFn: () => apiAccount.getBasic (auth.session)
+    queryFn: () => apiAccount.getBasic (auth.session),
+    enabled: apiAuth.checkSession ({
+      secret: auth.session,
+      issued: auth.sessionIssued,
+      expire: auth.sessionExpire
+    })
   });
   
   const toHome = () => { void navigation.toIndex (); }

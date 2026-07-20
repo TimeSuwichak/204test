@@ -557,7 +557,9 @@ export interface CommentCreate
     */
     text: string;
 }
-
+/**
+ * ข้อมูลประกอบการดึงสต็อกของสินค้า
+*/
 export interface StockFetch
 {
     /**
@@ -569,6 +571,9 @@ export interface StockFetch
     */
     quantity: number;
 }
+/**
+ * ข้อมูลประกอบการอัพเดทสต็อกของสินค้า
+*/
 export interface StockUpdate
 {
     /**

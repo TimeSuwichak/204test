@@ -93,8 +93,8 @@ content.checkSession = (input: Session) =>
     const now = Date.now ();
     return (
         input.secret.length > 0 &&
-        input.issued.getTime () >= now &&
-        input.expire.getTime () <= now
+        now >= input.issued.getTime () &&
+        now <= input.expire.getTime ()
     );
 }
 

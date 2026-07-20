@@ -264,8 +264,7 @@ content.getStock = (request: Request, response: Response) =>
 {
     const productId = Number (request.params ["id"]);
     
-    if (!Number.isSafeInteger (productId) ||
-        !request.body)
+    if (!Number.isSafeInteger (productId))
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
