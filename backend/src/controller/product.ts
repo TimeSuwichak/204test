@@ -605,17 +605,20 @@ content.postBasic = async (request: Request, response: Response) =>
     try
     {
         const [field, file] = await form.parse (request);
-        const metadata = JSON.stringify (field ["Metadata"]?.at (0));
-        const cover = file ["Cover"]?.at (0);
-        const reader = objectReader (metadata);
+
+        const listMetadata = field ["Metadata"] ?? [];
+        const listFile = file ["Cover"] ?? [];
+
+        const meta = objectReader (JSON.parse (listMetadata.at (0) ?? ""));
+        const cover = listFile.at (0);
 
         input = 
         {
-            name: reader.requireString ("Name"),
-            description: reader.requireString ("Description"),
-            price: reader.requireInteger ("Price"),
-            priceCode: reader.requireInteger ("PriceCode"),
-            platform: reader.requireInteger ("Platform"),
+            name: meta.requireString ("Name"),
+            description: meta.requireString ("Description"),
+            price: meta.requireInteger ("Price"),
+            priceCode: meta.requireInteger ("PriceCode"),
+            platform: meta.requireInteger ("Platform"),
             cover: cover?.newFilename ?? ""
         };
     }

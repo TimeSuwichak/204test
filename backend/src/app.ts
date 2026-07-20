@@ -40,6 +40,7 @@ content.start = async () =>
     {
         http.routeTo ("/auth", routerAuth.getRouteChallenge ());
         http.routeTo ("/account", routerAccount.getRoute ());
+        http.routeTo ("/account-list", routerAccount.getRouteList ());
         http.routeTo ("/account-cart", routerAccount.getRouteCart ());
         http.routeTo ("/product", routerProduct.getRoute ());
         http.routeTo ("/product-category", routerProduct.getRouteCategory ());

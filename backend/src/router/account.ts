@@ -42,6 +42,14 @@ content.getRoute = () =>
 
     return router;
 }
+content.getRouteList = () =>
+{
+    const router = http.router ();
+
+    router.get ("/");
+
+    return router;
+}
 content.getRouteCart = () =>
 {
     const router = http.router ();
