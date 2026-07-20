@@ -581,29 +581,29 @@ content.putStock = (request: Request, response: Response) =>
 */
 content.postBasic = async (request: Request, response: Response) =>
 {
-    const coverId = await modelStorage.createWriterId ();
-    const form = formidable ({
-        multiples: false,
-        uploadDir: modelStorage.getPath (),
-        filter: (part) =>
-        {
-            const isKey = part.name === "Cover";
-            const isImage = part.mimetype ? 
-                            part.mimetype.startsWith ("image/") : false;
-
-            return isKey && isImage;
-        },
-        filename: (name, ext, part, form) =>
-        {
-            void name; void ext;
-            void part; void form;
-            return coverId;
-        },
-    });
     let input: BasicCreate;
     
     try
     {
+        const coverId = await modelStorage.createWriterId ();
+        const form = formidable ({
+            multiples: false,
+            uploadDir: modelStorage.getPath (),
+            filter: (part) =>
+            {
+                const isKey = part.name === "Cover";
+                const isImage = part.mimetype ? 
+                                part.mimetype.startsWith ("image/") : false;
+
+                return isKey && isImage;
+            },
+            filename: (name, ext, part, form) =>
+            {
+                void name; void ext;
+                void part; void form;
+                return coverId;
+            },
+        });
         const [field, file] = await form.parse (request);
 
         const listMetadata = field ["Metadata"] ?? [];
@@ -622,8 +622,10 @@ content.postBasic = async (request: Request, response: Response) =>
             cover: cover?.newFilename ?? ""
         };
     }
-    catch
+    catch (e: unknown)
     {
+        log.warn (e);
+
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
         return;

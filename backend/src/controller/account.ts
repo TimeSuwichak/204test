@@ -14,6 +14,7 @@ import
 from "#core/http.ts";
 import
 {
+    type BasicFetch,
     type BasicUpdate,
     type BasicCreate,
     type CartUpdate,
@@ -41,26 +42,12 @@ const content = function ()
 content.getBasic = (request: Request, response: Response) =>
 {
     const authenticate = auth.validateResult (response);
-    const accountId = Number (request.params ["id"] ?? authenticate.id);
-    
-    if (!Number.isSafeInteger (accountId))
-    {
-        response.status (http.STATUS_BAD_REQUEST);
-        response.end ();
-        return;
-    }
+    const accountId = authenticate.id;
 
     void model.getBasic (accountId).then ((x) =>
     {
         response.status (http.STATUS_OK);
-        response.json ({
-            "Id": x.id,
-            "Icon": x.icon,
-            "Name": x.name,
-            "Role": x.role,
-            "Created": x.created,
-            "Modified": x.modified
-        });
+        response.json (content.writeBasic (x));
         response.end ();
     })
     .catch ((e: unknown) =>
@@ -74,7 +61,21 @@ content.getBasic = (request: Request, response: Response) =>
         log.error (e);
         response.status (http.STATUS_SERVICE_UNAVAILABLE);
         response.end ();
-        return;
+    });
+}
+content.getBasicList = (request: Request, response: Response) =>
+{
+    void model.getBasicList ().then ((x) =>
+    {
+        response.status (http.STATUS_OK);
+        response.json (content.writeBasicList (x));
+        response.end ();
+    })
+    .catch ((e: unknown) =>
+    {
+        log.error (e);
+        response.status (http.STATUS_SERVICE_UNAVAILABLE);
+        response.end ();
     });
 }
 content.getCart = (request: Request, response: Response) =>
@@ -369,6 +370,24 @@ content.deleteCart = (request: Request, response: Response) =>
         response.status (http.STATUS_SERVICE_UNAVAILABLE);
         response.end ();
     });
+}
+
+content.writeBasic = (data: BasicFetch) =>
+{
+    return  {
+        "Id": data.id,
+        "Icon": data.icon,
+        "Name": data.name,
+        "Role": data.role,
+        "Created": data.created.getTime (),
+        "Modified": data.modified ? data.modified.getTime () : null,
+    }
+}
+content.writeBasicList = (data: BasicFetch []) =>
+{
+    return {
+        "Item": data.map (x => content.writeBasic (x))
+    }
 }
 
 /**

@@ -1,8 +1,11 @@
-import react from "react";
-import styled from "styled-components";
-import MenuBar from "#component/menu.bar.tsx";
-import NavBar from "#component/navbar.tsx";
-import Logo from "#asset/image/favicon.ico";
+import react        from "react";
+import styled       from "styled-components";
+import MenuBar      from "#component/menu.bar.tsx";
+import NavBar       from "#component/navbar.tsx";
+import Logo         from "#asset/image/favicon.ico";
+
+import ContentStock from "#component/staff.stock.tsx";
+import ContentOrder from "#component/staff.order.tsx";
 
 import
 {
@@ -11,7 +14,9 @@ import
   Container,
   Coins,
   ArrowLeftCircleIcon,
-  XIcon
+  XIcon,
+  Cuboid,
+  PackageSearchIcon
 }
 from "lucide-react";
 
@@ -110,7 +115,7 @@ content.Root = function ConsoleRoot (prop: PropRoot)
 {
   const visible = prop.visible ?? false;
   const container = react.useRef<HTMLDivElement> (HTMLDivElement.prototype);
-  const [ctn, setCtn] = react.useState (content.CONTENT_GENERAL);
+  const [ctn, setCtn] = react.useState (content.CONTENT_STOCK);
 
   const SIZE_SMALL = "256px";
   const SIZE_THEREHOLD = 768;
@@ -250,14 +255,10 @@ content.Menu = function ConsoleMenu (prop: PropMenu)
         margin={prop.widthMax != "100%" ? "0px 32px 0px 0px" : "0px"}
         onClick={selectEvent}>
       <MenuBar.Heading text="คอนโซล"/>
-      <MenuBar.Item value={content.CONTENT_GENERAL} 
-        text="ทั่วไป" icon={<UserIcon/>}/>
-      <MenuBar.Item value={content.CONTENT_SECURITY} 
-        text="ความปลอดภัย" icon={<UserLock/>}/>
-      <MenuBar.Item value={content.CONTENT_SHIPPING} 
-        text="การจัดส่ง" icon={<Container/>}/>
-      <MenuBar.Item value={content.CONTENT_PAYMENT} 
-        text="การชำระเงิน" icon={<Coins/>}/>
+      <MenuBar.Item value={content.CONTENT_STOCK} 
+        text="สต็อกสินค้า" icon={<Cuboid/>}/>
+      <MenuBar.Item value={content.CONTENT_ORDER} 
+        text="คำสั่งซื้อ" icon={<PackageSearchIcon/>}/>
     </MenuBar>
   );
 }
@@ -265,23 +266,20 @@ content.Content = function ConsoleContent (prop: PropContent)
 {
   const visible = prop.visible ?? true;
   const current = prop.content ?? 0;
-  const isGeneral = visible && current === content.CONTENT_GENERAL;
-  const isSecurity = visible && current === content.CONTENT_SECURITY;
-  const isShipping = visible && current === content.CONTENT_SHIPPING;
-  const isPayment = visible && current === content.CONTENT_PAYMENT;
+  const isStock = visible && current === content.CONTENT_STOCK;
+  const isOrder = visible && current === content.CONTENT_ORDER;
   const onBack = prop.onBack;
 
 
   return (
     <StyleContent>
-      <content.ContentProduct visible={isGeneral} onBack={onBack}/>
-      <content.ContentSecurity visible={isSecurity} onBack={onBack}/>
-      <content.ContentShipping visible={isShipping} onBack={onBack}/>
-      <content.ContentPayment visible={isPayment} onBack={onBack}/>
+      <content.ContentStock visible={isStock} onBack={onBack}/>
+      <content.ContentOrder visible={isOrder} onBack={onBack}/>
     </StyleContent>
   );
 }
-content.ContentProduct = function ConsoleContentGeneral
+
+content.ContentStock = function ConsoleContentStock
   (prop: PropContentGeneral) : react.ReactElement
 {
   return (
@@ -289,34 +287,11 @@ content.ContentProduct = function ConsoleContentGeneral
       <content.TemplateBackButton 
         visible={prop.onBack != undefined} 
         onClick={prop.onBack}/>
-      <StyleTemplateHeader>ข้อมูลบัญชี</StyleTemplateHeader>
-      <StyleTemplateField>
-        <div>
-          <label>ชื่อผู้ใช้</label>
-        </div>
-        <div>
-          <label>iKla47</label>
-          <button>เปลี่ยนชื่อ</button>
-        </div>
-      </StyleTemplateField>
-      <StyleTemplateField>
-        <div>
-          <label>อีเมล</label>
-        </div>
-        <div>
-          <label>con****@***.net</label>
-          <button>เปลี่ยนอีเมล</button>
-        </div>
-      </StyleTemplateField>
-      <StyleTemplateField>
-        <div>
-          <button>ลงชื่อออก</button>
-        </div>
-      </StyleTemplateField>
+      <ContentStock/>
     </react.Activity>
   );
 }
-content.ContentSecurity = function ConsoleContentSecurity
+content.ContentOrder = function ConsoleContentOrder
   (prop: PropContentSecurity) : react.ReactElement
 {
   return (
@@ -324,91 +299,10 @@ content.ContentSecurity = function ConsoleContentSecurity
       <content.TemplateBackButton 
         visible={prop.onBack != undefined} 
         onClick={prop.onBack}/>
-      <StyleTemplateHeader>ความปลอดภัย</StyleTemplateHeader>
-      <StyleTemplateField>
-        <div>
-          <label>รหัสผ่าน</label>
-        </div>
-        <div>
-          <button>เปลี่ยน</button>
-        </div>
-      </StyleTemplateField>
-      <StyleTemplateField>
-        <div>
-          <label>ยืนยันสองชั้นด้วย รหัสผ่านใช้ครั้งเดียวแบบกำหนดเวลา</label>
-        </div>
-        <div>
-          <button>เปิด</button>
-        </div>
-      </StyleTemplateField>
-      <StyleTemplateField>
-        <div>
-          <label>ยืนยันสองชั้นด้วย อีเมล</label>
-        </div>
-        <div>
-          <button>เปิด</button>
-        </div>
-      </StyleTemplateField>
+      <ContentOrder/>
     </react.Activity>
   );
 }
-content.ContentShipping = function ConsoleContentShipping
-  (prop: PropContentShipping) : react.ReactElement
-{
-  return (
-    <react.Activity mode={prop.visible ? "visible" : "hidden"}>
-      <content.TemplateBackButton 
-        visible={prop.onBack != undefined} 
-        onClick={prop.onBack}/>
-      <StyleTemplateHeader>การจัดส่ง</StyleTemplateHeader>
-      <StyleTemplateField>
-        <div>
-          <label>ที่อยู่เริ่มต้น</label>
-          <br/>
-          <label>999/999 ดาวเคราะห์โลก</label>
-        </div>
-        <div>
-          <button>เลือก</button>
-        </div>
-      </StyleTemplateField>
-      <StyleTemplateHeader2>รายการบันทึกที่อยู่</StyleTemplateHeader2>
-      <StyleTemplateField>
-        <div>
-          <button>เพิ่มที่อยู่</button>
-        </div>
-      </StyleTemplateField>
-    </react.Activity>
-  );
-}
-content.ContentPayment = function ConsoleContentPayment 
-  (prop: PropContentPayment) : react.ReactElement
-{
-  return (
-    <react.Activity mode={prop.visible ? "visible" : "hidden"}>
-      <content.TemplateBackButton 
-        visible={prop.onBack != undefined} 
-        onClick={prop.onBack}/>
-      <StyleTemplateHeader>การชำระเงิน</StyleTemplateHeader>
-      <StyleTemplateField>
-        <div>
-          <label>วิธีเริ่มต้น</label>
-          <br/>
-          <label>0000-0000-0000-0000</label>
-        </div>
-        <div>
-          <button>เลือก</button>
-        </div>
-      </StyleTemplateField>
-      <StyleTemplateHeader2>รายการบันทึกที่อยู่</StyleTemplateHeader2>
-      <StyleTemplateField>
-        <div>
-          <button>เพิ่ม</button>
-        </div>
-      </StyleTemplateField>
-    </react.Activity>
-  );
-}
-
 
 content.TemplateBackButton = function ConsoleTemplateBackButton 
   (prop: PropTemplateBackButton) : react.ReactElement
@@ -432,8 +326,8 @@ content.TemplateBackButton = function ConsoleTemplateBackButton
 }
 
 content.CONTENT_UNDEFINED = 0;
-content.CONTENT_GENERAL = 1;
-content.CONTENT_SECURITY = 2;
+content.CONTENT_STOCK = 1;
+content.CONTENT_ORDER = 2;
 content.CONTENT_SHIPPING = 3;
 content.CONTENT_PAYMENT = 4;
 

@@ -34,11 +34,8 @@ content.getRoute = () =>
 
     router.get ("/", authUser, control.getBasic);
     router.put ("/", authUser, control.putBasic);
-
-    router.get ("/:id", control.getBasic);
-    router.put ("/:id", authUser, control.putBasic);
     router.post ("/", authManager, control.postBasic);
-    router.delete ("/:id", authManager, control.deleteBasic);
+    router.delete ("/", authManager, control.deleteBasic);
 
     return router;
 }
@@ -46,7 +43,7 @@ content.getRouteList = () =>
 {
     const router = http.router ();
 
-    // router.get ("/");
+    router.get ("/", control.getBasicList);
 
     return router;
 }

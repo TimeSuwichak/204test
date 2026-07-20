@@ -115,7 +115,7 @@ export default function Order() {
   return (
     <OrderContainer>
       <HeaderSection>
-        <h1>Order Section</h1>
+        <h1 style={{ color: "var(--text-primary)"}}>Order Section</h1>
 
         <ToolbarRow>
           <SearchWrapper>
@@ -449,21 +449,46 @@ const CloseModalButton = styled.button`
   &:hover { background-color: lightgray; }
 `;
 
-// Table ui
 const TableContainer = styled.div`
-  width: 100%; overflow-x: auto; border: 1px solid lightgray; border-radius: 8px;
+  background: #111827;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  overflow: hidden;
 `;
 
 const StyledTable = styled.table`
-  width: 100%; border-collapse: collapse; text-align: left; font-size: 1rem;
-  thead { background-color: blue; color: white; }
-  th { padding: 12px 16px; font-weight: 600; text-transform: uppercase; font-size: 0.9rem; }
-  td { padding: 12px 16px; border-bottom: 1px solid white; color: black; }
-  
-  tbody tr {
-    cursor: pointer;
-    transition: background-color 0.1s ease-in-out;
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    background: #0f172a;
   }
-  tbody tr:nth-child(even) { background-color: lightyellow; }
-  tbody tr:hover { background-color: lightblue; }
+
+  th {
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 18px;
+    border-bottom: 1px solid #1e293b;
+    text-align:left;
+  }
+
+  td {
+    padding: 18px;
+    color: white;
+    border-bottom: 1px solid #1e293b;
+    vertical-align: middle;
+  }
+
+  tbody tr:hover {
+    background: #1e293b;
+  }
+
+  img {
+    width: 58px;
+    height: 78px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
 `;
