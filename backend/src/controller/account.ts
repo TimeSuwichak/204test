@@ -355,6 +355,7 @@ content.inputPutBasic = async (
         id: accountId,
         name: meta.optionalString ("Name"),
         role: meta.optionalInteger ("Role"),
+        status: meta.optionalInteger ("Status"),
         icon: icon?.newFilename ?? ""
     };
 }
@@ -410,6 +411,7 @@ content.inputPostBasic = async (
     return {
         name: meta.requireString ("Name"),
         role: meta.requireInteger ("Role"),
+        status: meta.requireInteger ("Status"),
         icon: icon?.newFilename ?? ""
     };
 }
@@ -438,6 +440,7 @@ content.outputGetBasic = (r: Response, x: BasicFetch) =>
         "Role": x.role,
         "Created": x.created.getTime (),
         "Modified": x.modified ? x.modified.getTime () : null,
+        "Status": x.status,
     });
     r.end ();
 }
@@ -452,6 +455,7 @@ content.outputGetBasicList = (r: Response, x: BasicFetch []) =>
             "Role": x.role,
             "Created": x.created.getTime (),
             "Modified": x.modified ? x.modified.getTime () : null,
+            "Status": x.status,
         }})
     });
     r.end ();

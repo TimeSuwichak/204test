@@ -2,6 +2,7 @@ import error from "#core/error.ts";
 import objectReader from "#core/object.reader.ts";
 import sql from "#core/sql.ts";
 
+import { type ObjectReader } from "#core/object.reader.ts";
 import { type BasicId as AccountId } from "#model/account.ts";
 import { type BasicId as ProductId } from "#model/product.ts";
 
@@ -38,11 +39,12 @@ content.get = async (key: BasicId)
     : Promise<BasicFetch> =>
 {
     const transaction = await sql.transaction ();
-    let query;
+    let queryList;
+    let queryItem;
 
     try
     {
-        query = await Promise.all ([
+        const query = await Promise.all ([
             transaction.select (
             "SELECT * FROM OrderList WHERE OrderId = ?", 
             [key]),
@@ -50,6 +52,9 @@ content.get = async (key: BasicId)
             "SELECT * FROM OrderItem WHERE OrderId = ?", 
             [key]),
         ]);
+        queryList = query[0];
+        queryItem = query[1];
+
         await transaction.commit ();
     }
     catch (e: unknown)
@@ -62,53 +67,15 @@ content.get = async (key: BasicId)
         transaction.release ();
     }
 
-    let orderId: BasicId;
-    let accountId: AccountId;
-    let created: Date;
-    let delivered: Date | null;
-    let status: number;
-    const item: DataFetchItem [] = [];
-
-    try
-    {
-        const reader = objectReader (query[0].at (0));
-
-        orderId = reader.requireInteger ("OrderId");
-        accountId = reader.requireInteger ("AccountId");
-        created = reader.requireDate ("Created");
-        delivered = reader.requireDateOrNull ("Delivered");
-        status = reader.requireInteger ("Status");
-    }
-    catch (e: unknown)
-    {
-        throw new error.BadData (e);
-    }
-    try
-    {
-        for (const entry of query[1])
-        {
-            const reader = objectReader (entry);
-            const content: DataFetchItem =
-            {
-                productId: reader.requireInteger ("ProductId"),
-                quantity: reader.requireInteger ("Quantity")
-            };
-            item.push (content);
-        }
-    }
-    catch (e: unknown)
-    {
-        throw new error.BadData (e);
+    if (queryList.length == 0) {
+        throw new error.NotFound ("No entry of order");
     }
 
-    return {
-        orderId: orderId,
-        accountId: accountId,
-        created: created,
-        delivered: delivered,
-        status: status,
-        item: item
-    };
+    return content.readBasic (
+        objectReader (queryList [0]), queryItem.map ((x) =>
+    {
+        return objectReader (x);
+    }));
 }
 /**
  * เปลี่ยนแปลงข้อมูลคำสั่งซื้อสินค้า 
@@ -207,6 +174,23 @@ content.delete = async (key: BasicId) :
     finally
     {
         transaction.release ();
+    }
+}
+content.readBasic = (root: ObjectReader, item: ObjectReader []) : BasicFetch =>
+{
+    return {
+        orderId: root.requireInteger ("OrderId"),
+        accountId: root.requireInteger ("AccountId"),
+        created: root.requireDate ("Created"),
+        delivered: root.requireDateOrNull ("Delivered"),
+        status: root.requireInteger ("Status"),
+        item: item.map ((x) =>
+        {
+            return {
+                productId: x.requireInteger ("ProductId"),
+                quantity: x.requireInteger ("Quantity"),
+            }
+        })
     }
 }
 

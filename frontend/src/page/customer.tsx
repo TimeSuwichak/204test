@@ -127,7 +127,7 @@ content.NavBar = function PresetNavBar ()
         icon={<ShoppingBasket/>}
         onClick={onCart}/>
       <MenuContext.Item 
-        text="สถานะการจัดส่ง" 
+        text="ประวัติคำสั่งซื้อ" 
         icon={<Truck/>}
         onClick={onShipping}/>
       <MenuContext.Item 

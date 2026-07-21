@@ -175,6 +175,7 @@ content.getReview = (request: Request, response: Response) =>
         content.errorGetReview (response, e);
     });
 }
+
 /**
  * ดึงข้อมูลสต็อกของสินค้าดังกล่าว
  * 
@@ -237,7 +238,7 @@ content.putBasic = async (request: Request, response: Response) =>
         return;
     }
 
-    void model.update (input).then (() =>
+    void model.updateBasic (input).then (() =>
     {
         content.outputPutBasic (response);
     })
@@ -832,21 +833,19 @@ content.outputGetBasicList = (r: Response, x: BasicFetch []) =>
 {
     r.status (http.STATUS_OK);
     r.json ({
-        "Item": {
-            "Item": x.map ((x) => 
-            {
-                return {
-                    "Id": x.id,
-                    "Name": x.name,
-                    "Description": x.description,
-                    "Price": x.price,
-                    "PriceCode": x.priceCode,
-                    "Platform": x.platform,
-                    "Background": x.background,
-                    "Cover": x.cover
-                }
-            })
-        }
+        "Item": x.map ((x) => 
+        {
+            return {
+                "Id": x.id,
+                "Name": x.name,
+                "Description": x.description,
+                "Price": x.price,
+                "PriceCode": x.priceCode,
+                "Platform": x.platform,
+                "Background": x.background,
+                "Cover": x.cover
+            }
+        })
     })
     r.end ();
 }

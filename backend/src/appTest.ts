@@ -138,7 +138,8 @@ content.setupAccountFor = async (
             link = await modelAccount.create ({
                 name: accountName,
                 role: accountRole,
-                icon: ""
+                icon: "",
+                status: modelAccount.RESTRICTION_NONE,
             });
             await modelAuth.createDb (authId, authPwd, link);
         }

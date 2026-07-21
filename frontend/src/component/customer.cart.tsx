@@ -185,8 +185,6 @@ content.Summary = function CartSummary ()
     const price = prod ? prod.data?.price ?? 0 : 0;
     const sum = price * x.quantity;
 
-    console.log (sum, prod?.data, x.quantity);
-
     return sum;
 
   }).reduce ((x, y) => x + y, 0) : 0;
