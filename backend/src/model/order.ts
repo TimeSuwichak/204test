@@ -101,8 +101,9 @@ content.getListByAccount = async (key: AccountId)
 
     return await Promise.all (queryList.map ((x) =>
     {
+        const id = objectReader(x).requireInteger("OrderId");
         return sql.select (
-            "SELECT * FROM OrderItem WHERE = OrderId = ?", []
+            "SELECT * FROM OrderItem WHERE OrderId = ?", [id]
         )
         .then ((y) =>
         {
@@ -115,75 +116,112 @@ content.getListByAccount = async (key: AccountId)
 }
 /**
  * เปลี่ยนแปลงข้อมูลคำสั่งซื้อสินค้า 
- * คำสั่งนี้ใช้ได้แค่กับคำสั่งซื้อสินค้า (OrderList) เท่านั้น
+ * คำสั่งนี้ใช้ได้ OrderList
  * 
  * @key info ข้อมูลประกอบการเปลี่ยนแปลง
 */
-content.update = async (info: BasicUpdate) :
-    Promise<void> =>
-{
-    const key = [
-        info.delivered ? "Delivered = ?" : undefined,
-        info.status ? "Status = ?" : undefined
-    ]
-    .filter (x => x !== undefined)
-    .join (", ")
-    .concat (" ")
-    .concat ("WHERE Id = ?");
+content.update = async (info: BasicUpdate): Promise<void> => {
+    const fields: string[] = [];
+    const values: (string | number | Date | null)[] = [];
 
-    const value = [
-        info.delivered,
-        info.status,
-        info.orderId
-    ]
-    .filter (x => x !== undefined);
+    if (info.delivered !== undefined) {
+        fields.push("`Delivered` = ?");
+        values.push(info.delivered);
+    }
 
-    await sql.update (`UPDATE Product SET ${key}`, value);
-    return;
-}
+    if (info.status !== undefined) {
+        fields.push("`Status` = ?");
+        values.push(info.status);
+    }
+
+    if (fields.length === 0) {
+        return;
+    }
+
+    values.push(info.orderId);
+
+    await sql.update(
+        `UPDATE \`OrderList\` SET ${fields.join(", ")} WHERE \`OrderId\` = ?`,
+        values as any
+    );
+};
 /***
  * สร้างคำสั่งซื้อสินค้า
 */
-content.create = async (info: BasicCreate) :
-    Promise<BasicId> =>
-{
-    const transaction = await sql.transaction ();
+content.create = async (info: BasicCreate): Promise<BasicId> => {
+    const transaction = await sql.transaction();
 
-    try
-    {
-        const orderId = await transaction.insert (`
-            INSERT INTO OrderList (AccountId, Created, Delivered Status)
-            VALUES (?, ?, ?, ?)`,
+    try {
+        //
+        // วนลูปเช็กและลดสินค้า
+        //
+        for (const item of info.item) {
+            //
+            // ดึงจำนวนสต็อกปัจจุบันของสินค้า
+            //
+            const stockRows = await transaction.select(
+                `SELECT Quantity FROM ProductStock WHERE ProductId = ?`,
+                [item.productId]
+            );
+
+            if (stockRows.length === 0) {
+                throw new error.NotFound(`ไม่พบสินค้า ID ${item.productId} ในระบบสต็อก`);
+            }
+
+            const reader = objectReader(stockRows[0]);
+            const currentQuantity = reader.requireInteger("Quantity");
+            //
+            // เช็กจำนวนสินค้า
+            //
+            if (currentQuantity < item.quantity) {
+                throw new error.BadData(
+                    `สินค้า ID ${item.productId} มีจำนวนไม่พอ (คงเหลือ: ${currentQuantity}, ต้องการ: ${item.quantity})`
+                );
+            }
+            //
+            // ลดสต็อก
+            //
+            const newQuantity = currentQuantity - item.quantity;
+            await transaction.update(
+                `UPDATE ProductStock SET Quantity = ? WHERE ProductId = ?`,
+                [newQuantity, item.productId]
+            );
+        }
+        //
+        // บันทึกข้อมูลคำสั่งซื้อ
+        //
+        const orderId = (await transaction.insert(
+            `INSERT INTO OrderList (AccountId, Created, Delivered, Status)
+             VALUES (?, ?, ?, ?)`,
             [info.accountId, info.created, info.delivered, info.status]
-        );
-        const itemCmd = info.item.map (() =>
-        {
-            return `(?, ?, ?)`;
-        });
-        const itemValue = info.item.flatMap ((x) =>
-        {
-            return [x.productId, x.quantity];
-        });
-
-        await transaction.insert (`
-            INSERT INTO OrderItem (OrderId, ProductId, Quantity)
-            VALUES ${itemCmd.join (", ")};`, itemValue);
-
-        await transaction.commit ();
-        return orderId as ProductId;
+        )) as BasicId;
+        //
+        // บันทึกรายการสินค้าในคำสั่งซื้อ
+        //
+        for (const item of info.item) {
+            await transaction.insert(
+                `INSERT INTO OrderItem (OrderId, ProductId, Quantity)
+                 VALUES (?, ?, ?)`,
+                [orderId, item.productId, item.quantity]
+            );
+        }
+        //
+        // ยืนยันลงฐานข้อมูล
+        //
+        await transaction.commit();
+        return orderId;
+    } catch (e) {
+        //
+        // ถ้ารายการล้มเหลว หรือของไม่พอ คืนค่าสต็อก และคำสั่งซื้อ
+        //
+        await transaction.rollback();
+        throw e;
+    } finally {
+        transaction.release();
     }
-    catch (e: unknown)
-    {
-        await transaction.rollback ();
-        throw new error.NotAvailable (e);
-    }
-    finally
-    {
-        transaction.release ();
-    }
-}
+};
 /**
- * ลบคำสั่งซื้อสินค้าถ้าเป็นไปได้
+ * ลบคำสั่งซื้อสินค้า
 */
 content.delete = async (key: BasicId) :
     Promise<void> =>
@@ -231,7 +269,7 @@ content.readBasic = (root: ObjectReader, item: ObjectReader []) : BasicFetch =>
 }
 
 /**
- * โครงสร้างข้อมูลที่ได้รับจากการดึงข้อมูลในฐานข้อมูล
+ * โครงสร้างข้อมูลที่ได้รับจากการดึงข้อมูล
 */
 export interface BasicFetch
 {
@@ -270,7 +308,7 @@ export interface BasicFetch
     } [];
 }
 /**
- * โครงสร้างข้อมูลที่ใช้ในการเปลี่ยนแปลงข้อมูลในฐานข้อมูล
+ * โครงสร้างข้อมูลที่ใช้ในการเปลี่ยนแปลงข้อมูล
 */
 export interface BasicUpdate
 {
@@ -288,7 +326,7 @@ export interface BasicUpdate
     status ?: number;
 }
 /**
- * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลลงในฐานข้อมูล
+ * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูล
 */
 export interface BasicCreate
 {
@@ -314,7 +352,7 @@ export interface BasicCreate
     readonly item: DataCreateItem [];
 }
 /**
- * รายการสินค้าที่มีในคำสั่งซื้อดังกล่าว
+ * รายการสินค้าที่มีในคำสั่งซื้อ
 */
 export interface DataCreateItem
 {
@@ -328,7 +366,7 @@ export interface DataCreateItem
     quantity: number;
 }
 /**
- * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
+ * รหัสของชุดรหัสข้อมูล
 */
 export type BasicId = number;
 /**
