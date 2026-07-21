@@ -75,8 +75,10 @@ content.getList = async ()
 
     return await Promise.all (queryList.map ((x) =>
     {
+        const id = objectReader(x).requireInteger("OrderId");
+
         return sql.select (
-            "SELECT * FROM OrderItem WHERE = OrderId = ?", []
+            "SELECT * FROM OrderItem WHERE OrderId = ?", [id]
         )
         .then ((y) =>
         {

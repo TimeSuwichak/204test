@@ -1,121 +1,181 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
+import orderApi from "../util/api.order";
+import productApi from "../util/api.product";
+import type { BasicFetch as RawOrder } from "../util/api.order";
+import type { BasicFetch as ProductFetch } from "../util/api.product";
+import context from "#context/common.ts";
 
-// Order
-interface OrderItem {
-  id: string;
-  orderDate: string;
-  deliveryDate: string;
-  status: "กำลังจัดส่ง" | "ส่งแล้ว" | "ล่าช้า" | "ยกเลิก";
-  items: OrderProduct[];
-}
-
-// product in order
 interface OrderProduct {
-  productId: string;
+  productId: number;
   name: string;
   price: number;
   quantity: number;
 }
 
+interface OrderItem {
+  id: number;
+  orderDate: Date;
+  deliveryDate: Date | null;
+  status: number;
+  items: OrderProduct[];
+}
+
 export default function Order() {
-  // MockUp ข้อมูล Order
-  const [orders, setOrders] = useState<OrderItem[]>([
-    {
-      id: "ORD001",
-      orderDate: "2026-07-10",
-      deliveryDate: "2026-07-13",
-      status: "ส่งแล้ว",
-      items: [
-        { productId: "P001", name: "Product A", price: 250, quantity: 2 },
-        { productId: "P003", name: "Product C", price: 120, quantity: 1 }
-      ]
-    },
-    {
-      id: "ORD002",
-      orderDate: "2026-07-12",
-      deliveryDate: "2026-07-15",
-      status: "กำลังจัดส่ง",
-      items: [
-        { productId: "P002", name: "Product B", price: 500, quantity: 1 }
-      ]
-    },
-    {
-      id: "ORD003",
-      orderDate: "2026-07-11",
-      deliveryDate: "2026-07-16",
-      status: "ล่าช้า",
-      items: [
-        { productId: "P003", name: "Product C", price: 120, quantity: 5 },
-        { productId: "P005", name: "Product E", price: 350, quantity: 2 }
-      ]
-    },
-    {
-      id: "ORD004",
-      orderDate: "2026-07-14",
-      deliveryDate: "-",
-      status: "ยกเลิก",
-      items: [
-        { productId: "P004", name: "Product D", price: 990, quantity: 1 }
-      ]
-    },
-    {
-      id: "ORD005",
-      orderDate: "2026-07-15",
-      deliveryDate: "2026-07-18",
-      status: "กำลังจัดส่ง",
-      items: [
-        { productId: "P001", name: "Product A", price: 250, quantity: 1 },
-        { productId: "P005", name: "Product E", price: 350, quantity: 3 }
-      ]
-    }
-  ]);
+  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState<string>("All");
+  const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
 
-  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
+  const auth = context.useAuth();
 
-  const statusOptions: OrderItem["status"][] = ["กำลังจัดส่ง", "ส่งแล้ว", "ล่าช้า", "ยกเลิก"];
+  const getStatusText = (status: number): string => {
+    switch (status) {
+      case 1: return "กำลังจัดส่ง";
+      case 2: return "ส่งแล้ว";
+      case 3: return "ล่าช้า";
+      case 0: return "ยกเลิก";
+      default: return "กำลังจัดส่ง";
+    }
+  };
+
+  const getStatusNumber = (statusText: string): number => {
+    switch (statusText) {
+      case "กำลังจัดส่ง": return 1;
+      case "ส่งแล้ว": return 2;
+      case "ล่าช้า": return 3;
+      case "ยกเลิก": return 0;
+      default: return 1;
+    }
+  };
+
+  const statusOptions = ["กำลังจัดส่ง", "ส่งแล้ว", "ล่าช้า", "ยกเลิก"];
   const filterStatusList = ["All", ...statusOptions];
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+      const session = auth.session;
+
+      const rawOrders: RawOrder[] = await orderApi.getBasicList(session);
+
+      const extendedOrders: OrderItem[] = await Promise.all(
+        rawOrders.map(async (ord) => {
+          const itemsWithDetails: OrderProduct[] = await Promise.all(
+            ord.item.map(async (it) => {
+              try {
+                const prod: ProductFetch = await productApi.getBasic(session, it.productId);
+                return {
+                  productId: it.productId,
+                  name: prod.name,
+                  price: prod.price,
+                  quantity: it.quantity,
+                };
+              } catch {
+                return {
+                  productId: it.productId,
+                  name: `สินค้า ID: ${it.productId}`,
+                  price: 0,
+                  quantity: it.quantity,
+                };
+              }
+            })
+          );
+
+          return {
+            id: ord.orderId,
+            orderDate: new Date(ord.created),
+            deliveryDate: ord.delivered ? new Date(ord.delivered) : null,
+            status: ord.status,
+            items: itemsWithDetails,
+          };
+        })
+      );
+
+      setOrders(extendedOrders);
+    } catch (err: any) {
+      console.error("Failed to load orders:", err);
+      setErrorMsg(err.message || "เกิดข้อผิดพลาดในการดึงข้อมูลคำสั่งซื้อ");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadOrders();
+  }, []);
 
   const activeOrder = orders.find((o) => o.id === activeOrderId) || null;
 
   const filteredOrders = orders.filter((order) => {
-    const matchesSearch = order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.items.some((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = selectedStatus === "All" || order.status === selectedStatus;
+    const statusText = getStatusText(order.status);
+    const orderIdStr = `ORD${String(order.id).padStart(3, "0")}`;
+
+    const matchesSearch =
+      orderIdStr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.items.some((item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+    const matchesStatus = selectedStatus === "All" || statusText === selectedStatus;
     return matchesSearch && matchesStatus;
   });
 
-  const getTotalQuantity = (items: OrderProduct[]) => items.reduce((sum, item) => sum + item.quantity, 0);
+  const getTotalQuantity = (items: OrderProduct[]) =>
+    items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const getTotalPrice = (items: OrderProduct[]) => items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const getTotalPrice = (items: OrderProduct[]) =>
+    items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // ฟังก์ชันสำหรับกดเปลี่ยนสถานะของ Order ใน Modal
-  const handleUpdateStatus = (orderId: string, newStatus: OrderItem["status"]) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
+  const handleUpdateStatus = async (orderId: number, newStatusText: string) => {
+    try {
+      const session = auth.session;
+      const newStatusNum = getStatusNumber(newStatusText);
+      const newDeliveryDate = newStatusNum === 2 ? new Date() : null;
+
+      await orderApi.updateBasic(session, {
+        orderId: orderId,
+        status: newStatusNum,
+        delivered: newDeliveryDate,
+      });
+
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId
+            ? { ...order, status: newStatusNum, deliveryDate: newDeliveryDate }
+            : order
+        )
+      );
+    } catch (err: any) {
+      console.error("Failed to update status:", err);
+      alert(err.message || "เกิดข้อผิดพลาดในการอัปเดตสถานะ");
+    }
   };
 
-  // Order status color
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "ส่งแล้ว": return { bg: "#d4edda", text: "black" };
-      case "กำลังจัดส่ง": return { bg: "#cce5ff", text: "black" };
-      case "ล่าช้า": return { bg: "#fff3cd", text: "black" };
-      case "ยกเลิก": return { bg: "#f8d7da", text: "black" };
-      default: return { bg: "#e2e8f0", text: "black" };
+  const getStatusColor = (statusText: string) => {
+    switch (statusText) {
+      case "ส่งแล้ว": return { bg: "#d4edda", text: "#155724" };
+      case "กำลังจัดส่ง": return { bg: "#cce5ff", text: "#004085" };
+      case "ล่าช้า": return { bg: "#fff3cd", text: "#856404" };
+      case "ยกเลิก": return { bg: "#f8d7da", text: "#721c24" };
+      default: return { bg: "#e2e8f0", text: "#334155" };
     }
+  };
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return "-";
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? "-" : d.toISOString().split("T")[0];
   };
 
   return (
     <OrderContainer>
       <HeaderSection>
-        <h1 style={{ color: "var(--text-primary)"}}>Order Section</h1>
+        <h1 style={{ color: "var(--text-primary, #ffffff)" }}>Order Section</h1>
 
         <ToolbarRow>
           <SearchWrapper>
@@ -137,7 +197,9 @@ export default function Order() {
               onChange={(e) => setSelectedStatus(e.target.value)}
             >
               {filterStatusList.map((status) => (
-                <option key={status} value={status}>{status}</option>
+                <option key={status} value={status}>
+                  {status}
+                </option>
               ))}
             </StyledSelect>
           </FilterWrapper>
@@ -155,49 +217,60 @@ export default function Order() {
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map((order) => {
-              const colors = getStatusColor(order.status);
-              return (
-                <tr key={order.id} onClick={() => setActiveOrderId(order.id)}>
-                  <td>{order.id}</td>
-                  <td>{order.orderDate}</td>
-                  <td>
-                    {order.status === "กำลังจัดส่ง" || order.status === "ยกเลิก"
-                      ? "-"
-                      : order.deliveryDate}
-                  </td>
-                  <td style={{ textAlign: "center" }}>
-                    <StatusBadge bg={colors.bg} color={colors.text}>
-                      {order.status}
-                    </StatusBadge>
-                  </td>
-                </tr>
-              );
-            })}
-            {filteredOrders.length === 0 && (
+            {loading ? (
+              <tr>
+                <td colSpan={4} style={{ textAlign: "center", padding: "2rem" }}>
+                  กำลังโหลดข้อมูลคำสั่งซื้อ...
+                </td>
+              </tr>
+            ) : errorMsg ? (
+              <tr>
+                <td colSpan={4} style={{ textAlign: "center", padding: "2rem", color: "#ef4444" }}>
+                  {errorMsg}
+                </td>
+              </tr>
+            ) : filteredOrders.length === 0 ? (
               <tr>
                 <td colSpan={4} style={{ textAlign: "center", padding: "2rem" }}>
                   ไม่พบข้อมูลคำสั่งซื้อในระบบ
                 </td>
               </tr>
+            ) : (
+              filteredOrders.map((order) => {
+                const statusText = getStatusText(order.status);
+                const colors = getStatusColor(statusText);
+                return (
+                  <tr key={order.id} onClick={() => setActiveOrderId(order.id)}>
+                    <td>ORD{String(order.id).padStart(3, "0")}</td>
+                    <td>{formatDate(order.orderDate)}</td>
+                    <td>{formatDate(order.deliveryDate)}</td>
+                    <td style={{ textAlign: "center" }}>
+                      <StatusBadge bg={colors.bg} color={colors.text}>
+                        {statusText}
+                      </StatusBadge>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </StyledTable>
       </TableContainer>
 
-      {/* Order modal */}
       {activeOrder && (
         <ModalOverlay onClick={() => setActiveOrderId(null)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalHeader>
-              <h2>Order Details ({activeOrder.id})</h2>
+              <h2>Order Details (ORD{String(activeOrder.id).padStart(3, "0")})</h2>
               <CloseButton onClick={() => setActiveOrderId(null)}>&times;</CloseButton>
             </ModalHeader>
 
             <ModalBody>
               <DetailRow>
                 <span className="label">Order ID:</span>
-                <span className="value"><strong>{activeOrder.id}</strong></span>
+                <span className="value">
+                  <strong>ORD{String(activeOrder.id).padStart(3, "0")}</strong>
+                </span>
               </DetailRow>
 
               <DetailRow>
@@ -210,47 +283,55 @@ export default function Order() {
                 <div className="list-title">List สินค้าและราคา:</div>
                 {activeOrder.items.map((item, index) => (
                   <ProductItemRow key={item.productId || index}>
-                    <span className="p-name">{item.name} (x{item.quantity})</span>
-                    <span className="p-price">฿{(item.price * item.quantity).toLocaleString()}</span>
+                    <span className="p-name">
+                      {item.name} (x{item.quantity})
+                    </span>
+                    <span className="p-price">
+                      ฿{(item.price * item.quantity).toLocaleString()}
+                    </span>
                   </ProductItemRow>
                 ))}
               </ProductListContainer>
 
               <DetailRow className="highlight-row">
                 <span className="label">ราคารวม:</span>
-                <span className="value total-price">฿{getTotalPrice(activeOrder.items).toLocaleString()}</span>
+                <span className="value total-price">
+                  ฿{getTotalPrice(activeOrder.items).toLocaleString()}
+                </span>
               </DetailRow>
 
               <DetailRow>
                 <span className="label">วันที่สั่ง:</span>
-                <span className="value">{activeOrder.orderDate}</span>
+                <span className="value">{formatDate(activeOrder.orderDate)}</span>
               </DetailRow>
 
-              {activeOrder.status !== "กำลังจัดส่ง" && activeOrder.status !== "ยกเลิก" && (
-                <DetailRow>
-                  <span className="label">วันที่ส่งถึง:</span>
-                  <span className="value">{activeOrder.deliveryDate}</span>
-                </DetailRow>
-              )}
+              <DetailRow>
+                <span className="label">วันที่ส่งถึง:</span>
+                <span className="value">{formatDate(activeOrder.deliveryDate)}</span>
+              </DetailRow>
 
               <StatusEditRow>
                 <span className="label">สถานะ (กดเพื่อแก้ไข):</span>
                 <select
-                  value={activeOrder.status}
-                  onChange={(e) => handleUpdateStatus(activeOrder.id, e.target.value as OrderItem["status"])}
+                  value={getStatusText(activeOrder.status)}
+                  onChange={(e) => handleUpdateStatus(activeOrder.id, e.target.value)}
                   style={{
-                    backgroundColor: getStatusColor(activeOrder.status).bg,
-                    color: getStatusColor(activeOrder.status).text
+                    backgroundColor: getStatusColor(getStatusText(activeOrder.status)).bg,
+                    color: getStatusColor(getStatusText(activeOrder.status)).text,
                   }}
                 >
                   {statusOptions.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
                   ))}
                 </select>
               </StatusEditRow>
             </ModalBody>
 
-            <CloseModalButton onClick={() => setActiveOrderId(null)}>ปิดหน้าต่าง</CloseModalButton>
+            <CloseModalButton onClick={() => setActiveOrderId(null)}>
+              ปิดหน้าต่าง
+            </CloseModalButton>
           </ModalContent>
         </ModalOverlay>
       )}
@@ -258,6 +339,7 @@ export default function Order() {
   );
 }
 
+// Styled Components
 const OrderContainer = styled.div`
   background: #0b1220;
   min-height: 100vh;
@@ -267,19 +349,6 @@ const OrderContainer = styled.div`
 
 const HeaderSection = styled.div`
   margin-bottom: 24px;
-`;
-
-const TopBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  h1 {
-    margin: 0;
-    font-size: 2.3rem;
-    font-weight: 800;
-    color: white;
-  }
 `;
 
 const ToolbarRow = styled.div`
@@ -431,7 +500,6 @@ const ModalContent = styled.div`
       transform: translateY(-12px);
       opacity: 0;
     }
-
     to {
       transform: translateY(0);
       opacity: 1;

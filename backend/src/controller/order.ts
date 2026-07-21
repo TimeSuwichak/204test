@@ -151,18 +151,18 @@ content.post = async (request: Request, response: Response) => {
 
 content.inputPost = (request: Request): BasicCreate => {
     const reader = objectReader(request.body);
-    const rawItems = reader.requireArrayRecord("item");
+    const rawItems = reader.requireArrayRecord("Item");
 
     return {
-        accountId: reader.requireInteger("accountId"),
+        accountId: reader.requireInteger("AccountId"),
         created: new Date(),
         delivered: null,
-        status: reader.requireInteger("status"),
+        status: reader.requireInteger("Status"),
         item: rawItems.map((item) => {
             const itemReader = objectReader(item);
             return {
-                productId: itemReader.requireInteger("productId"),
-                quantity: itemReader.requireInteger("quantity"),
+                productId: itemReader.requireInteger("ProductId"),
+                quantity: itemReader.requireInteger("Quantity"),
             };
         }),
     };
@@ -203,15 +203,15 @@ content.inputPut = (request: Request): BasicUpdate => {
     };
 
     if (body && typeof body === "object") {
-        if (body["delivered"] !== undefined) {
+        if (body["Delivered"] !== undefined) {
             const reader = objectReader(body);
-            const deliveredRaw = reader.requireStringOrNull("delivered");
+            const deliveredRaw = reader.requireStringOrNull("Delivered");
             result.delivered = deliveredRaw ? new Date(deliveredRaw) : null;
         }
 
-        if (body["status"] !== undefined) {
+        if (body["Status"] !== undefined) {
             const reader = objectReader(body);
-            const statusRaw = reader.requireIntegerOrNull("status");
+            const statusRaw = reader.requireIntegerOrNull("Status");
             if (statusRaw !== null) {
                 result.status = statusRaw;
             }
@@ -255,8 +255,8 @@ content.outputGet = (r: Response, x: BasicFetch) => {
     r.json({
         OrderId: x.orderId,
         AccountId: x.accountId,
-        Created: x.created,
-        Delivered: x.delivered,
+        Created: x.created.getTime(),
+        Delivered: x.delivered ? x.delivered.getTime() : null,
         Status: x.status,
         Item: x.item.map((i) => ({
             ProductId: i.productId,
@@ -272,8 +272,8 @@ content.outputGetList = (r: Response, x: BasicFetch[]) => {
         Item: x.map((y) => ({
             OrderId: y.orderId,
             AccountId: y.accountId,
-            Created: y.created,
-            Delivered: y.delivered,
+            Created: y.created.getTime(),
+            Delivered: y.delivered ? y.delivered.getTime() : null,
             Status: y.status,
             Item: y.item.map((i) => ({
                 ProductId: i.productId,
