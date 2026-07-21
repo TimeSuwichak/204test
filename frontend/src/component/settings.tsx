@@ -279,6 +279,7 @@ content.ContentGeneral = function SettingsContentGeneral
   (prop: PropContentGeneral) : react.ReactElement
 {
   const auth = Context.useAuth ();
+  const toast = ContextUI.useToast ();
   const iconInput = useRef (HTMLInputElement.prototype);
   const [pending, setPending] = useState (false);
 
@@ -321,10 +322,16 @@ content.ContentGeneral = function SettingsContentGeneral
       })
       .then (() => queryBasic.refetch ()).then (() =>
       {
+          toast.setText ("เปลี่ยนรูปโปรไฟล์ใหม่เรียบร้อย");
+          toast.setDuration (5000);
+          toast.setVisible (true);
           setPending (false);
       })
       .catch (() =>
       {
+          toast.setText ("เกิดข้อผิดพลาดในการเปลี่ยนรูปโปรไฟล์ กรุณาลองใหม่อีกครั้ง");
+          toast.setDuration (5000);
+          toast.setVisible (true);
           setPending (false);
       });
   }

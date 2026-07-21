@@ -1,5 +1,5 @@
 import { useContext, createContext } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 
 import Ctx from "#context/common.ts";
 import ApiAuth from "#util/api.auth.ts";
@@ -53,6 +53,21 @@ const useProduct = (id: ProductId) =>
         throwOnError: false
     });
 }
+const useProducts = (id: ProductId []) =>
+{
+    const auth = Ctx.useAuth ();
+    return useQueries ({
+        queries: id.map ((x) =>
+        {
+            return {
+                queryKey: ["Product", "Basic", x],
+                queryFn: () => ApiProduct.getBasic (auth.session, x),
+                enabled: true,
+                throwOnError: false
+            }
+        })
+    });
+}
 const useProductList = (option: ProductSearchOption) =>
 {
     const auth = Ctx.useAuth ();
@@ -72,6 +87,7 @@ Content.defCart = defCart;
 Content.useCart = useCart;
 Content.useCartQuery = useCartQuery;
 Content.useProduct = useProduct;
+Content.useProducts = useProducts;
 Content.useProductList = useProductList;
 
 export default Content;

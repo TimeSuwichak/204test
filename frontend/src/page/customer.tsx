@@ -8,6 +8,7 @@ import navigation   from "#util/common.navigation.ts";
 import branding     from "#asset/image/favicon.ico";
 
 import MenuContext  from "#component/menu.context.tsx";
+import Toast        from "#component/toast.tsx";
 import Settings     from "#component/settings.tsx";
 import NavBar       from "#component/navbar.tsx";
 import Cart         from "#component/customer.cart";
@@ -39,6 +40,7 @@ const content = function Customer ()
 
       <Cart.Provider/>
       <Settings.Provider/>
+      <Toast.Provider/>
       <MenuContext.Provider/>
     </ctxCustomer.ProviderCart>
   </>

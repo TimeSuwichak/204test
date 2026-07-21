@@ -147,7 +147,8 @@ const content = function NavBar (prop: PropContent)
   */
   const resizeValue = () =>
   {
-    if (reference.current != HTMLDivElement.prototype)
+    if ((reference.current instanceof HTMLDivElement) &&
+        (reference.current != HTMLDivElement.prototype))
     {
       return (reference.current.clientWidth);
     }

@@ -19,6 +19,7 @@ const content = function InitSystemContext (prop: ComponentProperty)
   const language = useRef (Context.defLanguage ());
   const menuContext = useRef (ContextUI.defMenuContext ());
   const settings = useRef (ContextUI.defSettings ());
+  const toast = useRef (ContextUI.defToast ());
 
   const onInitAuth = useCallback (() =>
   {
@@ -64,11 +65,13 @@ const content = function InitSystemContext (prop: ComponentProperty)
     <Context.ProviderAuth value={auth.current}>
       <Context.ProviderLanguage value={language.current}>
         <ContextUI.ProviderMenuContext value={menuContext.current}>
-          <ContextUI.ProviderSettings value={settings.current}>
-            <QueryClientProvider client={query}>
-              {prop.children}
-            </QueryClientProvider>
-          </ContextUI.ProviderSettings>
+          <ContextUI.ProviderToast value={toast.current}>
+            <ContextUI.ProviderSettings value={settings.current}>
+              <QueryClientProvider client={query}>
+                {prop.children}
+              </QueryClientProvider>
+            </ContextUI.ProviderSettings>
+          </ContextUI.ProviderToast>
         </ContextUI.ProviderMenuContext>
       </Context.ProviderLanguage>
     </Context.ProviderAuth>

@@ -1,5 +1,6 @@
 import styled           from "styled-components";
 import ctx              from "#context/common.ts";
+import ctxUI              from "#context/common.ui.ts";
 import ctxCustomer      from "#context/customer.ts";
 import apiAccount       from "#util/api.account.ts";
 import apiStorage       from "#util/api.storage.ts";
@@ -34,6 +35,7 @@ content.Main = function ProductMainContent ()
   const [param] = useSearchParams ();
   const id = param.get ("id");
   const auth = ctx.useAuth ();
+  const toast = ctxUI.useToast ();
   const queryBasic = ctxCustomer.useProduct (Number (id));
   const basic = queryBasic.data;
 
@@ -45,14 +47,35 @@ content.Main = function ProductMainContent ()
     event.preventDefault ();
     event.stopPropagation ();
 
-    const query = queryBasic;
-    const queryData = query.data;
-    const queryId = queryData ? queryData.id : NaN;
+    if (ctx.authSigned (auth))
+    {
+      const query = queryBasic;
+      const queryData = query.data;
+      const queryId = queryData ? queryData.id : NaN;
 
-    void apiAccount.createCart (auth.session, {
-      productId: queryId,
-      quantity: 1
-    });
+      void apiAccount.createCart (auth.session, {
+        productId: queryId,
+        quantity: 1
+      })
+      .then (() =>
+      {
+        toast.setDuration (5000);
+        toast.setText (`เพิ่ม ${basic ? basic.name : ""} ลงในตะกร้าเรียบร้อย`);
+        toast.setVisible (true);
+      })
+      .catch (() =>
+      {
+        toast.setDuration (5000);
+        toast.setText (`เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง`);
+        toast.setVisible (true);
+      });
+    }
+    else
+    {
+      toast.setDuration (5000);
+      toast.setText ("คุณจำเป็นต้องลงชื่อเข้าใช้ก่อนจึงจะสามารถเพิ่มสินค้าได้");
+      toast.setVisible (true);
+    }
   }
   /**
    * เพิ่มสินค้านี้ลงในรายการโปรดของผู้ใช้งานระบบ
@@ -61,6 +84,17 @@ content.Main = function ProductMainContent ()
   {
     event.preventDefault ();
     event.stopPropagation ();
+
+    if (ctx.authSigned (auth))
+    {
+      return;
+    }
+    else
+    {
+      toast.setDuration (5000);
+      toast.setText ("คุณจำเป็นต้องลงชื่อเข้าใช้ก่อนจึงจะสามารถเพิ่มรายการโปรดได้");
+      toast.setVisible (true);
+    }
   }
   /**
    * เปิดหน้าต่างแชร์สินค้า
@@ -176,7 +210,7 @@ const StyleBackground = styled.img<{ $visible: boolean; }>`
 const StyleMain = styled.div`
   width: 100%;
   height: 100%;
-  height: 768px;
+  min-height: 768px;
   display: flex;
   flex-direction: flex;
   flex-wrap: nowrap;
@@ -307,6 +341,8 @@ const StyleMainPriceDiscount = styled.label`
 `;
 const StyleMainAction = styled.div`
   display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 8px;
 
   width: 100%;
@@ -315,7 +351,6 @@ const StyleMainAction = styled.div`
     & > button
   {
     display: inline-block;
-    width: 100%;
     min-width: 192px;
     min-height: 40px;
   }

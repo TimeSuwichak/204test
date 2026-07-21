@@ -1,5 +1,6 @@
 import styled       from "styled-components";
 import ctx          from "#context/common.ts";
+import ctxUI        from "#context/common.ui.ts";
 import ctxCustomer  from "#context/customer.ts";
 import apiAccount   from "#util/api.account.ts";
 import apiStorage   from "#util/api.storage.ts";
@@ -105,6 +106,7 @@ content.ReceiptItem = function CartReceiptItem ({ uid, pid }: {
   uid: number; pid: number; })
 {
   const auth = ctx.useAuth ();
+  const toast = ctxUI.useToast ();
   const queryList = ctxCustomer.useCartQuery ();
   const queryItem = ctxCustomer.useProduct (pid);
   const list = queryList.data;
@@ -133,7 +135,13 @@ content.ReceiptItem = function CartReceiptItem ({ uid, pid }: {
     if (quantity === 1)
     {
       void apiAccount.deleteCart (auth.session, uid)
-        .then (() => queryList.refetch ());
+        .then (() => queryList.refetch ())
+        .then (() =>
+        {
+          toast.setText (`ลบ ${name} ออกเรียบร้อย`);
+          toast.setDuration (5000);
+          toast.setVisible (true);
+        });
     }
     else
     {
@@ -161,24 +169,41 @@ content.ReceiptItem = function CartReceiptItem ({ uid, pid }: {
 content.Summary = function CartSummary ()
 {
   const queryList = ctxCustomer.useCartQuery ();
-  const queryData = queryList.data;
+  const queryBasics = ctxCustomer.useProducts (!queryList.data ? [] : 
+    queryList.data.map ((x) => x.productId)
+  );
+  
+  const list = queryList.data;
+  const basic = queryBasics;
+  
+  const quantity = list ? 
+    list.reduce ((x, y) => x += y.quantity, 0) : 0;
 
-  const quantity = queryData ? 
-    queryData.reduce ((x, y) => x += y.quantity, 0) : 0;
+  const sum = list ? list.map ((x) =>
+  {
+    const prod = basic.find (y => x.productId == y.data?.id);
+    const price = prod ? prod.data?.price ?? 0 : 0;
+    const sum = price * x.quantity;
 
-  const sum = 0;
+    console.log (sum, prod?.data, x.quantity);
+
+    return sum;
+
+  }).reduce ((x, y) => x + y, 0) : 0;
+
   const discount = 0;
-  const total = 0;
+  const total = sum - discount;
 
   return (
     <>
       <p>
         ทั้งหมด {quantity} ชิ้น
         รวมเป็นจำนวนเงิน {sum} บาท
-      </p>
-      <p>
+        <br/>
         ส่วนลด {discount} บาท
         ทั้งหมด {total} บาท
+        <br/>
+        (การคำนวณนี้ไม่รวมภาษี)
       </p>
     </>
   );

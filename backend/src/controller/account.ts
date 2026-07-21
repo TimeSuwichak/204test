@@ -577,10 +577,6 @@ content.errorDeleteCart = (r: Response, e: unknown) =>
 }
 
 /**
- * แข็งวัตถุ (ความปลอดภัย)
-*/
-Object.freeze (content);
-/**
  * ส่งออกตัวแปร
 */
 export default content;
