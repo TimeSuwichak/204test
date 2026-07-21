@@ -52,7 +52,7 @@ const content = function InitSystemRouter (prop: ComponentProperty)
         </Route>
         {/* Customer */}
         <Route Component={VCustomer} caseSensitive>
-          <Route index Component={CHome}/>
+          <Route index Component={CProdBrowse}/>
           <Route path="/about" Component={CAbout}/>
           <Route path="/product" Component={CProd}/>
           <Route path="/product-browser" Component={CProdBrowse}/>

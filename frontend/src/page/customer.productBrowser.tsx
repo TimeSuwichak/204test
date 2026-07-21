@@ -136,6 +136,10 @@ content.Filter = function ProductBrowserFilter ()
   return (
     <StyledFilter>
       <StyledFilterLabel>ตัวเลือก</StyledFilterLabel>
+      <div>
+        <input type="checkbox"/>
+        <label></label>
+      </div>
     </StyledFilter>
   );
 }

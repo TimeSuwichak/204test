@@ -198,7 +198,7 @@ CREATE TABLE IF NOT EXISTS `project`.`OrderList`
     `AccountId`    BIGINT NOT NULL COMMENT 'ลูกค้าที่สั่งซื้อ' ,
     `Created`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 COMMENT 'วันที่สั่งซื้อ' ,
-    `Delivered` DATETIME NOT NULL COMMENT 'วันที่รับสินค้า' , 
+    `Delivered` DATETIME COMMENT 'วันที่รับสินค้า' , 
     `Status`    INT NOT NULL COMMENT 'สถานะคำ' ,
 
     CONSTRAINT PK_Order_OrderId PRIMARY KEY (`OrderId`) ,
