@@ -93,10 +93,10 @@ content.updateBasic = (info: BasicUpdate) : Promise<void> =>
 {
     const cmd = 
     [
-        info.name ? "Name = ?" : undefined,
-        info.role ? "Role = ?" : undefined,
-        info.icon ? "Icon = ?" : undefined,
-        info.status ? "Status = ?" : undefined,
+        (info.name !== undefined) ? "Name = ?" : undefined,
+        (info.role !== undefined) ? "Role = ?" : undefined,
+        (info.icon !== undefined) ? "Icon = ?" : undefined,
+        (info.status !== undefined) ? "Status = ?" : undefined,
     ]
     .filter (x => x !== undefined)
     .join (", ")
@@ -125,7 +125,7 @@ content.updateCart = async (info: CartUpdate)
 {
     const key = 
     [
-        info.quantity ? "Quantity = ?" : undefined,
+        (info.quantity !== undefined) ? "Quantity = ?" : undefined,
     ]
     .filter (x => x !== undefined)
     .join (", ")

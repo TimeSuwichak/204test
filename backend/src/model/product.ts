@@ -268,13 +268,13 @@ content.updateBasic = async (info: BasicUpdate) : Promise<number> =>
 {
     const key = 
     [
-        info.name ? "Name = ?" : undefined,
-        info.description ? "Description = ?" : undefined,
-        info.price ? "Price = ?" : undefined,
-        info.priceCode ? "PriceCode = ?" : undefined,
-        info.platform ? "Platform = ?" : undefined,
-        info.cover ? "Cover = ?" : undefined,
-        info.background ? "Background = ?" : undefined
+        (info.name !== undefined) ? "Name = ?" : undefined,
+        (info.description !== undefined) ? "Description = ?" : undefined,
+        (info.price !== undefined) ? "Price = ?" : undefined,
+        (info.priceCode !== undefined) ? "PriceCode = ?" : undefined,
+        (info.platform !== undefined) ? "Platform = ?" : undefined,
+        (info.cover !== undefined) ? "Cover = ?" : undefined,
+        (info.background !== undefined) ? "Background = ?" : undefined
     ]
     .filter (x => x !== undefined)
     .join (", ")
@@ -302,7 +302,7 @@ content.updateBasic = async (info: BasicUpdate) : Promise<number> =>
 content.updateCategory = (info: CategoryUpdate) =>
 {
     const key = [
-        info.value ? "Value = ?" : undefined
+        (info.value !== undefined) ? "Value = ?" : undefined
     ]
     .filter (x => x !== undefined)
     .join (", ")
@@ -331,9 +331,9 @@ content.updateCategory = (info: CategoryUpdate) =>
 content.updateComment = (info: CommentUpdate) =>
 {
     const key = [
-        info.title ? "Title = ?" : undefined,
-        info.text ? "Text = ?" : undefined,
-        info.rating ? "Rating = ?" : undefined
+        (info.title !== undefined) ? "Title = ?" : undefined,
+        (info.text !== undefined) ? "Text = ?" : undefined,
+        (info.rating !== undefined) ? "Rating = ?" : undefined
     ]
     .filter (x => x !== undefined)
     .join (", ")
@@ -364,8 +364,8 @@ content.updateComment = (info: CommentUpdate) =>
 content.updateReview = (info: ReviewUpdate) =>
 {
     const key = [
-        info.mime ? "Mime = ?" : undefined,
-        info.link ? "Link = ?" : undefined
+        (info.mime !== undefined) ? "Mime = ?" : undefined,
+        (info.link !== undefined) ? "Link = ?" : undefined
     ]
     .filter (x => x !== undefined)
     .join (", ")
@@ -395,7 +395,7 @@ content.updateReview = (info: ReviewUpdate) =>
 content.updateStock = (info: StockUpdate) =>
 {
     const key = [
-        info.quantity ? "Quantity = ?" : undefined,
+        (info.quantity !== undefined) ? "Quantity = ?" : undefined,
     ]
     .filter (x => x !== undefined)
     .join (", ")
