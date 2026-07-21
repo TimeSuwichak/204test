@@ -259,194 +259,97 @@ export default function Order() {
 }
 
 const OrderContainer = styled.div`
-  color: black;
-  font-family: sans-serif;
+  background: #0b1220;
+  min-height: 100vh;
+  padding: 28px;
+  color: #fff;
 `;
 
 const HeaderSection = styled.div`
-  margin-bottom: 1.5rem;
-  h1 { font-size: 2rem; margin: 0 0 0.5rem 0; color: black; }
+  margin-bottom: 24px;
+`;
+
+const TopBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h1 {
+    margin: 0;
+    font-size: 2.3rem;
+    font-weight: 800;
+    color: white;
+  }
 `;
 
 const ToolbarRow = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 1rem 0;
-  width: 100%;
-  gap: 1rem;
+  gap: 16px;
+  margin-top: 24px;
 `;
 
 const SearchWrapper = styled.div`
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: black;
-  display: flex;
-  align-items: center;
+  flex: 1;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #cbd5e1;
+  }
 `;
 
 const SearchInput = styled.input`
-  padding: 6px 12px;
-  font-size: 1rem;
-  border-radius: 4px;
-  border: 1px solid lightgray;
-  margin-left: 0.5rem;
-  width: 220px;
-  background-color: white;
-  color: black;
+  width: 100%;
+  padding: 14px 18px;
+  background: #111827;
+  color: white;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+
+  &:focus {
+    border-color: #3b82f6;
+  }
+
+  &::placeholder {
+    color: #64748b;
+  }
 `;
 
 const FilterWrapper = styled.div`
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: black;
-  display: flex;
-  align-items: center;
+  width: 240px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #cbd5e1;
+  }
 `;
 
 const StyledSelect = styled.select`
-  padding: 6px 12px;
-  font-size: 1rem;
-  border-radius: 4px;
-  border: 1px solid white;
-  margin-left: 0.5rem;
-  cursor: pointer;
-  background-color: white;
-  color: black;
-  option { background-color: white; color: black; }
-`;
-
-const StatusBadge = styled.span<{ bg: string; color: string }>`
-  background-color: ${(props) => props.bg};
-  color: ${(props) => props.color};
-  padding: 4px 12px;
-  font-weight: bold;
-  font-size: 0.85rem;
-  border-radius: 20px;
-  display: inline-block;
-`;
-
-// UI Modal
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex; justify-content: center; align-items: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
   width: 100%;
-  max-width: 480px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  animation: fadeIn 0.15s ease-out;
-
-  @keyframes fadeIn {
-    from { transform: translateY(-10px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-`;
-
-const ModalHeader = styled.div`
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 1.2rem; border-bottom: 1px solid white; padding-bottom: 0.5rem;
-  h2 { margin: 0; font-size: 1.4rem; color: black; }
-`;
-
-const CloseButton = styled.button`
-  background: none; border: none; font-size: 1.8rem; cursor: pointer; color: red;
-  &:hover { color: lightgray; }
-`;
-
-const ModalBody = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  margin-bottom: 1.5rem;
-`;
-
-const DetailRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1rem;
-  color: black;
-  .label { color: black; }
-  .value { color: black; }
-  .total-price { font-size: 1.2rem; color: blue; font-weight: bold; }
-  
-  &.highlight-row {
-    background-color: white;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid white;
-  }
-`;
-
-// Modal
-const ProductListContainer = styled.div`
-  background-color: lightgoldenrodyellow;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid white;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  .list-title {
-    font-weight: bold;
-    font-size: 0.9rem;
-    color: black;
-    margin-bottom: 2px;
-  }
-`;
-
-const ProductItemRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.95rem;
-  padding-left: 6px;
-  .p-name { color: black; }
-  .p-price { color: black; font-weight: 500; }
-`;
-
-// Status Dropdown
-const StatusEditRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 4px;
-  .label { color: gray; font-size: 1rem; }
-
-  select {
-    padding: 6px 12px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    border-radius: 20px;
-    border: 1px solid lightgray;
-    cursor: pointer;
-    outline: none;
-    option {
-      background-color: white;
-      color: black;
-    }
-  }
-`;
-
-const CloseModalButton = styled.button`
-  background-color: darkred;
+  padding: 14px 18px;
+  background: #111827;
   color: white;
-  border: none;
-  width: 100%;
-  padding: 10px;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 4px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  font-size: 15px;
   cursor: pointer;
-  &:hover { background-color: lightgray; }
+  outline: none;
+
+  &:focus {
+    border-color: #3b82f6;
+  }
+
+  option {
+    background: #111827;
+    color: white;
+  }
 `;
 
 const TableContainer = styled.div`
@@ -471,7 +374,7 @@ const StyledTable = styled.table`
     text-transform: uppercase;
     padding: 18px;
     border-bottom: 1px solid #1e293b;
-    text-align:left;
+    text-align: left;
   }
 
   td {
@@ -481,14 +384,190 @@ const StyledTable = styled.table`
     vertical-align: middle;
   }
 
+  tbody tr {
+    transition: background 0.2s ease;
+    cursor: pointer;
+  }
+
   tbody tr:hover {
     background: #1e293b;
   }
+`;
 
-  img {
-    width: 58px;
-    height: 78px;
-    object-fit: cover;
+const StatusBadge = styled.span<{ bg: string; color: string }>`
+  background: ${(props) => props.bg};
+  color: ${(props) => props.color};
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-block;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  width: 100%;
+  max-width: 560px;
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 24px;
+  color: white;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+
+  animation: fadeIn 0.2s ease;
+
+  @keyframes fadeIn {
+    from {
+      transform: translateY(-12px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #334155;
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    color: white;
+  }
+`;
+
+const CloseButton = styled.button`
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 28px;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &:hover {
+    color: white;
+  }
+`;
+
+const ModalBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+`;
+
+const DetailRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .label {
+    color: #94a3b8;
+    font-size: 14px;
+  }
+
+  .value {
+    color: white;
+    font-weight: 600;
+  }
+
+  .total-price {
+    color: #3b82f6;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  &.highlight-row {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+`;
+
+const ProductListContainer = styled.div`
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .list-title {
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+`;
+
+const ProductItemRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  .p-name {
+    color: #e2e8f0;
+  }
+
+  .p-price {
+    color: white;
+    font-weight: 600;
+  }
+`;
+
+const StatusEditRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+
+  .label {
+    color: #94a3b8;
+    font-size: 14px;
+  }
+
+  select {
+    padding: 10px 16px;
     border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+  }
+`;
+
+const CloseModalButton = styled.button`
+  width: 100%;
+  margin-top: 24px;
+  padding: 12px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &:hover {
+    opacity: 0.9;
   }
 `;
