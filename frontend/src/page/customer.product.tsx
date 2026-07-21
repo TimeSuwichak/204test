@@ -1,64 +1,43 @@
 import styled           from "styled-components";
-
-import cmmCtx           from "#context/common.ts";
+import ctx              from "#context/common.ts";
+import ctxCustomer      from "#context/customer.ts";
 import apiAccount       from "#util/api.account.ts";
-import apiProduct       from "#util/api.product.ts";
 import apiStorage       from "#util/api.storage.ts";
 
 import { useSearchParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 
-import type { UseQueryResult } from "@tanstack/react-query";
 import type { MouseEvent } from "react";
-import type { BasicFetch } from "#util/api.product.ts";
 
-import { Share2Icon } from "lucide-react";
+import { ShoppingCart, Share2Icon, Heart } from "lucide-react";
 
 /**
- * โครงสร้างข้อมูลที่ส่วนประกอบต้องการใช้งาน: เนื้อหาหลัก
+ * ส่วนประกอบแสดงรายละเอียดสินค้าที่ผู้ใช้กำลังเลือก
 */
-interface PropMain
-{
-  /**
-   * ระบบดึงข้อมูลพื้นฐานสินค้า
-  */
-  queryBasic: UseQueryResult<BasicFetch>;
-}
-
 const content = function Product ()
 {
-  const [param] = useSearchParams ();
-  const id = param.get ("id");
-  const auth = cmmCtx.useAuth ();
-
-  const queryBasic = useQuery ({
-    queryKey: ["Product", "GetBasicById", id],
-    queryFn: () => apiProduct.getBasic (auth.session, Number (id)),
-  });
-
   return <>
     <StyleRoot>
-      <content.Main 
-        queryBasic={queryBasic}/>
+      <content.Main/>
     </StyleRoot>
   </>;
 }
-content.Main = function ProductMainContent (prop: PropMain)
+content.Main = function ProductMainContent ()
 {
-  const auth              = cmmCtx.useAuth ();
-  const [name, setName]   = useState ("");
-  const [sub, setSub]     = useState ("");
-  const [desc, setDesc]   = useState ("");
-  const [price, setPrice] = useState ("");
-  const [icon, setIcon]   = useState ("");
+  const [param] = useSearchParams ();
+  const id = param.get ("id");
+  const auth = ctx.useAuth ();
+  const queryBasic = ctxCustomer.useProduct (Number (id));
+  const basic = queryBasic.data;
 
+  /**
+   * เพิ่มสินค้านี้ลงในตะกร้าของผู้ใช้งานระบบ
+  */
   const onClickAdd = (event: MouseEvent) =>
   {
     event.preventDefault ();
     event.stopPropagation ();
 
-    const query = prop.queryBasic;
+    const query = queryBasic;
     const queryData = query.data;
     const queryId = queryData ? queryData.id : NaN;
 
@@ -67,27 +46,29 @@ content.Main = function ProductMainContent (prop: PropMain)
       quantity: 1
     });
   }
+  /**
+   * เพิ่มสินค้านี้ลงในรายการโปรดของผู้ใช้งานระบบ
+  */
+  const onClickFavorite = (event: MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+  }
+  /**
+   * เปิดหน้าต่างแชร์สินค้า
+  */
   const onClickShare = (event: MouseEvent) =>
   {
     event.preventDefault ();
     event.stopPropagation ();
   }
 
-  useEffect (() =>
-  {
-    const query = prop.queryBasic;
-    const data = query.data;
 
-    if (!data) {
-      return;
-    }
-    setName (data.name);
-    setSub ("");
-    setDesc (data.description);
-    setPrice (`${String (data.price)} ฿`);
-    setIcon (apiStorage.getUrlStream (data.cover));
-  },
-  [prop.queryBasic]);
+  const name = basic ? basic.name : "";
+  const sub = "";
+  const desc = basic ? basic.description : "";
+  const price = basic ? String (basic.price) : "";
+  const icon = basic ? apiStorage.getUrlStream (basic.cover) : undefined;
 
   return (
     <StyleMain>
@@ -108,28 +89,28 @@ content.Main = function ProductMainContent (prop: PropMain)
           <StyleMainOption>
             <StyleMainPrice>
               <StyleMainPriceDiscount>99%</StyleMainPriceDiscount>
-              <span>{price}</span>
+              <span>{price} ฿</span>
             </StyleMainPrice>
-            <button onClick={onClickAdd}>เพิ่มลงในตะกร้า</button>
-            <button onClick={onClickShare}>
-              <Share2Icon/>
-              <span>แชร์</span>
-            </button>
+            <StyleMainAction>
+              <button onClick={onClickAdd}>
+                <ShoppingCart/>
+                <span>เพิ่มลงในตะกร้า</span>
+              </button>
+              <button onClick={onClickFavorite}>
+                <Heart/>
+                <span>เพิ่มรายการโปรด</span>
+              </button>
+              <button onClick={onClickShare}>
+                <Share2Icon/>
+                <span>แชร์</span>
+              </button>
+            </StyleMainAction>
           </StyleMainOption>
         </main>
       </StyleMainView>
     </StyleMain>
   );
 }
-
-/**
- * แข็งวัตถุ (ความปลอดภัย)
-*/
-Object.freeze (content);
-/**
- * ส่งออกตัวแปร
-*/
-export default content;
 
 const StyleRoot = styled.div`
   margin: 96px 0px 64px 0px;
@@ -222,23 +203,16 @@ const StyleMainReview = styled.div`
 `;
 const StyleMainOption = styled.div`
   display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   width: 100%;
-  height: 40px;
+  min-height: 40px;
   align-items: center;
-  gap: 16px;
+  gap: 48px;
 
-  & > button
+  @media (max-width: 1024px)
   {
-    width: 160px;
-  }
-  & > button > img,
-  & > button > svg
-  {
-    display: inline-block;
-    vertical-align: middle;
-    width: 24px;
-    height: 24px;
-    margin-right: 8px;
+    flex-direction: column;
   }
 `;
 const StyleMainPrice = styled.label`
@@ -255,3 +229,32 @@ const StyleMainPriceDiscount = styled.label`
   border-radius: 16px;
   padding: 0px 16px;
 `;
+const StyleMainAction = styled.div`
+  display: inline-flex;
+  gap: 8px;
+
+  width: 100%;
+  height: 40px;
+
+    & > button
+  {
+    display: inline-block;
+    width: 100%;
+    min-width: 192px;
+    min-height: 40px;
+  }
+  & > button > img,
+  & > button > svg
+  {
+    display: inline-block;
+    vertical-align: middle;
+    width: 24px;
+    height: 24px;
+    margin-right: 16px;
+  }
+`;
+
+/**
+ * ส่งออกตัวแปร
+*/
+export default content;

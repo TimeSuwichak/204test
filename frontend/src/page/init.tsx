@@ -98,4 +98,7 @@ content.Splash = function InitSplash ({ visible }: { visible: boolean; })
 
   return (<></>);
 }
+/**
+ * ส่งออกตัวแปร
+*/
 export default content;

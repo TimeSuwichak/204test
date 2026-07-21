@@ -4,9 +4,7 @@ import {
   Disc, 
   Users, 
   TicketPercent, 
-  CreditCard, 
-  Truck, 
-  MessageSquare, 
+  ShoppingBag, 
   Settings,
   ChevronLeft, 
   ChevronRight 
@@ -14,7 +12,7 @@ import {
 
 import type { LucideIcon } from 'lucide-react';
 
-interface Menuitem {
+interface MenuItem {
   id: string;
   name: string;
   icon: LucideIcon;
@@ -34,16 +32,14 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
   setIsCollapsed 
 }) => {
   
-  // 🔥 ปรับเปลี่ยนเมนูให้ตรงกับ Use Case Diagram ของระบบหลังบ้านทั้งหมด
-  const sidebarMenus: Menuitem[] = [
-    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
+  // 🔥 เมนูตรงตามหน้าเพจที่มีในระบบครบ 100%
+  const sidebarMenus: MenuItem[] = [
+    { id: 'dashboard', name: 'Dashboard ภาพรวม', icon: LayoutDashboard },
     { id: 'items', name: 'จัดการแผ่น/ตลับเกม', icon: Disc },
-    { id: 'users', name: 'จัดการผู้ใช้', icon: Users },
-    { id: 'promotions', name: 'โปรโมชัน & ส่วนลด', icon: TicketPercent },
-    { id: 'payments', name: 'การชำระเงิน', icon: CreditCard },
-    { id: 'shipments', name: 'การจัดส่งสินค้า', icon: Truck },
-    { id: 'reviews', name: 'จัดการรีวิวลูกค้า', icon: MessageSquare },
-    { id: 'settings', name: 'ตั้งค่าเว็บไซต์/ระบบ', icon: Settings },
+    { id: 'shipments', name: 'จัดการคำสั่งซื้อ & จัดส่ง', icon: ShoppingBag },
+    { id: 'users', name: 'จัดการผู้ใช้ & สิทธิ์', icon: Users },
+    { id: 'promotions', name: 'โปรโมชัน & คูปอง', icon: TicketPercent },
+    { id: 'settings', name: 'ตั้งค่าข้อมูลหลักร้าน', icon: Settings },
   ];
 
   return (
@@ -52,7 +48,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
-      {/* รายการเมนูทั้งหมด (รองรับการ scroll ในกรณีที่เปิดจอเล็กแล้วเมนูเยอะ) */}
+      {/* รายการเมนูทั้งหมด */}
       <ul className="p-4 space-y-2 overflow-y-auto flex-1 custom-scrollbar">
         {sidebarMenus.map((menu) => {
           const Icon = menu.icon;

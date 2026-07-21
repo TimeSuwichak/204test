@@ -69,6 +69,9 @@ content.NavBar = function PresetNavBar ()
   const toSignIn = () => { void navigation.toAuth (); }
   const toProfile = () => 
   {
+    /**
+     * เปิดตะกร้า
+    */
     const onCart = () =>
     {
       menuCtx.setVisible (false);
@@ -76,18 +79,27 @@ content.NavBar = function PresetNavBar ()
       cartCtx.setClose (() => { cartCtx.setVisible (false); });
       return;
     }
+    /**
+     * เปิดประวัติการสั่งซื้อ
+    */
     const onShipping = () =>
     {
       menuCtx.setVisible (false);
-      void navigation.toShipping ();
+      void navigation.toOrder ();
       return;
     }
+    /**
+     * เปิดระบบคอนโซล
+    */
     const onConsole = () =>
     {
       menuCtx.setVisible (false);
       void navigation.toConsole ();
       return;
     }
+    /**
+     * เปิดหน้าการตั้งค่า
+    */
     const onSettings = () =>
     {
       settings.setClose (() =>
@@ -96,15 +108,15 @@ content.NavBar = function PresetNavBar ()
       });
       settings.setVisible (true);
       menuCtx.setVisible (false);
-      // void navigation.toSettings ();
-      return;
     }
+    /**
+     * ลงชื่อผู้ใช้ออก 
+    */
     const onSignOut = () =>
     {
       apiAuth.saveSetPrefered (-1);
       apiAuth.saveWrite ();
       location.reload ();
-      return;
     }
 
     menuCtx.setChildren (<>

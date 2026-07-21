@@ -1,5 +1,6 @@
 import react          from "react";
 import styled         from "styled-components";
+import ctx            from "#context/common.ts";
 import ctxCustomer    from "#context/customer.ts";
 import cmmNavigation  from "#util/common.navigation.ts";
 import apiStorage     from "#util/api.storage.ts";
@@ -143,6 +144,7 @@ content.Filter = function ProductBrowserFilter ()
 */
 content.Cart = function ProductBrowserCart ()
 {
+  const auth = ctx.useAuth ();
   const cart = ctxCustomer.useCart ();
   const cartQuery = ctxCustomer.useCartQuery ();
 
@@ -162,7 +164,7 @@ content.Cart = function ProductBrowserCart ()
   const count = data ? data.reduce ((x, y) => x += y.quantity, 0) : 0;
 
   return (
-    <StyledCart onClick={onClick}>
+    <StyledCart onClick={onClick} $visible={ctx.authSigned (auth)}>
       <StyledCartLabel>{count}</StyledCartLabel>
       <ShoppingBasket/>
     </StyledCart>
@@ -333,7 +335,8 @@ const StyledFilterLabel = styled.label`
   font-size: 1.25rem;
   font-weight: normal;
 `;
-const StyledCart = styled.button`
+const StyledCart = styled.button<{ $visible: boolean; }>`
+  display: ${prop => prop.$visible ? "block" : "none"};
   position: absolute;
   inset: auto 64px 64px auto;
   width: 64px;
@@ -349,6 +352,11 @@ const StyledCart = styled.button`
     min-width: 32px;
     min-height: 32px;
     vertical-align: middle;
+  }
+  @media (max-width: 1024px)
+  {
+    bottom: 24px;
+    right: 32px;
   }
 `;
 const StyledCartLabel = styled.label`
