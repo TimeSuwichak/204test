@@ -136,6 +136,25 @@ content.createCart = async (session: string, data: CartCreate) =>
 
     return result;
 }
+/**
+ * สร้างคำสั่งซื้อไปยังระบบ
+*/
+content.createOrder = async (session: string, data: OrderCreate) =>
+{
+    const url = content.NET_URL_ORDER;
+    const response = await common.postJson (session, url, {
+        "Item": data.item.map ((x) => {
+            return {
+                "ProductId": x.productId,
+                "Quantity": x.quantity
+            }
+        }),
+    });
+    const json = await common.toJson (response);
+    const result = content.outputPostCart (json);
+
+    return result;
+}
 
 /**
  * ลบข้อมูลบัญชีดังกล่าวออกจากระบบ ซึ่งรวมไปถึงข้อมูลการเข้าสู่ระบบเช่นกัน
@@ -440,6 +459,22 @@ export interface OrderFetch
         */
         quantity: number;
     } [];
+}
+export interface OrderCreate
+{
+    /**
+     * รายการสินค้าในคำสั้งซื้อสินค้า
+    */
+    readonly item: {
+        /**
+         * รหัสสินค้า
+        */
+        productId: ProductId;
+        /**
+         * จำนวนสินค้าที่สั่งซื้อ
+        */
+        quantity: number;
+    }[];
 }
 
 /**
