@@ -283,23 +283,37 @@ content.NET_URL_CART = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${Strin
  * ลิงค์เต็มของที่อยู่เซิร์ฟเวอร์ สำหรับระบบคำสั่งซื้อ
 */
 content.NET_URL_ORDER = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (content.NET_PORT)}${content.NET_PREFIX_ORDER}`;
+
+/**
+ * บทบาทบัญชี: ลงชื่อเข้าใช้
+*/
+content.ROLE_AUTH = 1;
 /**
  * บทบาทบัญชี: ผู้ใช้
 */
-content.ROLE_USER = 1;
+content.ROLE_USER = 2;
 /**
  * บทบาทบัญชี: ผู้ดูแล
 */
-content.ROLE_STAFF = 2;
+content.ROLE_STAFF = 3;
 /**
  * บทบาทบัญชี:ผู้ดูแลระบบ
 */
-content.ROLE_MANAGER = 3;
+content.ROLE_MANAGER = 4;
 /**
  * บทบาทบัญชี:ผู้พัฒนาระบบ
 */
-content.ROLE_DEVELOPER = 4;
-
+content.ROLE_DEVELOPER = 5;
+/**
+ * รายการบทบาทบัญชีทั้งหมดในระบบ
+*/
+content.ROLE_LIST = 
+[
+    content.ROLE_USER,
+    content.ROLE_STAFF,
+    content.ROLE_MANAGER,
+    content.ROLE_DEVELOPER
+];
 /**
  * เก็บรวบรวมข้อมูลพื้นฐานเกี่ยวกับบัญชีผู้ใช้
 */

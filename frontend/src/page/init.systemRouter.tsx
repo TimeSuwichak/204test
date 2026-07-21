@@ -17,7 +17,7 @@ const GAuth = lazy (() => import ("#page/auth.tsx"));
 const GSettings = lazy (() => import ("#page/settings.tsx"));
 const G404 = lazy (() => import ("#page/error.404.tsx"));
 const CAbout = lazy (() => import ("#page/customer.about.tsx"));
-const CHome = lazy (() => import ("#page/customer.home.tsx"));
+// const CHome = lazy (() => import ("#page/customer.home.tsx"));
 const CProd = lazy (() => import ("#page/customer.product.tsx"));
 const CProdBrowse = lazy (() => import ("#page/customer.productBrowser.tsx"));
 const COrder = lazy (() => import ("#page/customer.order.tsx"));
