@@ -109,7 +109,7 @@ content.Main = function ProductMainContent ()
   const name = basic ? basic.name : "";
   const sub = "";
   const desc = basic ? basic.description : "";
-  const price = basic ? String (basic.price.toFixed (2)) : "";
+  const price = basic ? basic.price.toFixed (2) : "";
   const icon = basic ? apiStorage.getUrlStream (basic.cover) : undefined;
 
   return (
