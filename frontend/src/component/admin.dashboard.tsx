@@ -1,7 +1,6 @@
 import React from 'react';
-import { AdminLayout } from "#component/admin.layout.tsx";
-
-import { TrendingUp, ShoppingBag, DollarSign, Package, Zap } from 'lucide-react';
+import { TrendingUp, ShoppingBag, DollarSign, Package, Zap } 
+from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   const stats = [
@@ -27,7 +26,7 @@ export const AdminDashboard: React.FC = () => {
           <p className="text-sm text-slate-400 mt-1">ยินดีต้อนรับกลับมา! ข้อมูลหลังบ้านร้านแผ่นเกมของคุณในปัจจุบัน</p>
         </div>
         <button
-          onClick={() => { alert('ล้าง Redis Cache เรียบร้อย!') }}
+          onClick={() => { alert('ล้าง Redis Cache เรียบร้อย!'); }}
           className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg border border-amber-500/30 active:scale-95"
         >
           <Zap size={14} /> เคลียร์ Redis Cache
@@ -101,10 +100,3 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
-
-const content = function AdminDashboard ()
-{
-  return (<AdminLayout/>)
-}
-
-export default content;

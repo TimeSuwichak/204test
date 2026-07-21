@@ -65,8 +65,19 @@ content.setupProduct = async () =>
         const price = read.requireFloat ("Price");
         const priceCode = read.requireInteger ("PriceCode");
         const platform = read.requireInteger ("Platform");
+        const bg = read.requireString ("Background");
         const cover = read.requireString ("Cover");
-        const coverBin = fs.readFileSync (path.join (folder, cover));
+
+        const bgPath = path.resolve (path.join (folder, bg));
+        const coverPath = path.resolve (path.join (folder, cover));
+
+        const bgBin = bg !== "" ?
+            fs.existsSync (bgPath) ? 
+            fs.readFileSync (bgPath) : undefined : undefined;
+
+        const coverBin = cover !== "" ?
+            fs.existsSync (coverPath) ?
+            fs.readFileSync (coverPath) : undefined : undefined;
 
         try
         {
@@ -77,14 +88,19 @@ content.setupProduct = async () =>
         {
             try
             {
-                const coverId = await modelStorage.createWriter (coverBin);
+                const bgId = bgBin ? 
+                    await modelStorage.createWriter (bgBin) : undefined;
+                const coverId = coverBin ?  
+                    await modelStorage.createWriter (coverBin) : undefined;
+
                 await modelProd.create ({
                     name: name,
                     description: desc,
                     price: price,
                     priceCode: priceCode,
                     platform: platform,
-                    cover: coverId
+                    background: bgId ?? "",
+                    cover: coverId ?? "",
                 });
             }
             catch (e: unknown)
@@ -122,7 +138,8 @@ content.setupAccountFor = async (
             link = await modelAccount.create ({
                 name: accountName,
                 role: accountRole,
-                icon: ""
+                icon: "",
+                status: modelAccount.RESTRICTION_NONE,
             });
             await modelAuth.createDb (authId, authPwd, link);
         }

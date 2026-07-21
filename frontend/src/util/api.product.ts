@@ -47,6 +47,21 @@ content.getBasicList = async (session: string, option ?: BasicFetchOption)
     const result = content.readBasicList (data);
 
     return result;
+}/**
+ * ทำการดึงข้อมูลหมวดหมู่ของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param key รหัสหมวดหมู่ที่ถูกต้อง
+*/
+content.getCategory = async (session: string, key: CategoryId) 
+    : Promise<CategoryFetch> =>
+{
+    const id = String (key);
+    const endpoint = `${content.NET_PREFIX_CATEGORY}/${id}`;
+    const data = await common.getJson (session, endpoint);
+    const result = content.readCategory (data);
+
+    return result; 
 }
 /**
  * ทำการดึงข้อมูลความคิดเห็นพื้นฐานของสินค้า
@@ -61,6 +76,22 @@ content.getComment = async (session: string, key: CommentId)
     const endpoint = `${content.NET_URL_COMMENT}/${id}`;
     const data = await common.getJson (session, endpoint);
     const result = content.readComment (data);
+
+    return result;
+}
+/**
+ * ทำการดึงข้อมูลตัวอย่างของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param key รหัสตัวอย่างสินค้าที่ถูกต้อง
+*/
+content.getReview = async (session: string, key: CommentId) 
+    : Promise<ReviewFetch> =>
+{
+    const id = String (key);
+    const endpoint = `${content.NET_URL_REVIEW}/${id}`;
+    const data = await common.getJson (session, endpoint);
+    const result = content.readReview (data);
 
     return result;
 }
@@ -100,6 +131,60 @@ content.updateBasic = async (session: string, data: BasicUpdate)
         "PriceCode": data.priceCode,
     });
 }
+/**
+ * ทำการเปลี่ยนข้อมูลหมวดหมู่ของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param data ชุดข้อมูลประกอบการเปลี่ยนแปลง
+*/
+content.updateCategory = async (session: string, data: CategoryUpdate) =>
+{
+    const id = String (data.categoryId);
+    const endpoint = `${content.NET_URL_CATEGORY}/${id}`;
+
+    await common.putJson (session, endpoint, {
+        "Value": data.value
+    });
+}
+/**
+ * ทำการเปลี่ยนข้อมูลความคิดเห็นของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param data ชุดข้อมูลประกอบการเปลี่ยนแปลง
+*/
+content.updateComment = async (session: string, data: CommentUpdate) =>
+{
+    const id = String (data.productId);
+    const endpoint = `${content.NET_URL_COMMENT}/${id}`;
+
+    await common.putJson (session, endpoint, {
+        "Title": data.title,
+        "Text": data.text,
+        "Rating": data.rating
+    });
+}
+/**
+ * ทำการเปลี่ยนข้อมูลความคิดเห็นของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param data ชุดข้อมูลประกอบการเปลี่ยนแปลง
+*/
+content.updateReview = async (session: string, data: ReviewUpdate) =>
+{
+    const id = String (data.reviewId);
+    const endpoint = `${content.NET_URL_COMMENT}/${id}`;
+
+    await common.putJson (session, endpoint, {
+        "Mime": data.mime,
+        "Link": data.link,
+    });
+}
+/**
+ * ทำการเปลี่ยนข้อมูลสต็อกของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param data ชุดข้อมูลประกอบการเปลี่ยนแปลง
+*/
 content.updateStock = async (session: string, data: StockUpdate) 
     : Promise<void> =>
 {
@@ -138,8 +223,59 @@ content.createBasic = async (session: string, data: BasicCreate) :
 
     const response = await common.postForm (session, endpoint, form);
     const reader = await common.toJson (response);
-    const result = content.readCreateResult (reader);
+    const result = content.readBasicCreate (reader);
 
+    return result;
+}
+/**
+ * ทำการสร้างข้อมูลหมวดหมู่ให้กับสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param data ชุดข้อมูลประกอบการสร้าง
+*/
+content.createCategory = async (session: string, data: CategoryCreate) =>
+{
+    const response = await common.postJson (session, content.NET_URL_CATEGORY, {
+        "ProductId": data.productId,
+        "Value": data.value
+    });
+    const json = await common.toJson (response);
+    const result = content.readCategoryCreate (json);
+    return result;
+}
+/**
+ * ทำการสร้างข้อมูลความคิดเห็นให้กับสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param data ชุดข้อมูลประกอบการสร้าง
+*/
+content.createComment = async (session: string, data: CommentCreate) =>
+{
+    const response = await common.postJson (session, content.NET_URL_COMMENT, {
+        "ProductId": data.productId,
+        "Title": data.title,
+        "Text": data.text,
+        "Rating": data.rating,
+    });
+    const json = await common.toJson (response);
+    const result = content.readCommentCreate (json);
+    return result;
+}
+/**
+ * ทำการสร้างข้อมูลตัวอย่างให้กับสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param data ชุดข้อมูลประกอบการสร้าง
+*/
+content.createReview = async (session: string, data: ReviewCreate) =>
+{
+    const response = await common.postJson (session, content.NET_URL_REVIEW, {
+        "ProductId": data.productId,
+        "Mime": data.mime,
+        "Link": data.link
+    });
+    const json = await common.toJson (response);
+    const result = content.readReviewCreate (json);
     return result;
 }
 /**
@@ -156,6 +292,48 @@ content.deleteBasic = async (session: string, key: BasicId)
 
     await common.delete (session, endpoint);
 }
+/**
+ * ทำการลบข้อมูลหมวดหมู่ของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param key รหัสหมวดหมู่
+*/
+content.deleteCategory = async (session: string, key: CategoryId) 
+    : Promise<void> =>
+{
+    const id = String (key);
+    const endpoint = `${content.NET_URL_CATEGORY}/${id}`;
+
+    await common.delete (session, endpoint);
+}
+/**
+ * ทำการลบข้อมูลความคิดเห็นของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param key รหัสความคิดเห็น
+*/
+content.deleteComment = async (session: string, key: CommentId) 
+    : Promise<void> =>
+{
+    const id = String (key);
+    const endpoint = `${content.NET_URL_COMMENT}/${id}`;
+
+    await common.delete (session, endpoint);
+}
+/**
+ * ทำการลบข้อมูลตัวอย่างของสินค้า
+ * 
+ * @param session ชุดรหัสยืนยันตัวตน
+ * @param key รหัสตัวอย่างสินค้า
+*/
+content.deleteReview = async (session: string, key: ReviewId) 
+    : Promise<void> =>
+{
+    const id = String (key);
+    const endpoint = `${content.NET_URL_REVIEW}/${id}`;
+
+    await common.delete (session, endpoint);
+}
 content.readBasic = (reader: ObjectReader) : BasicFetch =>
 {
     return {
@@ -165,6 +343,7 @@ content.readBasic = (reader: ObjectReader) : BasicFetch =>
         price: reader.requireFloat ("Price"),
         priceCode: reader.requireInteger ("PriceCode"),
         platform: reader.requireInteger ("Platform"),
+        background: reader.requireString ("Background"),
         cover: reader.requireString ("Cover"),
     };
 }
@@ -175,6 +354,14 @@ content.readBasicList = (reader: ObjectReader) : BasicFetch [] =>
         return content.readBasic (objectReader (x));
     });
 }
+content.readCategory = (reader: ObjectReader) : CategoryFetch =>
+{
+    return {
+        categoryId: reader.requireInteger ("CategoryId"),
+        productId: reader.requireInteger ("ProductId"),
+        value: reader.requireInteger ("Value"),
+    }
+}
 content.readComment = (reader: ObjectReader) : CommentFetch =>
 {
     return {
@@ -183,16 +370,46 @@ content.readComment = (reader: ObjectReader) : CommentFetch =>
         author: reader.requireInteger ("Author"),
         title: reader.requireString ("Title"),
         text: reader.requireString ("Text"),
+        rating: reader.requireInteger ("Rating"),
     };
 }
-content.readCreateResult = (reader: ObjectReader) : BasicCreateResult =>
+content.readReview = (reader: ObjectReader) : ReviewFetch =>
+{
+    return {
+        reviewId: reader.requireInteger ("ReviewId"),
+        productId: reader.requireInteger ("ProductId"),
+        mime: reader.requireString ("Mime"),
+        link: reader.requireString ("Link"),
+    };
+}
+content.readBasicCreate = (reader: ObjectReader) : BasicCreateResult =>
 {
     return {
         id: reader.requireInteger ("Id"),
         created: reader.requireDate ("Created") 
     };
 }
-
+content.readCategoryCreate = (reader: ObjectReader) : CategoryCreateResult =>
+{
+    return {
+        id: reader.requireInteger ("Id"),
+        created: reader.requireDate ("Created") 
+    };
+}
+content.readCommentCreate = (reader: ObjectReader) : CommentCreateResult =>
+{
+    return {
+        id: reader.requireInteger ("Id"),
+        created: reader.requireDate ("Created") 
+    };
+}
+content.readReviewCreate = (reader: ObjectReader) : ReviewCreateResult =>
+{
+    return {
+        id: reader.requireInteger ("Id"),
+        created: reader.requireDate ("Created") 
+    };
+}
 content.readStock = (reader: ObjectReader) : StockFetch =>
 {
     return {
@@ -377,6 +594,10 @@ export interface BasicFetch
     */
     platform: number;
     /**
+     * รูปภาพพื้นหลังสินค้า
+    */
+    background: string;
+    /**
      * รูปภาพปกสินค้า
     */
     cover: string;
@@ -441,6 +662,10 @@ export interface BasicCreate
     */
     platform: number;
     /**
+     * พื้นหลังสินค้า
+    */
+    background: Blob | File | undefined;
+    /**
      * ปกสินค้า
     */
     cover: Blob | File | undefined;
@@ -500,6 +725,17 @@ export interface CategoryCreate
     */
     value: number;
 }
+export interface CategoryCreateResult
+{
+    /**
+     * รหัสสินค้า
+    */
+    id: number;
+    /**
+     * วันที่สร้าง
+    */
+    created: Date;
+}
 
 /**
  * โครงสร้างข้อมูลเมื่อทำการดึงข้อมูลความคิดเห็น
@@ -526,6 +762,10 @@ export interface CommentFetch
      * ข้อความ
     */
     text: string;
+    /**
+     * คะแนน
+    */
+    rating: number;
 }
 export interface CommentUpdate
 {
@@ -541,6 +781,10 @@ export interface CommentUpdate
      * ข้อความ
     */
     text ?: string | undefined;
+    /**
+     * คะแนน
+    */
+    rating ?: number | undefined;
 }
 export interface CommentCreate
 {
@@ -556,7 +800,86 @@ export interface CommentCreate
      * ข้อความ
     */
     text: string;
+    /**
+     * คะแนน
+    */
+    rating: number;
 }
+export interface CommentCreateResult
+{
+    /**
+     * รหัสสินค้า
+    */
+    id: number;
+    /**
+     * วันที่สร้าง
+    */
+    created: Date;
+}
+
+
+export interface ReviewFetch
+{
+    /**
+     * รหัสเอกลักษณ์
+    */
+    reviewId: ReviewId;
+    /**
+     * รหัสสินค้า
+    */
+    productId: BasicId;
+    /**
+     * รหัส MIME
+    */
+    mime: string;
+    /**
+     * ลิงค์ที่อยู่ของทรัพยากร
+    */
+    link: string;
+}
+export interface ReviewUpdate
+{
+    /**
+     * รหัสเอกลักษณ์
+    */
+    reviewId: ReviewId;
+    /**
+     * รหัส MIME
+    */
+    mime ?: string | undefined;
+    /**
+     * ลิงค์ที่อยู่ของทรัพยากร
+    */
+    link ?: string | undefined;
+}
+export interface ReviewCreate
+{
+    /**
+     * รหัสสินค้า
+    */
+    productId: BasicId;
+    /**
+     * รหัส MIME
+    */
+    mime: string;
+    /**
+     * ลิงค์ที่อยู่ของทรัพยากร
+    */
+    link: string;
+}
+export interface ReviewCreateResult
+{
+    /**
+     * รหัสสินค้า
+    */
+    id: number;
+    /**
+     * วันที่สร้าง
+    */
+    created: Date;
+}
+
+
 /**
  * ข้อมูลประกอบการดึงสต็อกของสินค้า
 */

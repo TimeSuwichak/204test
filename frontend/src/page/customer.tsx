@@ -8,6 +8,7 @@ import navigation   from "#util/common.navigation.ts";
 import branding     from "#asset/image/favicon.ico";
 
 import MenuContext  from "#component/menu.context.tsx";
+import Toast        from "#component/toast.tsx";
 import Settings     from "#component/settings.tsx";
 import NavBar       from "#component/navbar.tsx";
 import Cart         from "#component/customer.cart";
@@ -39,6 +40,7 @@ const content = function Customer ()
 
       <Cart.Provider/>
       <Settings.Provider/>
+      <Toast.Provider/>
       <MenuContext.Provider/>
     </ctxCustomer.ProviderCart>
   </>
@@ -69,6 +71,9 @@ content.NavBar = function PresetNavBar ()
   const toSignIn = () => { void navigation.toAuth (); }
   const toProfile = () => 
   {
+    /**
+     * เปิดตะกร้า
+    */
     const onCart = () =>
     {
       menuCtx.setVisible (false);
@@ -76,18 +81,27 @@ content.NavBar = function PresetNavBar ()
       cartCtx.setClose (() => { cartCtx.setVisible (false); });
       return;
     }
+    /**
+     * เปิดประวัติการสั่งซื้อ
+    */
     const onShipping = () =>
     {
       menuCtx.setVisible (false);
-      void navigation.toShipping ();
+      void navigation.toOrder ();
       return;
     }
+    /**
+     * เปิดระบบคอนโซล
+    */
     const onConsole = () =>
     {
       menuCtx.setVisible (false);
       void navigation.toConsole ();
       return;
     }
+    /**
+     * เปิดหน้าการตั้งค่า
+    */
     const onSettings = () =>
     {
       settings.setClose (() =>
@@ -96,15 +110,15 @@ content.NavBar = function PresetNavBar ()
       });
       settings.setVisible (true);
       menuCtx.setVisible (false);
-      // void navigation.toSettings ();
-      return;
     }
+    /**
+     * ลงชื่อผู้ใช้ออก 
+    */
     const onSignOut = () =>
     {
       apiAuth.saveSetPrefered (-1);
       apiAuth.saveWrite ();
       location.reload ();
-      return;
     }
 
     menuCtx.setChildren (<>
@@ -113,7 +127,7 @@ content.NavBar = function PresetNavBar ()
         icon={<ShoppingBasket/>}
         onClick={onCart}/>
       <MenuContext.Item 
-        text="สถานะการจัดส่ง" 
+        text="ประวัติคำสั่งซื้อ" 
         icon={<Truck/>}
         onClick={onShipping}/>
       <MenuContext.Item 

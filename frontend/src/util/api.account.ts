@@ -65,6 +65,7 @@ content.updateBasic = async (session: string, data: BasicUpdate) =>
     form.append ("Metadata", JSON.stringify ({
         "Name": data.name,
         "Role": data.role,
+        "Status": data.status
     }));
     if (data.icon)
     {
@@ -95,7 +96,8 @@ content.createBasic = async (session: string, data: BasicCreate) =>
 
     form.append ("Metadata", JSON.stringify ({
         "Name": data.name,
-        "Role": data.role
+        "Role": data.role,
+        "Status": data.status,
     }));
 
     if (data.icon)
@@ -130,7 +132,7 @@ content.createCart = async (session: string, data: CartCreate) =>
 content.deleteBasic = async (session: string, id: BasicId) =>
 {
     const key = String (id);
-    const endpoint = `${content.NET_URL}/account/${key}`;
+    const endpoint = `${content.NET_URL}/${key}`;
     await common.delete (session, endpoint);
 }
 /**
@@ -139,7 +141,7 @@ content.deleteBasic = async (session: string, id: BasicId) =>
 content.deleteCart = async (session: string, id: CartId) =>
 {
     const key = String (id);
-    const endpoint = `${content.NET_URL_CART}/account/${key}`;
+    const endpoint = `${content.NET_URL_CART}/${key}`;
     await common.delete (session, endpoint);
 }
 
@@ -153,6 +155,7 @@ content.outputGetBasic = (reader: ObjectReader) : BasicFetch =>
         icon: reader.requireString ("Icon"),
         role: reader.optionalInteger ("Role") ?? 0,
         name: reader.requireString ("Name"),
+        status: reader.requireInteger ("Status"),
     }
 }
 /**
@@ -257,6 +260,10 @@ export interface BasicFetch
      * ชื่อผู้ใช้
     */
     name: string;
+    /**
+     * สถานะบัญชี
+    */
+    status: number;
 }
 /**
  * ข้อมูลพื้นฐานที่ใช้ในการปรับเปลี่ยนข้อมูลบัญชีผู้ใช้
@@ -279,6 +286,10 @@ export interface BasicUpdate
      * รูปโปรไฟล์
     */
     icon ?: File | undefined;
+    /**
+     * สถานะบัญชี
+    */
+    status ?: number | undefined;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลลงในฐานข้อมูล
@@ -297,6 +308,10 @@ export interface BasicCreate
      * ไอคอน
     */
     icon: File | undefined;
+    /**
+     * สถานะบัญชี
+    */
+    status: number;
 }
 export interface BasicCreateResult
 {

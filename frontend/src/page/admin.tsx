@@ -1,19 +1,29 @@
-import React, { useState }  from 'react';
-import { AdminSidebar }     from '#component/admin.sidebar.tsx';
-import { AdminDashboard }   from '#page/admin.dashboard.tsx';
-import {ManageItemsPage}    from '#page/admin.manageitem.tsx';
-import { X }                from 'lucide-react';
+import { type FC, useState }      from 'react';
+import { AdminSidebar }         from '#component/admin.sidebar';
+import { AdminDashboard }       from '#component/admin.dashboard.tsx';
+import { ManageItemsPage}       from '#component/admin.manageItem.tsx';
+import { ManageUsersPage}       from '#component/admin.manageUser.tsx';
+import { ManagePromotionsPage}  from '#component/admin.managePromotion.tsx';
+import { ManageOrdersPage }     from '#component/admin.manageOrder.tsx';
+import { SystemSettingsPage }   from '#component/admin.system.tsx';
+import { X } from 'lucide-react';
 
-// สมมติว่า Navbar อยู่ในโฟลเดอร์เดียวกัน หากพาทไม่ตรงสามารถปรับตามพาทจริงได้ครับ
+// สมมติว่า Navbar อยู่ในโฟลเดอร์เดียวกัน 
+// หากพาทไม่ตรงสามารถปรับตามพาทจริงได้ครับ
 // ตัวอย่าง: import { Navbar } from './components/admin/Navbar';
-import { AdminNavbar }      from '#component/admin.navbar'; 
+import {AdminNavbar } from '#component/admin.navbar.tsx'; 
 
-export const AdminLayout: React.FC = () => {
-  const [activeMenu, setActiveMenu] = useState('dashboard'); // เริ่มต้นที่หน้าแดชบอร์ด
-  const [isCollapsed, setIsCollapsed] = useState(false);
+export const AdminLayout: FC = () => 
+{
+  // เริ่มต้นที่หน้าแดชบอร์ด
+  const [activeMenu, setActiveMenu] = useState ('dashboard'); 
+  const [isCollapsed, setIsCollapsed] = useState (false);
 
   return (
-  /* 💡 ใช้ h-screen และ flex-col เพื่อควบคุมไม่ให้หน้าจอยืดล้น และจัดสรรพื้นที่แบบไม่มีช่องว่างคาด */
+  /* 💡 
+    ใช้ h-screen และ flex-col เพื่อควบคุมไม่ให้หน้าจอยืดล้น 
+    และจัดสรรพื้นที่แบบไม่มีช่องว่างคาด 
+  */
   <div className="h-screen w-screen bg-[#070b19] font-sans antialiased text-slate-200 flex flex-col overflow-hidden">
     
     {/* 1. แถบเมนูด้านบน (Top Navbar) - บล็อกความสูงไว้คงที่ */}
@@ -57,17 +67,18 @@ export const AdminLayout: React.FC = () => {
             {/* ส่วนควบคุมการเปลี่ยนหน้าเพจ */}
             {activeMenu === 'dashboard' && <AdminDashboard />}
 
+            {activeMenu === 'shipments' && <ManageOrdersPage />}
+
             {activeMenu === 'items' && <ManageItemsPage />}
 
-            {activeMenu === 'users' && (
-              <div className="animate-in fade-in duration-200">
-                <h1 className="text-2xl font-bold text-slate-100 pb-3 border-b border-slate-800">จัดการผู้ใช้และสิทธิ์พนักงาน (Manage Users)</h1>
-                <p className="text-sm text-slate-400 mt-4">ระบบ กำลังพัฒนาไฟล์ ManageUsersPage.tsx...</p>
-              </div>
-            )}
+            {activeMenu === 'users' && <ManageUsersPage />}
+
+            {activeMenu === 'promotions' && <ManagePromotionsPage />}
+
+            {activeMenu === 'settings' && <SystemSettingsPage />}
 
             {/* ดักจับกรณีหน้าอื่นๆ */}
-            {!['dashboard', 'items', 'users'].includes(activeMenu) && (
+            {!['dashboard', 'items', 'users','promotions' ].includes(activeMenu) && (
               <div className="animate-in fade-in duration-200 py-16 text-center text-slate-500">
                 <p className="text-base">กำลังพัฒนาหน้าส่วนระบบนี้เพิ่มในโฟลเดอร์ pages/admin/ ...</p>
               </div>
@@ -77,6 +88,6 @@ export const AdminLayout: React.FC = () => {
         </div>
       </main>
     </div>
-  </div>
-);
+  </div>);
 };
+export default AdminLayout;

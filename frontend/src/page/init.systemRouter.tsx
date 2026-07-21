@@ -1,5 +1,5 @@
 import { lazy, useEffect } from "react";
-import { Route, Routes, Outlet } from "react-router"
+import { Route, Routes, Outlet } from "react-router";
 
 import InitDebug from "#page/init.debug.tsx";
 
@@ -16,18 +16,14 @@ import InitDebug from "#page/init.debug.tsx";
 const GAuth = lazy (() => import ("#page/auth.tsx"));
 const GSettings = lazy (() => import ("#page/settings.tsx"));
 const G404 = lazy (() => import ("#page/error.404.tsx"));
-
 const CAbout = lazy (() => import ("#page/customer.about.tsx"));
 const CHome = lazy (() => import ("#page/customer.home.tsx"));
 const CProd = lazy (() => import ("#page/customer.product.tsx"));
 const CProdBrowse = lazy (() => import ("#page/customer.productBrowser.tsx"));
-const CShipping = lazy (() => import ("#page/customer.shipping.tsx"));
-
+const COrder = lazy (() => import ("#page/customer.order.tsx"));
 const SMain = lazy (() => import ("#page/staff.tsx"));
-
+const AMain = lazy (() => import ("#page/admin.tsx"));
 const AConsole = lazy (() => import ("#page/console.tsx"));
-const ADashboard = lazy (() => import ("#page/admin.dashboard.tsx"));
-
 const VCustomer = lazy (() => import ("#page/customer.tsx"));
 
 const content = function InitSystemRouter (prop: ComponentProperty)
@@ -60,12 +56,12 @@ const content = function InitSystemRouter (prop: ComponentProperty)
           <Route path="/about" Component={CAbout}/>
           <Route path="/product" Component={CProd}/>
           <Route path="/product-browser" Component={CProdBrowse}/>
-          <Route path="/shipping" Component={CShipping}/>
+          <Route path="/order" Component={COrder}/>
         </Route>
         {/* Staff && Manager */}
         <Route caseSensitive>
           <Route path="/staff" Component={SMain}/>
-          <Route path="/admin" Component={ADashboard}/>
+          <Route path="/admin" Component={AMain}/>
           <Route path="/console" Component={AConsole}/>
         </Route>
         <Route>

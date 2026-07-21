@@ -1,19 +1,13 @@
 import styled       from "styled-components";
 import ctx          from "#context/common.ts";
+import ctxUI        from "#context/common.ui.ts";
 import ctxCustomer  from "#context/customer.ts";
-import apiAuth      from "#util/api.auth.ts";
 import apiAccount   from "#util/api.account.ts";
-import apiProduct   from "#util/api.product.ts";
 import apiStorage   from "#util/api.storage.ts";
 
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { XIcon, MinusIcon, PlusIcon } from "lucide-react";
-import 
-{ 
-  type MouseEvent,  
-  type ReactNode 
-} from "react";
+import { type MouseEvent } from "react";
 
 /**
  * ส่วนประกอบการแสดงผลรายการในตะกร้าและการสั่งซื้อสินค้า
@@ -28,102 +22,7 @@ const content = function CustomerCart (prop: PropRoot)
 */
 content.Root = function CartRoot (prop: PropRoot)
 {
-  const visible = prop.visible ?? false;
-  const auth = ctx.useAuth ();
-
-  const { data: fetchItem } = useQuery ({
-    queryKey: ["Cart"],
-    queryFn: () => apiAccount.getCart (auth.session),
-    enabled: () => apiAuth.checkSession ({
-      secret: auth.session,
-      issued: auth.sessionIssued,
-      expire: auth.sessionExpire
-    })
-  });
-
-  const Component = ({ productId }: {productId: number;}) =>
-  {
-      const { data } = useQuery ({
-        queryKey: ["Product", "Basic", productId],
-        queryFn: () => apiProduct.getBasic (auth.session, productId)
-      });
-
-      return (
-        <content.ListItem 
-          key={productId} 
-          name={data?.name ?? ""}
-          cover={apiStorage.getUrlStream (data?.cover ?? "")}/>
-      );
-  }
-  const Component2 = ({ productId }: {productId: number;}) =>
-  {
-      const { data } = useQuery ({
-        queryKey: ["Product", "Basic", productId],
-        queryFn: () => apiProduct.getBasic (auth.session, productId)
-      });
-
-      return (
-        <content.ReceiptItem name={data?.name ?? ""} quantity={
-          fetchItem?.find ((x) => x.productId === productId)?.quantity ?? 0
-        }/>
-      );
-  }
-
-  const onRenderItem = () =>
-  {
-    return (!fetchItem ? [] : fetchItem.map ((x) =>
-    {
-      return <Component productId={x.productId} key={x.itemId}/>
-    }));
-  }
-  const onRenderReceipt = () =>
-  {
-    return (!fetchItem ? [] : fetchItem.map ((x) =>
-    {
-      return <Component2 productId={x.productId} key={x.itemId}/>
-    }));
-  }
-
-  return (
-    <content.View visible={visible}>
-      <content.ViewPanel>
-        <content.Header onClose={prop.onClose}/>
-        <content.Main>
-          <content.List>
-            {onRenderItem ()}
-          </content.List>
-          <content.MainSidebar>
-            <content.Receipt>
-              {onRenderReceipt ()}
-            </content.Receipt>
-            <button>สั่งซื้อสินค้า</button>
-          </content.MainSidebar>
-        </content.Main>
-      </content.ViewPanel>
-    </content.View>
-  );
-}
-content.View = function CartView (prop: PropView)
-{
-  return (
-    <StyleView $visible={prop.visible ?? true}>
-      <StyleViewInner $visible={prop.visible ?? true}>
-        {prop.children}
-      </StyleViewInner>
-    </StyleView>
-  )
-}
-content.ViewPanel = function CartViewPanel (prop: PropViewPanel)
-{
-  return (
-    <StyleViewPanel>
-      {prop.children}
-    </StyleViewPanel>
-  );
-}
-content.Header = function CartHeader (prop: PropHeader)
-{
-  const onClick = (event: MouseEvent) =>
+  const onClickClose = (event: MouseEvent) =>
   {
     event.preventDefault ();
     event.stopPropagation ();
@@ -134,73 +33,179 @@ content.Header = function CartHeader (prop: PropHeader)
   }
 
   return (
-    <StyleHeader>
-      <StyleHeaderText>ตะกร้าสินค้าของคุณ</StyleHeaderText>
-      <StyleHeaderClose onClick={onClick}>
-        <XIcon/>
-      </StyleHeaderClose>
-    </StyleHeader>
-  )
-}
-content.Main = function CartMain (prop: PropMain)
-{
-  return (
-    <StyleMain>
-      {prop.children}
-    </StyleMain>
-  )
-}
-content.MainSidebar = function CartMainSidebar (prop: PropMainSidebar)
-{
-  return (
-    <StyleMainSidebar>
-      {prop.children}
-    </StyleMainSidebar>
-  )
-}
-content.List = function CartList (prop: PropList)
-{
-  return (
-    <StyleItemContainer>{prop.children}</StyleItemContainer>
+    <StyleView $visible={prop.visible ?? true}>
+      <StyleViewInner $visible={prop.visible ?? true}>
+        <StyleViewPanel>
+            <StyleHeader>
+            <StyleHeaderText>ตะกร้าสินค้าของคุณ</StyleHeaderText>
+            <StyleHeaderClose onClick={onClickClose}>
+              <XIcon/>
+            </StyleHeaderClose>
+          </StyleHeader>
+          <StyleMain>
+            <content.List/>
+            <StyleMainSidebar>
+              <content.Receipt/>
+              <content.Summary/>
+              <button>สั่งซื้อสินค้า</button>
+            </StyleMainSidebar>
+          </StyleMain>
+        </StyleViewPanel>
+      </StyleViewInner>
+    </StyleView>
   );
 }
-content.ListItem = function CartListItem (prop: PropListItem)
+content.List = function CartList ()
 {
+  const queryList = ctxCustomer.useCartQuery ();
+  const queryData = queryList.data;
+
+  return (
+    <StyleItemContainer>
+      {(queryData) ?
+        (queryData.map ((x) => <content.ListItem 
+          key={x.itemId} pid={x.productId}/>)) : 
+        (<></>)
+      }
+    </StyleItemContainer>
+  );
+}
+content.ListItem = function CartListItem ({ pid }: { pid: number; })
+{
+  const queryData = ctxCustomer.useProduct (pid);
+  const data = queryData.data;
+  const cover = data ? apiStorage.getUrlStream (data.cover) : undefined;
+  const name = data ? data.name : "";
+
   return (
     <StyleItem>
-      <StyleItemImg src={prop.cover}/>
-      <StyleItemText>{prop.name}</StyleItemText>
+      <StyleItemImg src={cover}/>
+      <StyleItemText>{name}</StyleItemText>
     </StyleItem>
   );
 }
-content.Receipt = function CartReceipt (prop: PropReceipt)
+content.Receipt = function CartReceipt ()
 {
+  const queryList = ctxCustomer.useCartQuery ();
+  const queryData = queryList.data;
+
   return (
     <StyleReceipt>
       <StyleReceipLabel>รายการสินค้า</StyleReceipLabel>
-      <StyleReceiptItemContainer>
-        {prop.children}
-      </StyleReceiptItemContainer>
+      <StyleReceiptBody>
+        {(queryData) ?
+          (queryData.map ((x) => <content.ReceiptItem 
+            key={x.itemId} uid={x.itemId} pid={x.productId}/>)) : 
+          (<></>)
+        }
+      </StyleReceiptBody>
     </StyleReceipt>
   );
 }
-content.ReceiptItem = function CartReceiptItem (prop: PropReceiptItem)
+content.ReceiptItem = function CartReceiptItem ({ uid, pid }: { 
+  uid: number; pid: number; })
 {
+  const auth = ctx.useAuth ();
+  const toast = ctxUI.useToast ();
+  const queryList = ctxCustomer.useCartQuery ();
+  const queryItem = ctxCustomer.useProduct (pid);
+  const list = queryList.data;
+  const item = queryItem.data;
+  const name = item ? item.name : "";
+  const quantityFind = list ? list.find (x => x.itemId === uid) : undefined;
+  const quantity = quantityFind ? quantityFind.quantity : 0;
+  const pending = queryList.isLoading;
+
+  const onClickIncrement = (event: MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    void apiAccount.updateCart (auth.session, {
+      itemId: uid,
+      quantity: quantity + 1
+    })
+    .then (() => queryList.refetch ());
+  }
+  const onClickDecrement = (event: MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    if (quantity === 1)
+    {
+      void apiAccount.deleteCart (auth.session, uid)
+        .then (() => queryList.refetch ())
+        .then (() =>
+        {
+          toast.setText (`ลบ ${name} ออกเรียบร้อย`);
+          toast.setDuration (5000);
+          toast.setVisible (true);
+        });
+    }
+    else
+    {
+      void apiAccount.updateCart (auth.session, {
+        itemId: uid,
+        quantity: quantity - 1
+      })
+      .then (() => queryList.refetch ());
+    }
+  }
+  
   return (
     <StyleReceiptItem>
-      <StyleReceiptItemText1>{prop.name}</StyleReceiptItemText1>
-      <StyleReceiptItemText2>{prop.quantity} จำนวน</StyleReceiptItemText2>
-      
-      <StyleReceiptItemBtn1>
+      <StyleReceiptItemText1>{name}</StyleReceiptItemText1>
+      <StyleReceiptItemText2>{quantity} จำนวน</StyleReceiptItemText2>
+      <StyleReceiptItemBtn1 onClick={onClickIncrement} disabled={pending}>
         <PlusIcon/>
       </StyleReceiptItemBtn1>
-      <StyleReceiptItemBtn2>
+      <StyleReceiptItemBtn2 onClick={onClickDecrement} disabled={pending}>
         <MinusIcon/>
       </StyleReceiptItemBtn2>
     </StyleReceiptItem>
   );
 }
+content.Summary = function CartSummary ()
+{
+  const queryList = ctxCustomer.useCartQuery ();
+  const queryBasics = ctxCustomer.useProducts (!queryList.data ? [] : 
+    queryList.data.map ((x) => x.productId)
+  );
+  
+  const list = queryList.data;
+  const basic = queryBasics;
+  
+  const quantity = list ? 
+    list.reduce ((x, y) => x += y.quantity, 0) : 0;
 
+  const sum = list ? list.map ((x) =>
+  {
+    const prod = basic.find (y => x.productId == y.data?.id);
+    const price = prod ? prod.data?.price ?? 0 : 0;
+    const sum = price * x.quantity;
+
+    return sum;
+
+  }).reduce ((x, y) => x + y, 0) : 0;
+
+  const discount = 0;
+  const total = sum - discount;
+
+  return (
+    <>
+      <p>
+        ทั้งหมด {quantity} ชิ้น
+        รวมเป็นจำนวนเงิน {sum} บาท
+        <br/>
+        ส่วนลด {discount} บาท
+        ทั้งหมด {total} บาท
+        <br/>
+        (การคำนวณนี้ไม่รวมภาษี)
+      </p>
+    </>
+  );
+}
 content.Provider = function CartProvider ()
 {
   const context = ctxCustomer.useCart ();
@@ -421,7 +426,7 @@ const StyleReceipLabel = styled.label`
   display: block;
   font-size: 1.25rem;
 `;
-const StyleReceiptItemContainer = styled.div`
+const StyleReceiptBody = styled.div`
   padding: 16px 0px;
 `;
 const StyleReceiptItem = styled.div`
@@ -473,50 +478,10 @@ const StyleReceiptItemBtn2 = styled.button`
     vertical-align: middle;
   }
 `;
-
 interface PropRoot
 {
   visible ?: boolean;
   onClose ?: () => void;
-}
-interface PropView
-{
-  visible ?: boolean;
-  children ?: ReactNode;
-}
-interface PropViewPanel
-{
-  children ?: ReactNode;
-}
-interface PropHeader
-{
-  onClose ?: () => void;
-}
-interface PropMain
-{
-  children ?: ReactNode;
-}
-interface PropMainSidebar
-{
-  children ?: ReactNode;
-}
-interface PropList
-{
-  children ?: ReactNode;
-}
-interface PropListItem
-{
-  name: string;
-  cover: string;
-}
-interface PropReceipt
-{
-  children ?: ReactNode;
-}
-interface PropReceiptItem
-{
-  name: string;
-  quantity: number;
 }
 /**
  * ส่งออกตัวแปร

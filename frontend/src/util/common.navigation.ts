@@ -15,7 +15,7 @@ content.PATH_CONSOLE = "/console";
 content.PATH_DOC = "/doc";
 content.PATH_PRODUCT = "/product";
 content.PATH_PRODUCT_BROWSER = "/product-browser";
-content.PATH_SHIPPING = "/shipping";
+content.PATH_ORDER = "/order";
 content.PATH_SETTINGS = "/settings";
 
 content.init = function (navigator: NavigateFunction)
@@ -65,9 +65,9 @@ content.toProductBrowser = (search ?: string) =>
 
     return router (content.PATH_PRODUCT_BROWSER + paramFormatted);
 }
-content.toShipping = () =>
+content.toOrder = () =>
 {
-    return router (content.PATH_SHIPPING);
+    return router (content.PATH_ORDER);
 }
 content.toSettings = () =>
 {

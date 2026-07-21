@@ -355,6 +355,7 @@ content.inputPutBasic = async (
         id: accountId,
         name: meta.optionalString ("Name"),
         role: meta.optionalInteger ("Role"),
+        status: meta.optionalInteger ("Status"),
         icon: icon?.newFilename ?? ""
     };
 }
@@ -366,12 +367,15 @@ content.inputPutCart = (
 {
     const reader = objectReader (request.body);
     const quantity = reader.requireInteger ("Quantity");
-
-    return {
+    const result = {
         accountId: accountId,
         itemId: itemId,
         quantity: quantity
     };
+    if (result.quantity && result.quantity < 0) {
+        throw new error.BadData ("Negative quantity not accepted");
+    }
+    return result;
 }
 content.inputPostBasic = async (
     iconId: ResourceId, 
@@ -407,17 +411,22 @@ content.inputPostBasic = async (
     return {
         name: meta.requireString ("Name"),
         role: meta.requireInteger ("Role"),
+        status: meta.requireInteger ("Status"),
         icon: icon?.newFilename ?? ""
     };
 }
 content.inputPostCart = (request: Request, accountId: number) : CartCreate =>
 {
     const reader = objectReader (request.body);
-    return {
+    const result = {
         accountId: accountId,
         productId: reader.requireInteger ("ProductId"),
         quantity: reader.requireInteger ("Quantity")
     };
+    if (result.quantity && result.quantity < 0) {
+        throw new error.BadData ("Negative quantity not accepted");
+    }
+    return result;
 }
 
 
@@ -431,6 +440,7 @@ content.outputGetBasic = (r: Response, x: BasicFetch) =>
         "Role": x.role,
         "Created": x.created.getTime (),
         "Modified": x.modified ? x.modified.getTime () : null,
+        "Status": x.status,
     });
     r.end ();
 }
@@ -445,6 +455,7 @@ content.outputGetBasicList = (r: Response, x: BasicFetch []) =>
             "Role": x.role,
             "Created": x.created.getTime (),
             "Modified": x.modified ? x.modified.getTime () : null,
+            "Status": x.status,
         }})
     });
     r.end ();
@@ -569,10 +580,6 @@ content.errorDeleteCart = (r: Response, e: unknown) =>
     r.end ();
 }
 
-/**
- * แข็งวัตถุ (ความปลอดภัย)
-*/
-Object.freeze (content);
 /**
  * ส่งออกตัวแปร
 */

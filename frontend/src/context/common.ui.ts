@@ -12,6 +12,15 @@ export interface Settings
     setVisible: (value: boolean) => void;
     setClose: (value ?: () => void) => void;
 }
+export interface Toast
+{
+    setIcon: (
+        value:  string | React.ComponentType<unknown> | React.ReactElement
+    ) => void;
+    setText: (value: string) => void;
+    setDuration: (value: number) => void;
+    setVisible: (value: boolean) => void;
+}
 
 export interface IrMenuBar
 {
@@ -32,6 +41,7 @@ export interface IrNavBar
     width: number;
 }
 
+
 const defMenuContext = () : MenuContext =>
 {
     return {
@@ -45,7 +55,16 @@ const defSettings = () : Settings =>
 {
     return {
         setVisible: () => { return; },
-        setClose: () => { return;}
+        setClose: () => { return; }
+    }
+}
+const defToast = () : Toast =>
+{
+    return {
+        setIcon: () => { return; },
+        setText: () => { return; },
+        setDuration: () => { return; },
+        setVisible: () => { return; },
     }
 }
 const defIrMenuBar = () : IrMenuBar =>
@@ -65,6 +84,7 @@ const defIrNavBar = () : IrNavBar =>
     }
 }
 
+
 const useMenuContext = () =>
 {
     return react.useContext (ContextMenuContext);
@@ -72,6 +92,10 @@ const useMenuContext = () =>
 const useSettings = () =>
 {
     return react.useContext (ContextSettings);
+}
+const useToast = () =>
+{
+    return react.useContext (ContextToast);
 }
 const useIrMenuBar = () =>
 {
@@ -85,16 +109,20 @@ const useIrNavBar = () =>
 const Content = () => { return; }
 const ContextMenuContext = react.createContext (defMenuContext ());
 const ContextSettings = react.createContext (defSettings ());
+const ContextToast = react.createContext (defToast ());
 const ContextIrMenuBar = react.createContext (defIrMenuBar ());
 const ContextIrNavBar = react.createContext (defIrNavBar ());
 
 Content.ProviderMenuContext = ContextMenuContext;
 Content.ProviderSettings = ContextSettings;
+Content.ProviderToast = ContextToast;
 
 Content.defMenuContext = defMenuContext;
 Content.defSettings = defSettings;
+Content.defToast = defToast;
 Content.useMenuContext = useMenuContext
 Content.useSettings = useSettings;
+Content.useToast = useToast;
 
 Content.ProviderIrMenuBar = ContextIrMenuBar.Provider;
 Content.ProviderIrNavBar = ContextIrNavBar.Provider;

@@ -1,5 +1,5 @@
 import { useContext, createContext } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 
 import Ctx from "#context/common.ts";
 import ApiAuth from "#util/api.auth.ts";
@@ -40,7 +40,7 @@ const useCartQuery = () =>
             issued: auth.sessionIssued,
             expire: auth.sessionExpire
         }),
-        throwOnError: true
+        throwOnError: false
     });
 }
 const useProduct = (id: ProductId) =>
@@ -50,7 +50,22 @@ const useProduct = (id: ProductId) =>
         queryKey: ["Product", "Basic", id],
         queryFn: () => ApiProduct.getBasic (auth.session, id),
         enabled: true,
-        throwOnError: true
+        throwOnError: false
+    });
+}
+const useProducts = (id: ProductId []) =>
+{
+    const auth = Ctx.useAuth ();
+    return useQueries ({
+        queries: id.map ((x) =>
+        {
+            return {
+                queryKey: ["Product", "Basic", x],
+                queryFn: () => ApiProduct.getBasic (auth.session, x),
+                enabled: true,
+                throwOnError: false
+            }
+        })
     });
 }
 const useProductList = (option: ProductSearchOption) =>
@@ -60,7 +75,7 @@ const useProductList = (option: ProductSearchOption) =>
         queryKey: ["Product", "BasicList", option],
         queryFn: () => ApiProduct.getBasicList (auth.session, option),
         enabled: true,
-        throwOnError: true
+        throwOnError: false
     });
 }
 
@@ -72,6 +87,7 @@ Content.defCart = defCart;
 Content.useCart = useCart;
 Content.useCartQuery = useCartQuery;
 Content.useProduct = useProduct;
+Content.useProducts = useProducts;
 Content.useProductList = useProductList;
 
 export default Content;

@@ -12,17 +12,28 @@ import
     type Response
 }
 from "#core/http.ts";
+import { type BasicId as AccountId } from "#model/account.ts";
+import { type ResourceId } from "#model/storage.ts";
 import
 {
+    type BasicId,
+    type BasicFetch,
     type BasicFetchOption,
     type BasicUpdate,
     type BasicCreate,
+    type CategoryId,
+    type CategoryFetch,
     type CategoryUpdate,
     type CategoryCreate,
+    type CommentId,
+    type CommentFetch,
     type CommentUpdate,
     type CommentCreate,
+    type ReviewId,
+    type ReviewFetch,
     type ReviewUpdate,
     type ReviewCreate,
+    type StockFetch,
     type StockUpdate,
 }
 from "#model/product.ts";
@@ -48,7 +59,7 @@ content.getBasic = (request: Request, response: Response) =>
 {
     const productId = Number (request.params ["id"]);
     
-    if (!Number.isSafeInteger (productId))
+    if (!Number.isSafeInteger (productId) || productId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -57,30 +68,11 @@ content.getBasic = (request: Request, response: Response) =>
 
     void model.getBasic (productId).then ((x) =>
     {
-        response.status (http.STATUS_OK);
-        response.json ({
-            "Id": x.id,
-            "Name": x.name,
-            "Description": x.description,
-            "Price": x.price,
-            "PriceCode": x.priceCode,
-            "Platform": x.platform,
-            "Cover": x.cover
-        });
-        response.end ();
+        content.outputGetBasic (response, x);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorGetBasic (response, e);
     });
 }
 /**
@@ -98,30 +90,11 @@ content.getBasicList = (request: Request, response: Response) =>
 
     void model.getBasicList (option).then ((x) =>
     {
-        response.status (http.STATUS_OK);
-        response.json (
-        {
-            "Item": x.map ((x) => 
-            {
-                return {
-                    "Id": x.id,
-                    "Name": x.name,
-                    "Description": x.description,
-                    "Price": x.price,
-                    "PriceCode": x.priceCode,
-                    "Platform": x.platform,
-                    "Cover": x.cover
-                }
-            })
-        });
-        response.end ();
+        content.outputGetBasicList (response, x);
     })
     .catch ((e: unknown) =>
     {
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorGetBasicList (response, e);
     });
 }
 /**
@@ -134,8 +107,7 @@ content.getCategory = (request: Request, response: Response) =>
 {
     const categoryId = Number (request.params ["id"]);
 
-    if (!Number.isSafeInteger (categoryId) ||
-        !request.body)
+    if (!Number.isSafeInteger (categoryId) || categoryId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -144,26 +116,11 @@ content.getCategory = (request: Request, response: Response) =>
 
     void model.getCategory (categoryId).then ((x) =>
     {
-        response.status (http.STATUS_OK);
-        response.json ({
-            "CategoryId": x.categoryId,
-            "ProductId": x.productId,
-            "Value": x.value,
-        });
-        response.end ();
+        content.outputGetCategory (response, x);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorGetCategory (response, e);
     });
 }
 /**
@@ -176,8 +133,7 @@ content.getComment = (request: Request, response: Response) =>
 {
     const commentId = Number (request.params ["id"]);
 
-    if (!Number.isSafeInteger (commentId) ||
-        !request.body)
+    if (!Number.isSafeInteger (commentId) || commentId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -186,29 +142,11 @@ content.getComment = (request: Request, response: Response) =>
 
     void model.getComment (commentId).then ((x) =>
     {
-        response.status (http.STATUS_OK);
-        response.json ({
-            "CommentId": x.commentId,
-            "ProductId": x.productId,
-            "Author": x.author,
-            "Title": x.title,
-            "Text": x.text,
-            "Rating": x.rating,
-        });
-        response.end ();
+        content.outputGetComment (response, x);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorGetComment (response, e);
     });
 }
 /**
@@ -221,8 +159,7 @@ content.getReview = (request: Request, response: Response) =>
 {
     const reviewId = Number (request.params ["id"]);
 
-    if (!Number.isSafeInteger (reviewId) ||
-        !request.body)
+    if (!Number.isSafeInteger (reviewId) || reviewId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -231,29 +168,14 @@ content.getReview = (request: Request, response: Response) =>
 
     void model.getReview (reviewId).then ((x) =>
     {
-        response.status (http.STATUS_OK);
-        response.json ({
-            "ReviewId": x.reviewId,
-            "ProductId": x.productId,
-            "Mime": x.mime,
-            "Link": x.link,
-        });
-        response.end ();
+        content.outputGetReview (response, x);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorGetReview (response, e);
     });
 }
+
 /**
  * ดึงข้อมูลสต็อกของสินค้าดังกล่าว
  * 
@@ -262,36 +184,22 @@ content.getReview = (request: Request, response: Response) =>
 */
 content.getStock = (request: Request, response: Response) =>
 {
-    const productId = Number (request.params ["id"]);
+    const stockId = Number (request.params ["id"]);
     
-    if (!Number.isSafeInteger (productId))
+    if (!Number.isSafeInteger (stockId) || stockId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
         return;
     }
 
-    void model.getStock (productId).then ((x) =>
+    void model.getStock (stockId).then ((x) =>
     {
-        response.status (http.STATUS_OK);
-        response.json ({
-            "ProductId": x.productId,
-            "Quantity": x.quantity,
-        });
-        response.end ();
+        content.outputGetStock (response, x);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorGetStock (response, e);
     });
 }
 /**
@@ -300,56 +208,46 @@ content.getStock = (request: Request, response: Response) =>
  * @param request คำขอ
  * @param response คำตอบ
 */
-content.putBasic = (request: Request, response: Response) =>
+content.putBasic = async (request: Request, response: Response) =>
 {
-    const productId = Number (request.params ["id"]);
+    const basicId = Number (request.params ["id"]);
     let input: BasicUpdate;
 
-    if (!Number.isSafeInteger (productId) ||
-        !request.body)
-    {
-        response.status (http.STATUS_BAD_REQUEST);
-        response.end ();
-        return;
-    }
-    try
-    {
-        const reader = objectReader (request.body);
-        input = 
-        {
-            id: productId,
-            name: reader.optionalString ("Name"),
-            description: reader.optionalString ("Description"),
-            price: reader.optionalInteger ("Price"),
-            priceCode: reader.optionalInteger ("PriceCode"),
-            platform: reader.optionalInteger ("Platform"),
-        };
-    }
-    catch
+    if (!Number.isSafeInteger (basicId) || basicId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
         return;
     }
 
-    void model.update (input).then (() =>
+    const coverId = await modelStorage.createWriterId ();
+    const bgId = await modelStorage.createWriterId ();
+
+    try
     {
-        response.status (http.STATUS_NO_CONTENT);
+        input = await content.inputPutBasic (request, basicId, coverId, bgId);
+    }
+    catch (e: unknown)
+    {
+        await modelStorage.delete (coverId);
+        await modelStorage.delete (bgId);
+
+        log.warn (e);
+        response.status (http.STATUS_BAD_REQUEST);
         response.end ();
         return;
+    }
+
+    void model.updateBasic (input).then (() =>
+    {
+        content.outputPutBasic (response);
     })
-    .catch ((e: unknown) =>
+    .catch (async (e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        await modelStorage.delete (coverId);
+        await modelStorage.delete (bgId);
+
+        content.errorPutBasic (response, e);
     });
 }
 /**
@@ -363,7 +261,7 @@ content.putCategory = (request: Request, response: Response) =>
     const categoryId = Number (request.params ["id"]);
     let input: CategoryUpdate;
 
-    if (!Number.isSafeInteger (categoryId) ||
+    if (!Number.isSafeInteger (categoryId) || categoryId <= 0 ||
         !request.body)
     {
         response.status (http.STATUS_BAD_REQUEST);
@@ -372,12 +270,7 @@ content.putCategory = (request: Request, response: Response) =>
     }
     try
     {
-        const reader = objectReader (request.body);
-        input = 
-        {
-            categoryId: categoryId,
-            value: reader.optionalInteger ("Value")
-        };
+        input = content.inputPutCategory (request, categoryId);
     }
     catch
     {
@@ -388,22 +281,11 @@ content.putCategory = (request: Request, response: Response) =>
 
     void model.updateCategory (input).then (() =>
     {
-        response.status (http.STATUS_NO_CONTENT);
-        response.end ();
-        return;
+        content.outputPutCategory (response);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorPutCategory (response, e);
     });
 }
 /**
@@ -414,10 +296,10 @@ content.putCategory = (request: Request, response: Response) =>
 */
 content.putComment = (request: Request, response: Response) =>
 {
-    const categoryId = Number (request.params ["id"]);
+    const commentId = Number (request.params ["id"]);
     let input: CommentUpdate;
 
-    if (!Number.isSafeInteger (categoryId) ||
+    if (!Number.isSafeInteger (commentId) || commentId <= 0 ||
         !request.body)
     {
         response.status (http.STATUS_BAD_REQUEST);
@@ -426,14 +308,7 @@ content.putComment = (request: Request, response: Response) =>
     }
     try
     {
-        const reader = objectReader (request.body);
-        input = 
-        {
-            commentId: categoryId,
-            title: reader.optionalString ("Title"),
-            text: reader.optionalString ("Text"),
-            rating: reader.optionalInteger ("Rating")
-        };
+        input = content.inputPutComment (request, commentId);
     }
     catch
     {
@@ -444,22 +319,11 @@ content.putComment = (request: Request, response: Response) =>
 
     void model.updateComment (input).then (() =>
     {
-        response.status (http.STATUS_NO_CONTENT);
-        response.end ();
-        return;
+        content.outputPutComment (response);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorPutComment (response, e);
     });
 }
 /**
@@ -473,7 +337,7 @@ content.putReview = (request: Request, response: Response) =>
     const reviewId = Number (request.params ["id"]);
     let input: ReviewUpdate;
 
-    if (!Number.isSafeInteger (reviewId) ||
+    if (!Number.isSafeInteger (reviewId) || reviewId <= 0 ||
         !request.body)
     {
         response.status (http.STATUS_BAD_REQUEST);
@@ -482,13 +346,7 @@ content.putReview = (request: Request, response: Response) =>
     }
     try
     {
-        const reader = objectReader (request.body);
-        input = 
-        {
-            reviewId: reviewId,
-            mime: reader.optionalString ("Mime"),
-            link: reader.optionalString ("Link"),
-        };
+        input = content.inputPutPreview (request, reviewId);
     }
     catch
     {
@@ -499,22 +357,11 @@ content.putReview = (request: Request, response: Response) =>
 
     void model.updateReview (input).then (() =>
     {
-        response.status (http.STATUS_NO_CONTENT);
-        response.end ();
-        return;
+        content.outputPutReview (response);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorPutReview (response, e);
     });
 }
 /**
@@ -525,10 +372,10 @@ content.putReview = (request: Request, response: Response) =>
 */
 content.putStock = (request: Request, response: Response) =>
 {
-    const productId = Number (request.params ["id"]);
+    const basicId = Number (request.params ["id"]);
     let input: StockUpdate;
 
-    if (!Number.isSafeInteger (productId) ||
+    if (!Number.isSafeInteger (basicId) || basicId <= 0 ||
         !request.body)
     {
         response.status (http.STATUS_BAD_REQUEST);
@@ -537,12 +384,7 @@ content.putStock = (request: Request, response: Response) =>
     }
     try
     {
-        const reader = objectReader (request.body);
-        input = 
-        {
-            productId: productId,
-            quantity: reader.optionalInteger ("Quantity"),
-        };
+        input = content.inputPutStock (request, basicId);
     }
     catch
     {
@@ -553,22 +395,11 @@ content.putStock = (request: Request, response: Response) =>
 
     void model.updateStock (input).then (() =>
     {
-        response.status (http.STATUS_NO_CONTENT);
-        response.end ();
-        return;
+        content.outputPutStock (response);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorPutStock (response, e);
     });
 }
 
@@ -580,49 +411,19 @@ content.putStock = (request: Request, response: Response) =>
 */
 content.postBasic = async (request: Request, response: Response) =>
 {
+    const coverId = await modelStorage.createWriterId ();
+    const bgId = await modelStorage.createWriterId ();
     let input: BasicCreate;
     
     try
     {
-        const coverId = await modelStorage.createWriterId ();
-        const form = formidable ({
-            multiples: false,
-            uploadDir: modelStorage.getPath (),
-            filter: (part) =>
-            {
-                const isKey = part.name === "Cover";
-                const isImage = part.mimetype ? 
-                                part.mimetype.startsWith ("image/") : false;
-
-                return isKey && isImage;
-            },
-            filename: (name, ext, part, form) =>
-            {
-                void name; void ext;
-                void part; void form;
-                return coverId;
-            },
-        });
-        const [field, file] = await form.parse (request);
-
-        const listMetadata = field ["Metadata"] ?? [];
-        const listFile = file ["Cover"] ?? [];
-
-        const meta = objectReader (JSON.parse (listMetadata.at (0) ?? ""));
-        const cover = listFile.at (0);
-
-        input = 
-        {
-            name: meta.requireString ("Name"),
-            description: meta.requireString ("Description"),
-            price: meta.requireInteger ("Price"),
-            priceCode: meta.requireInteger ("PriceCode"),
-            platform: meta.requireInteger ("Platform"),
-            cover: cover?.newFilename ?? ""
-        };
+        input = await content.inputPostBasic (request, coverId, bgId);
     }
     catch (e: unknown)
     {
+        await modelStorage.delete (coverId);
+        await modelStorage.delete (bgId);
+
         log.warn (e);
 
         response.status (http.STATUS_BAD_REQUEST);
@@ -632,20 +433,14 @@ content.postBasic = async (request: Request, response: Response) =>
 
     void model.create (input).then ((x) =>
     {
-        response.status (http.STATUS_CREATED);
-        response.json ({
-            "Id": x,
-            "Created": new Date ().getTime ()
-        });
-        response.end ();
-        return;
+        content.outputPostBasic (response, x);
     })
-    .catch ((e: unknown) =>
+    .catch (async (e: unknown) =>
     {
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        await modelStorage.delete (coverId);
+        await modelStorage.delete (bgId);
+
+        content.errorPostBasic (response, e);
     });
 }
 /**
@@ -660,12 +455,7 @@ content.postCategory = (request: Request, response: Response) =>
 
     try
     {
-        const reader = objectReader (request.body);
-        input = 
-        {
-            productId:  reader.requireInteger ("ProductId"),
-            value: reader.requireInteger ("Value")
-        };
+        input = content.inputPostCategory (request);
     }
     catch
     {
@@ -676,20 +466,11 @@ content.postCategory = (request: Request, response: Response) =>
 
     void model.createCategory (input).then ((x) =>
     {
-        response.status (http.STATUS_CREATED);
-        response.json ({
-            "Id": x,
-            "Created": new Date ().getTime ()
-        });
-        response.end ();
-        return;
+        content.outputPostCategory (response, x);
     })
     .catch ((e: unknown) =>
     {
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorPostCategory (response, e);
     });
 }
 /**
@@ -705,15 +486,7 @@ content.postComment = (request: Request, response: Response) =>
 
     try
     {
-        const reader = objectReader (request.body);
-        input = 
-        {
-            productId: reader.requireInteger ("ProductId"),
-            author: authorId,
-            title: reader.requireString ("Title"),
-            text: reader.requireString ("Text"),
-            rating: reader.requireInteger ("Rating"),
-        };
+        input = content.inputPostComment (request, authorId);
     }
     catch
     {
@@ -724,20 +497,11 @@ content.postComment = (request: Request, response: Response) =>
 
     void model.createComment (input).then ((x) =>
     {
-        response.status (http.STATUS_CREATED);
-        response.json ({
-            "Id": x,
-            "Created": new Date ().getTime ()
-        });
-        response.end ();
-        return;
+        content.outputPostComment (response, x);
     })
     .catch ((e: unknown) =>
     {
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorPostComment (response, e);
     });
 }
 /**
@@ -752,13 +516,7 @@ content.postReview = (request: Request, response: Response) =>
 
     try
     {
-        const reader = objectReader (request.body);
-        input = 
-        {
-            productId: reader.requireInteger ("ProductId"),
-            mime: reader.requireString ("Mime"),
-            link: reader.requireString ("Link"),
-        };
+        input = content.inputPostReview (request);
     }
     catch
     {
@@ -769,20 +527,11 @@ content.postReview = (request: Request, response: Response) =>
 
     void model.createReview (input).then ((x) =>
     {
-        response.status (http.STATUS_CREATED);
-        response.json ({
-            "Id": x,
-            "Created": new Date ().getTime ()
-        });
-        response.end ();
-        return;
+        content.outputPostReview (response, x);
     })
     .catch ((e: unknown) =>
     {
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorPostReview (response, e);
     });
 }
 
@@ -794,34 +543,11 @@ content.postReview = (request: Request, response: Response) =>
 */
 content.deleteBasic = (request: Request, response: Response) =>
 {
-    const productId = Number (request.params ["id"]);
-
-    if (!Number.isSafeInteger (productId) ||
-        !request.body)
-    {
-        response.status (http.STATUS_BAD_REQUEST);
-        response.end ();
-        return;
-    }
-
-    void model.delete (productId).then (() =>
-    {
-        response.status (http.STATUS_NO_CONTENT);
-        response.end ();
-    })
-    .catch ((e: unknown) =>
-    {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
-    });
+    //
+    // เสี่ยงเกินไปที่ดำเนินการ ดังนั้นจึงไม่มีการทำงานใด ๆ
+    //
+    response.status (http.STATUS_NOT_IMPLEMENTED);
+    response.end ();
 }
 /**
  * ลบหมวดหมู่ออกจากสินค้าดังกล่าว
@@ -833,8 +559,7 @@ content.deleteCategory = (request: Request, response: Response) =>
 {
     const categoryId = Number (request.params ["id"]);
 
-    if (!Number.isSafeInteger (categoryId) ||
-        !request.body)
+    if (!Number.isSafeInteger (categoryId) || categoryId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -843,21 +568,11 @@ content.deleteCategory = (request: Request, response: Response) =>
 
     void model.deleteCategory (categoryId).then (() =>
     {
-        response.status (http.STATUS_NO_CONTENT);
-        response.end ();
+        content.outputDeleteCategory (response);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorDeleteCategory (response, e);
     });
 }
 /**
@@ -870,8 +585,7 @@ content.deleteComment = (request: Request, response: Response) =>
 {
     const commentId = Number (request.params ["id"]);
 
-    if (!Number.isSafeInteger (commentId) ||
-        !request.body)
+    if (!Number.isSafeInteger (commentId) || commentId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -880,21 +594,11 @@ content.deleteComment = (request: Request, response: Response) =>
 
     void model.deleteComment (commentId).then (() =>
     {
-        response.status (http.STATUS_NO_CONTENT);
-        response.end ();
+        content.outputDeleteComment (response);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorDeleteComment (response, e);
     });
 }
 /**
@@ -907,8 +611,7 @@ content.deleteReview = (request: Request, response: Response) =>
 {
     const reviewId = Number (request.params ["id"]);
 
-    if (!Number.isSafeInteger (reviewId) ||
-        !request.body)
+    if (!Number.isSafeInteger (reviewId) || reviewId <= 0)
     {
         response.status (http.STATUS_BAD_REQUEST);
         response.end ();
@@ -917,24 +620,541 @@ content.deleteReview = (request: Request, response: Response) =>
 
     void model.deleteReview (reviewId).then (() =>
     {
-        response.status (http.STATUS_NO_CONTENT);
-        response.end ();
+        content.outputDeleteReview (response);
     })
     .catch ((e: unknown) =>
     {
-        if (e instanceof error.NotFound)
-        {
-            response.status (http.STATUS_NOT_FOUND);
-            response.end ();
-            return;
-        }
-        log.error (e);
-        response.status (http.STATUS_SERVICE_UNAVAILABLE);
-        response.end ();
-        return;
+        content.errorDeleteReview (response, e);
     });
 }
 
+content.inputPutBasic = async (
+    request: Request,
+    productId: BasicId,
+    coverId: ResourceId,
+    backgroundId: ResourceId
+) : Promise<BasicUpdate> =>
+{
+    const form = formidable ({
+        multiples: false,
+        uploadDir: modelStorage.getPath (),
+        filter: (part) =>
+        {
+            const isKey = part.name === "Cover" || 
+                            part.name === "Background";
+            const isImage = part.mimetype ? 
+                            part.mimetype.startsWith ("image/") : false;
+
+            return isKey && isImage;
+        },
+        filename: (name, ext, part, form) =>
+        {
+            void name; void ext;
+            void part; void form;
+
+            switch (part.name)
+            {
+                case "Cover": return coverId;
+                case "Background": return backgroundId;
+            }
+            throw new Error ("unknown part name");
+        },
+    });
+    const [field, file] = await form.parse (request);
+
+    const arrayMeta = field ["Metadata"] ?? [];
+    const arrayCover = file ["Cover"] ?? [];
+    const arrayBG = file ["Background"] ?? [];
+
+    const meta = objectReader (JSON.parse (arrayMeta.at (0) ?? ""));
+    const cover = arrayCover.at (0);
+    const bg = arrayBG.at (0);
+
+    const result: BasicUpdate =
+    {
+        id: productId,
+        name: meta.optionalString ("Name"),
+        description: meta.optionalString ("Description"),
+        price: meta.optionalFloat ("Price"),
+        priceCode: meta.optionalInteger ("PriceCode"),
+        cover: cover?.newFilename ?? undefined,
+        background: bg?.newFilename ?? undefined,
+    };
+    return result;
+}
+content.inputPutCategory = (r: Request, id: CategoryId) : CategoryUpdate =>
+{
+    const reader = objectReader (r.body);
+    const result: CategoryUpdate =
+    {
+        categoryId: id,
+        value: reader.optionalInteger ("Value")
+    };
+    return result;
+}
+content.inputPutComment = (r: Request, id: CommentId) : CommentUpdate =>
+{
+    const reader = objectReader (r.body);
+    const result: CommentUpdate =
+    {
+        commentId: id,
+        title: reader.optionalString ("Title"),
+        text: reader.optionalString ("Text"),
+        rating: reader.optionalInteger ("Rating")
+    };
+    return result;
+}
+content.inputPutPreview = (r: Request, id: ReviewId) : ReviewUpdate =>
+{
+    const reader = objectReader (r.body);
+    const result: ReviewUpdate =
+    {
+        reviewId: id,
+        mime: reader.optionalString ("Mime"),
+        link: reader.optionalString ("Link"),
+    };
+    return result;
+}
+content.inputPutStock = (r: Request, id: BasicId) : StockUpdate =>
+{
+    const reader = objectReader (r.body);
+    const result: StockUpdate =
+    {
+        productId: id,
+        quantity: reader.optionalInteger ("Quantity"),
+    };
+    return result;
+}
+content.inputPostBasic = async (
+    request: Request, 
+    coverId: ResourceId,
+    bgId: ResourceId
+) : Promise<BasicCreate> =>
+{
+    const form = formidable ({
+        multiples: false,
+        uploadDir: modelStorage.getPath (),
+        filter: (part) =>
+        {
+            const isKey = part.name === "Cover" || 
+                            part.name == "Background";
+            const isImage = part.mimetype ? 
+                            part.mimetype.startsWith ("image/") : false;
+
+            return isKey && isImage;
+        },
+        filename: (name, ext, part, form) =>
+        {
+            void name; void ext;
+            void part; void form;
+
+            switch (part.name)
+            {
+                case "Cover": return coverId;
+                case "Background": return bgId;
+            }
+            return "";
+        },
+    });
+    const [field, file] = await form.parse (request);
+
+    const listMetadata = field ["Metadata"] ?? [];
+    const listCover = file ["Cover"] ?? [];
+    const listBackground = file ["Background"] ?? [];
+
+    const meta = objectReader (JSON.parse (listMetadata.at (0) ?? ""));
+    const background = listBackground.at (0);
+    const cover = listCover.at (0);
+
+    const result: BasicCreate = 
+    {
+        name: meta.requireString ("Name"),
+        description: meta.requireString ("Description"),
+        price: meta.requireInteger ("Price"),
+        priceCode: meta.requireInteger ("PriceCode"),
+        platform: meta.requireInteger ("Platform"),
+        background: background?.newFilename ?? "",
+        cover: cover?.newFilename ?? ""
+    };
+    return result;
+}
+content.inputPostCategory = (request: Request) : CategoryCreate =>
+{
+    const reader = objectReader (request.body);
+    const result: CategoryCreate = 
+    {
+        productId: reader.requireInteger ("ProductId"),
+        value: reader.requireInteger ("Value")
+    };
+    return result;
+}
+content.inputPostComment = (request: Request, author: AccountId) 
+    : CommentCreate =>
+{
+    const reader = objectReader (request.body);
+    const result: CommentCreate = 
+    {
+        productId: reader.requireInteger ("ProductId"),
+        author: author,
+        title: reader.requireString ("Title"),
+        text: reader.requireString ("Text"),
+        rating: reader.requireInteger ("Rating"),
+    };
+    return result;
+}
+content.inputPostReview = (request: Request) : ReviewCreate =>
+{
+    const reader = objectReader (request.body);
+    const result: ReviewCreate = 
+    {
+        productId: reader.requireInteger ("ProductId"),
+        mime: reader.requireString ("Mime"),
+        link: reader.requireString ("Link"),
+    };
+    return result;
+}
+
+content.outputGetBasic = (r: Response, x: BasicFetch) =>
+{
+    r.status (http.STATUS_OK);
+    r.json ({
+        "Id": x.id,
+        "Name": x.name,
+        "Description": x.description,
+        "Price": x.price,
+        "PriceCode": x.priceCode,
+        "Platform": x.platform,
+        "Background": x.background,
+        "Cover": x.cover
+    });
+    r.end ();
+}
+content.outputGetBasicList = (r: Response, x: BasicFetch []) =>
+{
+    r.status (http.STATUS_OK);
+    r.json ({
+        "Item": x.map ((x) => 
+        {
+            return {
+                "Id": x.id,
+                "Name": x.name,
+                "Description": x.description,
+                "Price": x.price,
+                "PriceCode": x.priceCode,
+                "Platform": x.platform,
+                "Background": x.background,
+                "Cover": x.cover
+            }
+        })
+    })
+    r.end ();
+}
+content.outputGetCategory = (r: Response, x: CategoryFetch) =>
+{
+    r.status (http.STATUS_OK);
+    r.json ({
+        "CategoryId": x.categoryId,
+        "ProductId": x.productId,
+        "Value": x.value,
+    });
+    r.end ();
+}
+content.outputGetComment = (r: Response, x: CommentFetch) =>
+{
+    r.status (http.STATUS_OK);
+    r.json ({
+        "CommentId": x.commentId,
+        "ProductId": x.productId,
+        "Author": x.author,
+        "Title": x.title,
+        "Text": x.text,
+        "Rating": x.rating,
+    });
+    r.end ();
+}
+content.outputGetReview = (r: Response, x: ReviewFetch) =>
+{
+    r.status (http.STATUS_OK);
+    r.json ({
+        "ReviewId": x.reviewId,
+        "ProductId": x.productId,
+        "Mime": x.mime,
+        "Link": x.link,
+    });
+    r.end ();
+}
+content.outputGetStock = (r: Response, x: StockFetch) =>
+{
+    r.status (http.STATUS_OK);
+    r.json ({
+        "ProductId": x.productId,
+        "Quantity": x.quantity,
+    });
+    r.end ();
+}
+content.outputPutBasic = (r: Response) =>
+{
+    r.status (http.STATUS_NO_CONTENT);
+    r.end ();
+}
+content.outputPutCategory = (r: Response) =>
+{
+    r.status (http.STATUS_NO_CONTENT);
+    r.end ();
+}
+content.outputPutComment = (r: Response) =>
+{
+    r.status (http.STATUS_NO_CONTENT);
+    r.end ();
+}
+content.outputPutReview = (r: Response) =>
+{
+    r.status (http.STATUS_NO_CONTENT);
+    r.end ();
+}
+content.outputPutStock = (r: Response) =>
+{
+    r.status (http.STATUS_NO_CONTENT);
+    r.end ();
+}
+content.outputPostBasic = (r: Response, id: BasicId) =>
+{
+    r.status (http.STATUS_CREATED);
+    r.json ({
+        "Id": id,
+        "Created": new Date ().getTime ()
+    });
+    r.end ();
+}
+content.outputPostCategory = (r: Response, id: CategoryId) =>
+{
+    r.status (http.STATUS_CREATED);
+    r.json ({
+        "Id": id,
+        "Created": new Date ().getTime ()
+    });
+    r.end ();
+}
+content.outputPostComment = (r: Response, id: CommentId) =>
+{
+    r.status (http.STATUS_CREATED);
+    r.json ({
+        "Id": id,
+        "Created": new Date ().getTime ()
+    });
+    r.end ();
+}
+content.outputPostReview = (r: Response, id: ReviewId) =>
+{
+    r.status (http.STATUS_CREATED);
+    r.json ({
+        "Id": id,
+        "Created": new Date ().getTime ()
+    });
+    r.end ();
+}
+content.outputDeleteCategory = (r: Response) =>
+{
+    r.status (http.STATUS_NO_CONTENT);
+    r.end ();
+}
+content.outputDeleteComment = (r: Response) =>
+{
+    r.status (http.STATUS_NO_CONTENT);
+    r.end ();
+}
+content.outputDeleteReview = (r: Response) =>
+{
+    r.status (http.STATUS_NO_CONTENT);
+    r.end ();
+}
+
+content.errorGetBasic = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorGetBasicList = (r: Response, e: unknown) =>
+{
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorGetCategory = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorGetComment = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorGetReview = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorGetStock = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorPutBasic = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorPutCategory = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorPutComment = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorPutReview = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorPutStock = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorPostBasic = (r: Response, e: unknown) =>
+{
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorPostCategory = (r: Response, e: unknown) =>
+{
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorPostComment = (r: Response, e: unknown) =>
+{
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorPostReview = (r: Response, e: unknown) =>
+{
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorDeleteCategory = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorDeleteComment = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorDeleteReview = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
 /**
  * ส่งออกตัวแปร
 */

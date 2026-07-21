@@ -93,13 +93,13 @@ content.updateBasic = (info: BasicUpdate) : Promise<void> =>
 {
     const cmd = 
     [
-        info.name ? "Name" : undefined,
-        info.role ? "Role" : undefined,
-        info.icon ? "Icon" : undefined,
+        info.name ? "Name = ?" : undefined,
+        info.role ? "Role = ?" : undefined,
+        info.icon ? "Icon = ?" : undefined,
+        info.status ? "Status = ?" : undefined,
     ]
     .filter (x => x !== undefined)
-    .join (" = ?, ")
-    .concat (" = ? ")
+    .join (", ")
     .concat ("WHERE Id = ?");
 
     const param = 
@@ -107,6 +107,7 @@ content.updateBasic = (info: BasicUpdate) : Promise<void> =>
         info.name,
         info.role,
         info.icon,
+        info.status,
         info.id
     ]
     .filter (x => x !== undefined);
@@ -123,11 +124,10 @@ content.updateCart = async (info: CartUpdate)
 {
     const key = 
     [
-        info.quantity ? "Quantity" : undefined,
+        info.quantity ? "Quantity = ?" : undefined,
     ]
     .filter (x => x !== undefined)
-    .join (" = ?, ")
-    .concat (" = ? ")
+    .join (", ")
     .concat ("WHERE ItemId = ? AND AccountId = ?");
 
     const value = 
@@ -157,9 +157,9 @@ content.create = async (info: BasicCreate) : Promise<BasicId> =>
     try
     {
         const id = await ctx.insert (`
-            INSERT INTO Account (Name, Role, Icon)
-            VALUES (?, ?, ?)`,
-            [info.name, info.role, info.icon]
+            INSERT INTO Account (Name, Role, Icon, Status)
+            VALUES (?, ?, ?, ?)`,
+            [info.name, info.role, info.icon, info.status]
         ) as BasicId;
         await ctx.insert (`
             INSERT INTO AccountContact (Id)
@@ -235,7 +235,8 @@ content.readBasic = (reader: ObjectReader) : BasicFetch =>
         icon: reader.requireString ("Icon"),
         role: reader.requireInteger ("Role"),
         created: reader.requireDate ("Created"),
-        modified: reader.requireDateOrNull ("Modified")
+        modified: reader.requireDateOrNull ("Modified"),
+        status: reader.requireInteger ("Status")
     }
 }
 content.readCart = (reader: ObjectReader) : CartFetch =>
@@ -324,6 +325,10 @@ export interface BasicFetch
      * วันที่ปรับเปลี่ยนข้อมูลบัญชี
     */
     readonly modified: Date | null; 
+    /**
+     * สถานะบัญชี
+    */
+    readonly status: number;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการเปลี่ยนแปลงข้อมูลในฐานข้อมูล
@@ -343,6 +348,10 @@ export interface BasicUpdate
      * รูปบัญชี
     */
     icon ?: string | undefined;
+    /**
+     * สถานะบัญชี
+    */
+    status ?: number | undefined;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลลงในฐานข้อมูล
@@ -361,6 +370,10 @@ export interface BasicCreate
      * ไอคอน
     */
     icon: string;
+    /**
+     * สถานะบัญชี
+    */
+    status: number;
 }
 
 export interface CartFetch

@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS `project`.`Account`
                 COMMENT 'เวลาที่บัญชีถูกสร้าง' ,
     `Modified`  DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                 COMMENT 'เวลาที่แก้ไข' ,
+    `Status`    INT NOT NULL DEFAULT 0 COMMENT 'สถานะบัญชี' ,
     
     CONSTRAINT  PK_Account_Id PRIMARY KEY (`Id`) ,
     CONSTRAINT  UK_Account_Id UNIQUE (`Id`)
@@ -53,6 +54,10 @@ CREATE TABLE IF NOT EXISTS `project`.`AccountContact`
 )
 ENGINE = InnoDB 
 COMMENT = 'ข้อมูลบัญชีผู้ใช้ (ติดต่อ)';
+
+-- #
+-- # ข้อมูลการจัดส่งของผู้ใช้
+-- #
 
 --
 -- สร้างข้อมูลการเข้าสู่ระบบ (ชื่อ/รหัสผ่าน)
@@ -101,7 +106,8 @@ CREATE TABLE IF NOT EXISTS `project`.`Product`
     `Price`     FLOAT NOT NULL DEFAULT 0 COMMENT 'ราคา' ,
     `PriceCode` INT NOT NULL DEFAULT 1 COMMENT 'สกุลเงินราคา' ,
     `Platform`  INT NOT NULL DEFAULT 0 COMMENT 'แพลตฟอร์ม' ,
-    `Cover`   CHAR(255) NOT NULL DEFAULT "" COMMENT 'รูปสินค้า' ,
+    `Background` CHAR(255) NOT NULL DEFAULT "" COMMENT 'รูปพื้นหลัง' ,
+    `Cover`     CHAR(255) NOT NULL DEFAULT "" COMMENT 'รูปสินค้า' ,
 
     CONSTRAINT  PK_Product_Id PRIMARY KEY (`Id`),
     CONSTRAINT  UK_Product_Id UNIQUE (`Id`)

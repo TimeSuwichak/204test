@@ -264,20 +264,20 @@ content.getStock = (key: BasicId) =>
  * @param productId รหัสสินค้า
  * @param info ข้อมูลที่ต้องการแก้ไข
 */
-content.update = async (info: BasicUpdate) : Promise<number> =>
+content.updateBasic = async (info: BasicUpdate) : Promise<number> =>
 {
     const key = 
     [
-        info.name ? "Name" : undefined,
-        info.description ? "Description" : undefined,
-        info.price ? "Price" : undefined,
-        info.priceCode ? "PriceCode" : undefined,
-        info.platform ? "Platform" : undefined,
-        info.artwork ? "Artwork" : undefined
+        info.name ? "Name = ?" : undefined,
+        info.description ? "Description = ?" : undefined,
+        info.price ? "Price = ?" : undefined,
+        info.priceCode ? "PriceCode = ?" : undefined,
+        info.platform ? "Platform = ?" : undefined,
+        info.cover ? "Cover = ?" : undefined,
+        info.background ? "Background = ?" : undefined
     ]
     .filter (x => x !== undefined)
-    .join (" = ?, ")
-    .concat (" = ? ")
+    .join (", ")
     .concat ("WHERE Id = ?");
 
     const value = [
@@ -286,7 +286,7 @@ content.update = async (info: BasicUpdate) : Promise<number> =>
         info.price,
         info.priceCode,
         info.platform,
-        info.artwork,
+        info.cover,
         info.id
     ]
     .filter (x => x !== undefined);
@@ -301,11 +301,10 @@ content.update = async (info: BasicUpdate) : Promise<number> =>
 content.updateCategory = (info: CategoryUpdate) =>
 {
     const key = [
-        info.value ? "Value" : undefined
+        info.value ? "Value = ?" : undefined
     ]
     .filter (x => x !== undefined)
-    .join (" = ?, ")
-    .concat (" = ? ")
+    .join (", ")
     .concat ("WHERE CategoryId = ?");
 
     const value = [
@@ -330,17 +329,15 @@ content.updateCategory = (info: CategoryUpdate) =>
 content.updateComment = (info: CommentUpdate) =>
 {
     const key = [
-        info.title ? "Title" : undefined,
-        info.text ? "Text" : undefined,
-        info.rating ? "Rating" : undefined
+        info.title ? "Title = ?" : undefined,
+        info.text ? "Text = ?" : undefined,
+        info.rating ? "Rating = ?" : undefined
     ]
     .filter (x => x !== undefined)
-    .join (" = ?, ")
-    .concat (" = ? ")
-    .concat ("WHERE CategoryId = ?");
+    .join (", ")
+    .concat ("WHERE CommentId = ?");
 
     const value = [
-        info.title,
         info.title,
         info.text,
         info.rating,
@@ -364,13 +361,12 @@ content.updateComment = (info: CommentUpdate) =>
 content.updateReview = (info: ReviewUpdate) =>
 {
     const key = [
-        info.mime ? "Mime" : undefined,
-        info.link ? "Link" : undefined
+        info.mime ? "Mime = ?" : undefined,
+        info.link ? "Link = ?" : undefined
     ]
     .filter (x => x !== undefined)
-    .join (" = ?, ")
-    .concat (" = ? ")
-    .concat ("WHERE CategoryId = ?");
+    .join (", ")
+    .concat ("WHERE ReviewId = ?");
 
     const value = [
         info.mime,
@@ -395,11 +391,10 @@ content.updateReview = (info: ReviewUpdate) =>
 content.updateStock = (info: StockUpdate) =>
 {
     const key = [
-        info.quantity ? "Quantity" : undefined,
+        info.quantity ? "Quantity = ?" : undefined,
     ]
     .filter (x => x !== undefined)
-    .join (" = ?, ")
-    .concat (" = ? ")
+    .join (", ")
     .concat ("WHERE ProductId = ?");
 
     const value = [
@@ -431,14 +426,15 @@ content.create = async (info: BasicCreate) : Promise<BasicId> =>
     {
         const id = await transaction.insert (`
             INSERT INTO Product 
-            (Name, Description, Price, PriceCode, Platform, Cover) 
-            VALUES (?, ?, ?, ?, ?, ?)`,
+            (Name, Description, Price, PriceCode, Platform, Background, Cover) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
                 info.name, 
                 info.description, 
                 info.price, 
                 info.priceCode, 
                 info.platform,
+                info.background,
                 info.cover,
             ]
         ) as BasicId;
@@ -633,6 +629,7 @@ content.readBasic = (column: Record<string, unknown>) =>
         price: reader.requireFloat ("Price"),
         priceCode: reader.requireInteger ("PriceCode"),
         platform: reader.requireInteger ("Platform"),
+        background: reader.requireString ("Background"),
         cover: reader.requireString ("Cover")
     };
     return result;
@@ -741,6 +738,10 @@ export interface BasicFetch
     */
     platform: number;
     /**
+     * พื้นหลังสินค้า
+    */
+    background: string;
+    /**
      * รูปปกเกม
     */
     cover: string;
@@ -779,9 +780,13 @@ export interface BasicUpdate
     */
     platform ?: number | undefined;
     /**
+     * พื้นหลังสินค้า
+    */
+    background ?: string | undefined;
+    /**
      * รูปปกเกม
     */
-    artwork ?: string;
+    cover ?: string | undefined;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลลงในฐานข้อมูล
@@ -808,6 +813,10 @@ export interface BasicCreate
      * แพลตฟอร์ม
     */
     platform: number;
+    /**
+     * พื้นหลังสินค้า
+    */
+    background: string;
     /**
      * รูปปกสินค้า
     */

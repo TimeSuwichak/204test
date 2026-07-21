@@ -5,7 +5,8 @@
         "Price": 1099,
         "PriceCode": 1,
         "Platform": 1,
-        "Cover": "./cover.battlefield_1.jpg",
+        "Background": "./battlefield_1.background.jpg",
+        "Cover": "./battlefield_1.cover.jpg",
         "Category": []
     },
     {
@@ -14,7 +15,8 @@
         "Price": 1099,
         "PriceCode": 1,
         "Platform": 1,
-        "Cover": "./cover.dying_light.jpg",
+        "Background": "./dying_light.background.jpg",
+        "Cover": "./dying_light.cover.jpg",
         "Category": []
     },
     {
@@ -23,7 +25,8 @@
         "Price": 1899,
         "PriceCode": 1,
         "Platform": 1,
-        "Cover": "./cover.dying_light_2.jpg",
+        "Background": "./dying_light_2.background.jpg",
+        "Cover": "./dying_light_2.cover.jpg",
         "Category": []
     },
     {
@@ -32,7 +35,8 @@
         "Price": 1799,
         "PriceCode": 1,
         "Platform": 1,
-        "Cover": "./cover.cyberpunk_2077.jpg",
+        "Background": "./cyberpunk_2077.background.jpg",
+        "Cover": "./cyberpunk_2077.cover.jpg",
         "Category": []
     },
     {
@@ -41,7 +45,8 @@
         "Price": 1790,
         "PriceCode": 1,
         "Platform": 1,
-        "Cover": "./cover.elden_ring.jpg",
+        "Background": "./elden_ring.background.jpg",
+        "Cover": "./elden_ring.cover.jpg",
         "Category": []
     },
     {
@@ -50,7 +55,8 @@
         "Price": 888,
         "PriceCode": 1,
         "Platform": 1,
-        "Cover": "./cover.icom.png",
+        "Background": "",
+        "Cover": "./icom.cover.png",
         "Category": []
     }]
 }
