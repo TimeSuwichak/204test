@@ -292,21 +292,7 @@ content.deleteCart = (itemId: CartId, accountId: BasicId) =>
         }
     });
 }
-content.deleteFavorite = (favoriteId: FavoriteId, accountId: BasicId) =>
-{
-    return sql.delete (`
-        DELETE FROM Favorite 
-        WHERE FavoriteId = ? AND AccountId = ?`,
-        [favoriteId, accountId]
-    )
-    .then ((x) =>
-    {
-        if (x === 0)
-        {
-            throw new error.NotFound (`ไม่พบข้อมูลรายการโปรด: ${String (favoriteId)}`);
-        }
-    });
-}content.deleteCartAll = (accountId: BasicId) =>
+content.deleteCartAll = (accountId: BasicId) =>
 {
     return sql.delete (`
         DELETE FROM AccountCart 
@@ -321,6 +307,22 @@ content.deleteFavorite = (favoriteId: FavoriteId, accountId: BasicId) =>
         }
     });
 }
+content.deleteFavorite = (favoriteId: FavoriteId, accountId: BasicId) =>
+{
+    return sql.delete (`
+        DELETE FROM Favorite 
+        WHERE FavoriteId = ? AND AccountId = ?`,
+        [favoriteId, accountId]
+    )
+    .then ((x) =>
+    {
+        if (x === 0)
+        {
+            throw new error.NotFound (`ไม่พบข้อมูลรายการโปรด: ${String (favoriteId)}`);
+        }
+    });
+}
+
 
 content.readBasic = (reader: ObjectReader) : BasicFetch =>
 {
