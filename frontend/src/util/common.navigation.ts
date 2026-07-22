@@ -17,6 +17,7 @@ content.PATH_PRODUCT = "/product";
 content.PATH_PRODUCT_BROWSER = "/product-browser";
 content.PATH_ORDER = "/order";
 content.PATH_SETTINGS = "/settings";
+content.PATH_CART = "/cart";
 
 content.init = function (navigator: NavigateFunction)
 {
@@ -72,5 +73,9 @@ content.toOrder = () =>
 content.toSettings = () =>
 {
     return router (content.PATH_SETTINGS);
+}
+content.toCart = () =>
+{
+    return router (content.PATH_CART);
 }
 export default content;
