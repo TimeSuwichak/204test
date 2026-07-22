@@ -1,26 +1,30 @@
 {
     "Item": [{
+        "Id":"CSI204",
         "Expire": "2026-08-31T23:59:59.000Z",
         "Type": 2,
         "Discount": 15,
         "MinPrice": 100,
         "MaxDiscount": 300 
     },
-    {
+    {   
+        "Id":"ICOM",
         "Expire": "2030-08-31T23:59:59.000Z",
         "Type": 2,
         "Discount": 10,
         "MinPrice": 300,
         "MaxDiscount": 200
     },
-    {
+    {   
+        "Id":"IKLA",
         "Expire": "2077-07-31T23:59:59.000Z",
         "Type": 2,
         "Discount": 15,
         "MinPrice": 400,
         "MaxDiscount": 200 
     },
-    {
+    {   
+        "Id":"ISUS",
         "Expire": "2077-07-31T23:59:59.000Z",
         "Type": 2,
         "Discount": 15,
