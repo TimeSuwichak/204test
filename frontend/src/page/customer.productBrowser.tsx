@@ -341,7 +341,7 @@ const StyledFilterLabel = styled.label`
 `;
 const StyledCart = styled.button<{ $visible: boolean; }>`
   display: ${prop => prop.$visible ? "block" : "none"};
-  position: absolute;
+  position: fixed;
   inset: auto 64px 64px auto;
   width: 64px;
   height: 64px;
