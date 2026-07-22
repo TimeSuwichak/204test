@@ -141,6 +141,24 @@ Use Cases Diagram, Sequences Diagram
 | 3 | พัฒนา Backend และฐานข้อมูล (Backend & Database Development)| สร้าง API จัดการสินค้า, เชื่อมต่อ API สำหรับชำระเงิน และทำ Mock Shipping |
 | 4 | ทดสอบระบบและนำเสนอผลงาน (Testing & Presentation) |ทำ Manual Testing/UAT ตรวจสอบบัค และเตรียมพรีเซนต์โปรเจกต์ |
 
+### 9. ข้อกำหนดที่ไม่ใช่เชิงหน้าที่ (Non-Functional Requirements: NFRs)
+
+| หมวดหมู่                                          | ข้อกำหนดที่ไม่ใช่เชิงหน้าที่                                                                                                                |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ประสิทธิภาพ (Performance)**                     | ระบบควรแสดงผลการค้นหาสินค้า รายละเอียดสินค้า และข้อมูลคำสั่งซื้อได้ภายในระยะเวลาที่เหมาะสม (เช่น ไม่เกิน 3 วินาทีในสภาวะการใช้งานปกติ)      |
+| **ความพร้อมใช้งาน (Availability)**                | ระบบควรพร้อมให้บริการสำหรับลูกค้าในการค้นหาสินค้า สั่งซื้อสินค้า และติดตามสถานะคำสั่งซื้อได้ตลอดเวลาที่เซิร์ฟเวอร์ทำงาน                     |
+| **ความง่ายในการใช้งาน (Usability)**               | ระบบควรมีส่วนติดต่อผู้ใช้ที่เข้าใจง่าย ใช้งานสะดวก และเหมาะสมสำหรับ Customer, Staff และ Manager                                             |
+| **ความน่าเชื่อถือ (Reliability)**                 | ระบบต้องสามารถบันทึกข้อมูลผู้ใช้ ตะกร้าสินค้า คำสั่งซื้อ รีวิว รายการโปรด และข้อมูลสต็อกได้อย่างถูกต้องโดยไม่สูญหาย                         |
+| **ความถูกต้องของข้อมูล (Data Integrity)**         | จำนวนสินค้าคงเหลือต้องถูกอัปเดตอย่างถูกต้องหลังการยืนยันคำสั่งซื้อ และระบบต้องสร้าง Low Stock Alert เมื่อจำนวนสินค้าเหลือต่ำกว่าค่าที่กำหนด |
+| **ความปลอดภัย (Security)**                        | ผู้ใช้ต้องเข้าสู่ระบบก่อนเข้าถึงฟังก์ชันที่มีการป้องกัน เช่น การจัดการข้อมูลส่วนตัว ประวัติการสั่งซื้อ การจัดการสต็อก และการจัดการระบบ      |
+| **การกำหนดสิทธิ์ (Authorization)**                | ระบบต้องจำกัดสิทธิ์การเข้าถึงตามบทบาทของผู้ใช้ (Customer, Staff, Manager/Admin)                                                             |
+| **ความสามารถในการบำรุงรักษา (Maintainability)**   | ระบบควรออกแบบแบบแยกส่วน (React Frontend, Node.js Backend และ MySQL Database) เพื่อให้สามารถพัฒนาและแก้ไขระบบได้ง่ายในอนาคต                  |
+| **ความสามารถในการขยายระบบ (Scalability)**         | ระบบควรรองรับการเพิ่มจำนวนสินค้า ผู้ใช้งาน หมวดหมู่ โปรโมชั่น และคำสั่งซื้อในอนาคตได้โดยไม่ต้องปรับเปลี่ยนสถาปัตยกรรมหลัก                   |
+| **ความเข้ากันได้ (Compatibility)**                | ระบบควรทำงานได้บนเว็บเบราว์เซอร์สมัยใหม่ เช่น Google Chrome, Microsoft Edge และ Firefox                                                     |
+| **การเชื่อมต่อระบบภายนอก (External Integration)** | ระบบต้องสามารถเชื่อมต่อกับ Mock Shipping API เพื่อสร้างข้อมูลการจัดส่งและติดตามสถานะสินค้าได้                                               |
+| **การจัดเก็บและกู้คืนข้อมูล (Backup & Recovery)** | ข้อมูลผู้ใช้ คำสั่งซื้อ สินค้า และสต็อกต้องถูกจัดเก็บอย่างถาวรในฐานข้อมูล MySQL เพื่อป้องกันข้อมูลสูญหาย                                    |
+
+
 ### เอกสารการวิเคราะห์และออกแบบระบบ (Analysis & Design Document)
 
 ### 1. ขอบเขตของระบบ (System Scope)
@@ -240,48 +258,54 @@ flowchart TD
         B1[Auth Service<br/>Node.js / Express]
         B2[Product Service<br/>Node.js / Express]
         B3[Order & Cart Service<br/>Node.js / Express]
-        B4[Payment Service<br/>Node.js / Express]
-        B5[Shipping Service<br/>Mock Shipping API]
+        B4[Mock Payment Service<br/>Node.js / Express]
+        B5[Shipping Service<br/>Node.js / Express]
     end
 
-    subgraph DataStorage
+    subgraph External Services
+        ShipAPI[(Mock Shipping API)]
+    end
+
+    subgraph Data Storage
         DB[(MySQL Database)]
-        Cache[(Redis Cache)]
     end
 
+    %% User Access
     A1 -->|Login / Browse / Checkout| Web1
     A2 -->|Manage Orders / Inventory| Web2
-    A3 -->|View Reports / Admin| Web2
+    A3 -->|View Reports / Administration| Web2
 
+    %% Frontend → Backend
     Web1 -->|HTTP REST| B1
     Web1 -->|HTTP REST| B2
     Web1 -->|HTTP REST| B3
-    Web1 -->|HTTP REST| B4
+    Web1 -->|Confirm Mock Payment| B4
 
     Web2 -->|HTTP REST| B1
     Web2 -->|HTTP REST| B2
     Web2 -->|HTTP REST| B3
     Web2 -->|HTTP REST| B5
 
+    %% Backend → Database
     B1 -->|User Data| DB
-    B2 -->|Product Data| DB
-    B3 -->|Order Data| DB
-    B4 -->|Payment Records| DB
-    B5 -->|Shipping Status| DB
+    B2 -->|Product & Inventory Data| DB
+    B3 -->|Cart & Order Data| DB
+    B4 -->|Update Order Status| DB
+    B5 -->|Shipment Information| DB
 
-    B2 -->|Cache Reads/Writes| Cache
-    B3 -->|Cache Reads/Writes| Cache
-
-    B4 -->|Payment Gateway| Omise[(Omise Payment Gateway)]
-    B5 -->|Shipping API| Omise
+    %% External Integration
+    B5 -->|Create Shipment / Track Shipment| ShipAPI
 
     classDef frontend fill:#f5f5ff,stroke:#5c6bc0,stroke-width:1px;
     classDef backend fill:#e8f5e9,stroke:#2e7d32,stroke-width:1px;
+    classDef external fill:#fce4ec,stroke:#ad1457,stroke-width:1px;
     classDef data fill:#fff8e1,stroke:#f57f17,stroke-width:1px;
 
     class A1,A2,A3,Web1,Web2 frontend;
     class B1,B2,B3,B4,B5 backend;
-    class DB,Cache data;
+    class ShipAPI external;
+    class DB data;
 ```
+
 เอกสารเพิ่มเติม : https://ikla47.github.io/UniversityCSI204/doc/
 
