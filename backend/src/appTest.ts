@@ -158,7 +158,7 @@ content.setupPromotion = async () =>
 
         try
         {
-            const id = await modelPromotion.create ({
+            await modelPromotion.create ({
                 id: pid,
                 expire: new Date (expire),
                 type: type,
@@ -166,7 +166,7 @@ content.setupPromotion = async () =>
                 minPrice: minPrice,
                 maxDiscount: maxDiscount
             });
-            log.info (`Created Promotion ID: ${id}`);
+            log.info (`Created Promotion ID: ${pid}`);
         }
         catch (e: unknown)
         {
