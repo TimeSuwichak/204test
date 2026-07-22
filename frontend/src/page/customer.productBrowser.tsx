@@ -5,10 +5,13 @@ import ctxCustomer    from "#context/customer.ts";
 import cmmNavigation  from "#util/common.navigation.ts";
 import apiStorage     from "#util/api.storage.ts";
 
+import Filter         from "#component/customer.productBrowser.filter.tsx";
+
+
 import { useSearchParams } from "react-router";
 import type { MouseEvent } from "react";
 
-import { RefreshCwOff, ShoppingBasket } from "lucide-react";
+import { RefreshCwOff, ShoppingBasket, ShoppingCart } from "lucide-react";
 
 /**
  * ส่วนประกอบหน้าต่างเลือกสินค้า
@@ -67,12 +70,14 @@ content.List = function ProductBrowserList ()
       const name = x.name;
       const artwork = (x.cover.length > 0) ? 
         apiStorage.getUrlStream (x.cover) : undefined;
+      const price = x.price;
 
       return <content.ListItem 
         key={key}
         id={id}
         name={name}
         artwork={artwork}
+        price={price}
         onClick={onClick}/>
     }));
   }
@@ -122,10 +127,32 @@ content.ListItem = function ProductBrowserListItem (prop: PropListItem)
   }
 
   return (
-    <StyledListItemContainer onClick={onClick}>
-      <StyledListItem src={prop.artwork}/>
-      <StyledListItemText>{prop.name}</StyledListItemText>
-    </StyledListItemContainer>
+    <Card aria-label={`ดูรายละเอียด ${prop.name}`} onClick={onClick}>
+      <ImageWrapper>
+          {
+              prop.artwork
+                  ? <Image src={prop.artwork} alt={prop.name}/>
+                  : <Placeholder>
+                      <PlaceholderMark>✦</PlaceholderMark>
+                      <PlaceholderText>รูปเกม</PlaceholderText>
+                    </Placeholder>
+          }
+          <Overlay/>
+      </ImageWrapper>
+
+      <Info>
+          <ProductName>{prop.name}</ProductName>
+          <Footer>
+              <PriceGroup>
+                  <PriceLabel>ราคา</PriceLabel>
+                  <Price>{prop.price.toFixed (2)} <span style={{ color: "white" }}>฿</span></Price>
+              </PriceGroup>
+              <AddButton onClick={onClick} aria-label="เพิ่มลงตะกร้า">
+                  <ShoppingCart size={16}/>
+              </AddButton>
+          </Footer>
+      </Info>
+  </Card>
   )
 }
 /**
@@ -135,11 +162,9 @@ content.Filter = function ProductBrowserFilter ()
 {
   return (
     <StyledFilter>
-      <StyledFilterLabel>ตัวเลือก</StyledFilterLabel>
-      <div>
-        <input type="checkbox"/>
-        <label></label>
-      </div>
+      <StyledFilterInner>
+        <Filter/>
+      </StyledFilterInner>
     </StyledFilter>
   );
 }
@@ -192,6 +217,10 @@ interface PropListItem
    * ปกสินค้า
   */
   artwork: string | undefined;
+  /**
+   * ราคา
+  */
+  price: number;
   /**
    * ทำงานเมื่อผู้ใช้กดเลือกสินค้า
   */
@@ -309,22 +338,27 @@ const StyledListItem = styled.img`
   -webkit-user-select: none;
   -webkit-user-drag: none;
   -ms-user-select: none;
+
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(160deg, #223148 0%, #0F1A2A 100%);
+  overflow: hidden;
 `;
 const StyledFilter = styled.div`
   position: fixed;
-  inset: 64px 144px auto auto;
+  inset: 64px 144px 16px auto;
   width: 324px;
   background-color: var(--bg-primary);
   border-radius: 4px;
-  padding: 8px 16px;
 
   @media (max-width: 1920px)
   {
-    inset: 64px 192px auto auto;
+    inset: 64px 192px 16px auto;
   }
   @media (max-width: 1440px)
   {
-    inset: 64px 64px auto auto;
+    inset: 64px 64px 16px auto;
   }
   @media (max-width: 1024px)
   {
@@ -332,13 +366,14 @@ const StyledFilter = styled.div`
     inset: 0px 0px 0px 0px;
   }
 `;
-const StyledFilterLabel = styled.label`
+const StyledFilterInner = styled.div`
+  position: relative;
   width: 100%;
-  height: 32px;
-  display: block;
-  font-size: 1.25rem;
-  font-weight: normal;
+  height: 100%;
+  padding: 8px 16px;
+  overflow-y: scroll;
 `;
+
 const StyledCart = styled.button<{ $visible: boolean; }>`
   display: ${prop => prop.$visible ? "block" : "none"};
   position: fixed;
@@ -376,6 +411,140 @@ const StyledCartLabel = styled.label`
   background-color: #FF7373;
   border-radius: 4px;
 `;
+
+const Card = styled.article`
+    --text-accent: #61c4c8;
+    --accent: #61c4c8;
+
+    background: var(--bg-primary);
+    border: 1px solid var(--bg-hairline);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 220ms ease, border-color 220ms ease,
+                box-shadow 220ms ease;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+
+    &:hover {
+        transform: translateY(-3px);
+        border-color: rgba(198,161,91,0.35);
+        box-shadow: var(--shadow-hover);
+    }
+`;
+
+const ImageWrapper = styled.div`
+    position: relative;
+    width: 100%;
+    max-height: 324px;
+    min-width: 100px;
+    min-height: 300px;
+    aspect-ratio: 3 / 4;
+    background: linear-gradient(160deg, #223148 0%, #0F1A2A 100%);
+    overflow: hidden;
+`;
+
+const Image = styled.img`
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 400ms ease;
+    ${Card}:hover & { transform: scale(1.04); }
+`;
+
+const Placeholder = styled.div`
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+`;
+const PlaceholderMark = styled.span`
+    font-size: 2rem;
+    color: var(--text-accent);
+    opacity: 0.6;
+`;
+const PlaceholderText = styled.span`
+    font-size: 0.7rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+`;
+
+const Overlay = styled.div`
+    position: absolute;
+    inset: 8px;
+    border: 1px solid rgba(198,161,91,0.14);
+    border-radius: 2px;
+    pointer-events: none;
+`;
+
+const Info = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 14px 14px 14px;
+    border-top: 1px solid var(--bg-hairline);
+`;
+
+const ProductName = styled.h4`
+    color: var(--text-primary);
+    font-size: 1rem;
+    line-height: 1.35;
+    font-weight: 500;
+    min-height: 2.7em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+`;
+
+const Footer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+`;
+
+const PriceGroup = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+`;
+const PriceLabel = styled.span`
+    font-size: 1.0rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+`;
+const Price = styled.span`
+    font-size: 1.25rem;
+    color: var(--text-accent);
+`;
+
+const AddButton = styled.button`
+    all: unset;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    border: 1px solid var(--btn-ghost-border);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease,
+                border-color 160ms ease;
+
+    &:hover {
+        background: var(--accent);
+        color: var(--accent-contrast);
+        border-color: var(--accent);
+    }
+`;
+
 /**
  * ส่งออกตัวแปร
 */

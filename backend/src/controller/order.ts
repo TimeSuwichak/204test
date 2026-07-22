@@ -98,14 +98,25 @@ content.post = async (request: Request, response: Response) => {
     const authenticate = auth.validateResult (response);
     const accountId = authenticate.id;
 
-    try {
+    try 
+    {
         const payload = content.inputPost(request, accountId);
         const orderId = await model.create(payload);
 
+        void modelAccount.deleteCartAll (accountId);
+
         response.status(http.STATUS_CREATED);
-        response.json({ OrderId: orderId, Created: new Date () });
+        response.json({ Id: orderId, Created: new Date ().getTime () });
         response.end();
     } catch (e: unknown) {
+
+        if (e instanceof error.BadData)
+        {
+            response.status(http.STATUS_GONE);
+            response.end();
+            return;
+        }
+
         log.error(e);
         response.status(http.STATUS_BAD_REQUEST);
         response.end();
@@ -120,13 +131,14 @@ content.inputPost = (request: Request, accountId: AccountId): BasicCreate => {
         accountId: accountId,
         created: new Date(),
         delivered: null,
-        status: reader.requireInteger("Status"),
+        status: 1,
         shipName: reader.requireString ("ShipName"),
         shipAddress: reader.requireString ("ShipAddress"),
         shipPhone: reader.requireString ("ShipPhone"),
         shipEmail: reader.requireString ("ShipEmail"),
         paymentType: reader.requireInteger ("PaymentType"),
         promotionId: reader.requireStringOrNull ("PromotionId"),
+        remark: reader.requireString ("Remark"),
         item: rawItems.map((item) => {
             const itemReader = objectReader(item);
             return {
@@ -233,6 +245,7 @@ content.outputGet = (r: Response, x: BasicFetch) => {
         ShipEmail: x.shipEmail,
         PaymentType: x.paymentType,
         PromotionId: x.promotionId,
+        Remark: x.remark,
         Item: x.item.map((i) => ({
             ProductId: i.productId,
             Quantity: i.quantity,
@@ -256,6 +269,7 @@ content.outputGetList = (r: Response, x: BasicFetch[]) => {
             ShipEmail: y.shipEmail,
             PaymentType: y.paymentType,
             PromotionId: y.promotionId,
+            Remark: y.remark,
             Item: y.item.map((i) => ({
                 ProductId: i.productId,
                 Quantity: i.quantity,

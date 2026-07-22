@@ -10,10 +10,11 @@ const content = () =>
 content.getRoute = () =>
 {
     const router = http.router ();
+    const authUser = controlAuth.validateLeastUser ();
     const authManager = controlAuth.validateOnlyManager ();
 
     router.get ("/", control.getBasicList);
-    router.get ("/:id", control.getBasic);
+    router.get ("/:id", authUser, control.getBasic);
     router.put ("/:id", authManager, control.putBasic);
     router.post ("/", authManager, control.postBasic);
     router.delete ("/:id", authManager, control.deleteBasic);

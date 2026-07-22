@@ -5,6 +5,7 @@ import Ctx from "#context/common.ts";
 import ApiAuth from "#util/api.auth.ts";
 import ApiAccount from "#util/api.account.ts";
 import ApiProduct from "#util/api.product.ts";
+import ApiPromotion from "#util/api.promotion.ts";
 
 import { 
     type BasicId as ProductId,
@@ -37,6 +38,34 @@ const useCartQuery = () =>
     return useQuery ({
         queryKey: ["Cart"],
         queryFn: () => ApiAccount.getCart (auth.session),
+        enabled: () => ApiAuth.checkSession ({
+            secret: auth.session,
+            issued: auth.sessionIssued,
+            expire: auth.sessionExpire
+        }),
+        throwOnError: false
+    });
+}
+const useAccountBasic = () =>
+{
+    const auth = Ctx.useAuth ();
+    return useQuery ({
+    queryKey: ["Account", "Basic"],
+    queryFn: () => ApiAccount.getBasic (auth.session),
+        enabled: ApiAuth.checkSession ({
+            secret: auth.session,
+            issued: auth.sessionIssued,
+            expire: auth.sessionExpire
+        }),
+        throwOnError: false
+    });
+}
+const useAccountContact = () =>
+{
+    const auth = Ctx.useAuth ();
+    return useQuery ({
+        queryKey: ["Account", "Contact"],
+        queryFn: () => ApiAccount.getContact (auth.session),
         enabled: () => ApiAuth.checkSession ({
             secret: auth.session,
             issued: auth.sessionIssued,
@@ -120,6 +149,16 @@ const useProductReviewList = (id: ProductId) =>
         throwOnError: false
     });
 }
+const usePromotion = (code: string) =>
+{
+    const auth = Ctx.useAuth ();
+    return useQuery ({
+        queryKey: ["Promotion", "Basic", code],
+        queryFn: () => ApiPromotion.getBasic (auth.session, code),
+        enabled: () => code.length > 0,
+        throwOnError: false
+    });
+}
 
 
 const Content = () => { return; }
@@ -129,6 +168,8 @@ Content.ProviderCart = ContextCart.Provider;
 Content.defCart = defCart;
 Content.useCart = useCart;
 Content.useCartQuery = useCartQuery;
+Content.useAccountBasic = useAccountBasic;
+Content.useAccountContact = useAccountContact;
 Content.useProduct = useProduct;
 Content.useProducts = useProducts;
 Content.useProductList = useProductList;
@@ -136,5 +177,6 @@ Content.useProductComment = useProductComment;
 Content.useProductCommentList = useProductCommentList;
 Content.useProductReview = useProductReview;
 Content.useProductReviewList = useProductReviewList;
+Content.usePromotion = usePromotion;
 
 export default Content;

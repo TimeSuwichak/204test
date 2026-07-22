@@ -2,16 +2,16 @@ import styled           from "styled-components";
 import ctx              from "#context/common.ts";
 import ctxUI            from "#context/common.ui.ts";
 import ctxCustomer      from "#context/customer.ts";
-import apiAuth          from "#util/api.auth.ts";
 import apiAccount       from "#util/api.account.ts";
 import apiStorage       from "#util/api.storage.ts";
 
+import MenuBar          from "#component/menu.bar.tsx";
+
 import { useSearchParams } from "react-router";
 
-import type { MouseEvent } from "react";
+import { useState, type MouseEvent } from "react";
 
-import { ShoppingCart, Share2Icon, Heart, StarIcon, MessageSquare } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { ShoppingCart, Share2Icon, Heart, StarIcon, MessageSquare, TextAlignStart, MonitorCog, Package, ShoppingBasket } from "lucide-react";
 
 /**
  * ส่วนประกอบแสดงรายละเอียดสินค้าที่ผู้ใช้กำลังเลือก
@@ -29,8 +29,40 @@ const content = function Product ()
       <StyleBackground src={bg} $visible={(bg != undefined && bg.length > 0)}/>
       <content.Main/>
       <content.Comment/>
+      <content.Cart/>
     </StyleRoot>
   </>;
+}
+/**
+ * ส่วนประกอบแสดงผลไอคอนตะกร้า
+*/
+content.Cart = function ProductBrowserCart ()
+{
+  const auth = ctx.useAuth ();
+  const cart = ctxCustomer.useCart ();
+  const cartQuery = ctxCustomer.useCartQuery ();
+
+  /**
+   * ทำงานเมื่อผู้ใช้ต้องกดเปิดตะกร้าของตนเอง
+  */
+  const onClick = (event: MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    cart.setVisible (true);
+    cart.setClose (() => { cart.setVisible (false); });
+  }
+
+  const data = cartQuery.data;
+  const count = data ? data.reduce ((x, y) => x += y.quantity, 0) : 0;
+
+  return (
+    <StyledCart onClick={onClick} $visible={ctx.authSigned (auth)}>
+      <StyledCartLabel>{count}</StyledCartLabel>
+      <ShoppingBasket/>
+    </StyledCart>
+  );
 }
 content.Main = function ProductMainContent ()
 {
@@ -42,6 +74,8 @@ content.Main = function ProductMainContent ()
   const queryReview = ctxCustomer.useProductReviewList (Number (id));
   const basic = queryBasic.data;
   const review = queryReview.data;
+
+  const [menu, setMenu] = useState (1);
 
   /**
    * เพิ่มสินค้านี้ลงในตะกร้าของผู้ใช้งานระบบ
@@ -124,9 +158,45 @@ content.Main = function ProductMainContent ()
           <StyleMainTitleSub>{sub}</StyleMainTitleSub>
         </header>
         <main>
-          <StyleMainDesc>
-            {desc}
-          </StyleMainDesc>
+          <MenuBar
+            direction="row" selected={menu} margin="0px 0px 16px 0px"
+            onClick={(v) => { setMenu (v as number); }}>
+            <MenuBar.Item icon={<TextAlignStart/>} width="192px" text="รายละเอียด" value={1}/>
+            <MenuBar.Item icon={<MonitorCog/>} width="192px" text="ข้อมูลจำเพาะ" value={2}/>
+            {/* <MenuBar.Item icon={<Package/>} width="192px" text="การจัดส่ง" value={3}/> */}
+          </MenuBar>
+          { (menu !== 1) ? (<></>) : (<StyleMainDesc>{desc}</StyleMainDesc>) }
+          { (menu !== 2) ? (<></>) : (
+            <SpecTable>
+              <SpecRow>
+                <SpecKey>ผู้ผลิต</SpecKey>
+                <SpecVal>—</SpecVal>
+              </SpecRow>
+              <SpecRow>
+                <SpecKey>แพลตฟอร์ม</SpecKey>
+                <SpecVal>PlayStation 5</SpecVal>
+              </SpecRow>
+              <SpecRow>
+                <SpecKey>ประเภท</SpecKey>
+                <SpecVal>Action</SpecVal>
+              </SpecRow>
+              <SpecRow>
+                <SpecKey>ภาษา</SpecKey>
+                <SpecVal>ไทย / อังกฤษ</SpecVal>
+                </SpecRow>
+              <SpecRow>
+                <SpecKey>ปีที่ออก</SpecKey>
+                <SpecVal>2024</SpecVal>
+              </SpecRow>
+            </SpecTable>
+          ) }
+          { (menu !== 3) ? (<></>) : (
+            <StyleMainDesc>
+              จัดส่งทั่วประเทศไทยผ่าน Kerry / Flash ภายใน 1-3 วันทำการ
+              สั่งซื้อครบ 1,500 ฿ ขึ้นไป จัดส่งฟรี
+              สามารถรับสินค้าที่หน้าร้านได้เช่นกัน
+            </StyleMainDesc>) 
+          }
           <StyleMainReview>
             { (!review) ?
               (<></>) :
@@ -183,6 +253,8 @@ content.Comment = function ProductComment ()
   const rating = (queryData ? 
       queryData.length > 0 ?
       queryData.reduce ((x, y) => x += y.rating, 0) / queryData.length : 0.0 : 0.0).toFixed (1);
+    
+  const count = queryData ? queryData.length : 0;
   const empty = queryData ? queryData.length === 0 : true;
 
   const onClickComment = (event: MouseEvent) =>
@@ -213,7 +285,7 @@ content.Comment = function ProductComment ()
           <StarIcon/>
           <StarIcon/>
         </StyleCommentStar>
-        <p>{rating} / 5.0 จากทั้งหมด 1000 คน</p>
+        <p>{rating} / 5.0 จากทั้งหมด {count} คน</p>
         <StyleCommentAdd onClick={onClickComment}>
           <MessageSquare size={24}/>
           <span>ให้คะแนนเลย</span>
@@ -232,17 +304,8 @@ content.Comment = function ProductComment ()
 }
 content.CommentItem = function ProductCommentItem ({id}: {id: number;})
 {
-  const auth = ctx.useAuth ();
   const queryComment = ctxCustomer.useProductComment (id);
-  const queryAccount = useQuery ({
-    queryKey: ["Account", "Basic"],
-    queryFn: () => apiAccount.getBasic (auth.session),
-    enabled: apiAuth.checkSession ({
-      secret: auth.session,
-      issued: auth.sessionIssued,
-      expire: auth.sessionExpire
-    })
-  });
+  const queryAccount = ctxCustomer.useAccountBasic ();
 
   const comment = queryComment.data;
   const account = queryAccount.data;
@@ -277,7 +340,6 @@ const StyleBackground = styled.img<{ $visible: boolean; }>`
 const StyleMain = styled.div`
   width: 100%;
   height: 100%;
-  min-height: 768px;
   display: flex;
   flex-direction: flex;
   flex-wrap: nowrap;
@@ -345,6 +407,7 @@ const StyleMainDesc = styled.p`
   font-size: 1rem;
   font-weight: normal;
   margin-bottom: 32px;
+  min-height: 256px;
 `;
 const StyleMainReview = styled.div`
   display: flex;
@@ -352,7 +415,7 @@ const StyleMainReview = styled.div`
   flex-wrap: nowrap;
   width: 100%;
   height: 100%;
-  min-height: 256px;
+  max-height: 256px;
   margin-bottom: 32px;
   overflow: hidden;
   gap: 8px;
@@ -378,6 +441,8 @@ const StyleMainReview = styled.div`
     }
   }
 `;
+
+
 const StyleMainOption = styled.div`
   display: inline-flex;
   flex-direction: row;
@@ -544,6 +609,67 @@ const StyleCommentItemText = styled.p `
   font-weight: normal
 `;
 
+const SpecTable = styled.dl`
+    margin: 0;
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    row-gap: 0;
+    min-height: 256px;
+    margin-bottom: 32px;
+    color: var(--text-primary);
+`;
+const SpecRow = styled.div`
+    display: contents;
+    & > * { padding: 12px 0; border-bottom: 1px solid var(--bg-hairline); }
+`;
+const SpecKey = styled.dt`
+    color: var(--text-muted);
+    font-size: 1rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+`;
+const SpecVal = styled.dd`
+    margin: 0;
+    color: #fff;
+    font-size: 0.92rem;
+`;
+const StyledCart = styled.button<{ $visible: boolean; }>`
+  display: ${prop => prop.$visible ? "block" : "none"};
+  position: fixed;
+  inset: auto 64px 64px auto;
+  width: 64px;
+  height: 64px;
+  padding: 0px;
+  margin: 0px;
+  border-radius: 100%;
+
+  & > img,
+  & > svg
+  {
+    display: inline-block;
+    min-width: 32px;
+    min-height: 32px;
+    vertical-align: middle;
+  }
+  @media (max-width: 1024px)
+  {
+    bottom: 24px;
+    right: 32px;
+  }
+`;
+const StyledCartLabel = styled.label`
+  position: absolute;
+  inset: auto -16px 0px auto;
+  font-size: 1rem;
+
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0px 4px;
+  text-align: center;
+
+  background-color: #FF7373;
+  border-radius: 4px;
+`;
 /**
  * ส่งออกตัวแปร
 */

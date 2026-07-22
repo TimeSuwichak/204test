@@ -2,6 +2,7 @@ import error            from "#core/error.ts";
 import http             from "#core/http.ts";
 import logging          from "#core/log.ts";
 import objectReader     from "#core/object.reader.ts";
+import auth             from "#controller/auth.ts";
 import model            from "#model/promotion.ts";
 import
 {
@@ -25,13 +26,15 @@ const content = function ()
     return;
 }
 
-content.getBasic = (request: Request, response: Response) =>
+content.getBasic = async (request: Request, response: Response) =>
 {
+    const authenticate = auth.validateResult (response);
     const promotionId = String (request.params ["id"]);
+    const used = authenticate ? await model.getUsedState (promotionId, authenticate.id) : false;
 
     void model.getBasic (promotionId).then ((x) =>
     {
-        content.outputGetBasic (response, x);
+        content.outputGetBasic (response, x, used);
     })
     .catch ((e: unknown) =>
     {
@@ -146,7 +149,7 @@ content.inputPostBasic = (r: Request) : BasicCreate =>
     return result;
 }
 
-content.outputGetBasic = (r: Response, x: BasicFetch) =>
+content.outputGetBasic = (r: Response, x: BasicFetch, used: boolean) =>
 {
     r.status (http.STATUS_OK);
     r.json ({
@@ -156,7 +159,8 @@ content.outputGetBasic = (r: Response, x: BasicFetch) =>
         "Type": x.type,
         "Discount": x.discount,
         "MinPrice": x.minPrice,
-        "MaxDiscount": x.maxDiscount
+        "MaxDiscount": x.maxDiscount,
+        "Used": used,
     });
     r.end ();
 }

@@ -86,7 +86,7 @@ content.getComment = async (session: string, key: CommentId)
 content.getCommentList = async (session: string, key: BasicId) =>
 {
     const id = String (key);
-    const endpoint = `${content.NET_URL_COMMENT}/${id}`;
+    const endpoint = `${content.NET_URL_COMMENT_LIST}/${id}`;
     const data = await common.getJson (session, endpoint);
     const result = content.readCommentList (data);
 

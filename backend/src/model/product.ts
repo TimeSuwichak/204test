@@ -205,9 +205,6 @@ content.getCommentList = (key: BasicId) =>
     
     return sql.select (cmd, param).then ((x) =>
     {
-        if (x.length == 0) {
-            throw new error.NotFound ();
-        }
         return x.map ((x) =>
         {
             return content.readComment (objectReader (x));
@@ -256,10 +253,6 @@ content.getReviewList = (key: BasicId) =>
     
     return sql.select (cmd, param).then ((x) =>
     {
-        if (x.length == 0) {
-            throw new error.NotFound ();
-        }
-
         return x.map ((x) =>
         {
             return content.readReview (objectReader (x));

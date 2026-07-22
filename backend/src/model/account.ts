@@ -269,6 +269,21 @@ content.deleteCart = (itemId: CartId, accountId: BasicId) =>
         }
     });
 }
+content.deleteCartAll = (accountId: BasicId) =>
+{
+    return sql.delete (`
+        DELETE FROM AccountCart 
+        WHERE AccountId = ?`,
+        [accountId]
+    )
+    .then ((x) =>
+    {
+        if (x === 0)
+        {
+            throw new error.NotFound (`ไม่พบข้อมูลตะกร้า: ${String (accountId)}`);
+        }
+    });
+}
 
 content.readBasic = (reader: ObjectReader) : BasicFetch =>
 {

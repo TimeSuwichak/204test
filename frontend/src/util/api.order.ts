@@ -57,6 +57,7 @@ content.outputGetOrder = (reader: ObjectReader) : BasicFetch =>
         shipEmail: reader.requireString ("ShipEmail"),
         paymentType: reader.requireInteger ("PaymentType"),
         promotionId: reader.requireStringOrNull ("PromotionId"),
+        remark: reader.requireString ("Remark"),
         item: reader.requireArrayRecord ("Item").map ((x) =>
         {
             const inner = objectReader (x);
@@ -139,6 +140,7 @@ export interface BasicFetch
      * รหัสโปรโมชั่น
     */
     readonly promotionId: PromotionId | null;
+    readonly remark: string;
     /**
      * รายการสินค้า
     */

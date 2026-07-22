@@ -198,12 +198,12 @@ content.create = async (info: BasicCreate): Promise<BasicId> => {
         //
         const orderId = (await transaction.insert(
             `INSERT INTO OrderList (AccountId, Created, Delivered, 
-            Status, ShipName, ShipAddress, ShipPhone, ShipEmail, PaymentType, PromotionId)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            Status, ShipName, ShipAddress, ShipPhone, ShipEmail, PaymentType, PromotionId, Remark)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 info.accountId, info.created, info.delivered, info.status,
                 info.shipName, info.shipAddress, info.shipPhone, info.shipEmail,
-                info.paymentType, info.promotionId
+                info.paymentType, info.promotionId, info.remark
             ]
         )) as BasicId;
         //
@@ -275,6 +275,7 @@ content.readBasic = (root: ObjectReader, item: ObjectReader []) : BasicFetch =>
         shipEmail: root.requireString ("ShipEmail"),
         paymentType: root.requireInteger ("PaymentType"),
         promotionId: root.requireStringOrNull ("PromotionId"),
+        remark: root.requireString ("Remark"),
         item: item.map ((x) =>
         {
             return {
@@ -334,6 +335,7 @@ export interface BasicFetch
      * รหัสโปรโมชั่น
     */
     readonly promotionId: PromotionId | null;
+    readonly remark: string;
     /**
      * รายการสินค้า
     */
@@ -411,6 +413,7 @@ export interface BasicCreate
      * รหัสโปรโมชั่น
     */
     readonly promotionId: PromotionId | null;
+    readonly remark: string;
     /**
      * รายการสินค้าในคำสั้งซื้อสินค้า
     */

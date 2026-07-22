@@ -174,6 +174,7 @@ content.createOrder = async (session: string, data: OrderCreate) =>
         "ShipEmail": data.shipEmail,
         "PaymentType": data.paymentType,
         "PromotionId": data.promotionId,
+        "Remark": data.remark,
         "Item": data.item.map ((x) => {
             return {
                 "ProductId": x.productId,
@@ -260,6 +261,7 @@ content.outputGetOrder = (reader: ObjectReader) : OrderFetch =>
         shipEmail: reader.requireString ("ShipEmail"),
         paymentType: reader.requireInteger ("PaymentType"),
         promotionId: reader.requireStringOrNull ("PromotionId"),
+        remark: reader.requireString ("Remark"),
         item: reader.requireArrayRecord ("Item").map ((x) =>
         {
             const inner = objectReader (x);
@@ -580,6 +582,7 @@ export interface OrderFetch
      * รหัสโปรโมชั่น
     */
     readonly promotionId: PromotionId | null;
+    readonly remark: string;
     /**
      * รายการสินค้า
     */
@@ -620,6 +623,7 @@ export interface OrderCreate
      * รหัสโปรโมชั่น
     */
     readonly promotionId: PromotionId | null;
+    readonly remark: string;
     /**
      * รายการสินค้าในคำสั้งซื้อสินค้า
     */

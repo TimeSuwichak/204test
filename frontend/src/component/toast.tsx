@@ -78,6 +78,7 @@ const StyleRoot = styled.div`
   pointer-events: none;
   position: fixed;
   inset: 0px;
+  z-index: 1000;
 `;
 const StyleInner = styled.div`
   position: relative;

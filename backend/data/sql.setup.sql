@@ -228,6 +228,7 @@ CREATE TABLE IF NOT EXISTS `project`.`OrderList`
     `ShipEmail` CHAR(32) NOT NULL COMMENT 'อีเมลของผู้รับ' ,
     `PaymentType` INT NOT NULL COMMENT 'รูปแบบชำระเงิน' ,
     `PromotionId` CHAR(32) COMMENT 'รหัสโปรโมชั่น' ,
+    `Remark` VARCHAR(4096) COMMENT 'หมายเหตุ' ,
 
     CONSTRAINT PK_Order_OrderId PRIMARY KEY (`OrderId`) ,
     CONSTRAINT UK_Order_OrderId UNIQUE (`OrderId`) ,

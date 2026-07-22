@@ -85,7 +85,8 @@ content.readBasic = (reader: ObjectReader) =>
         type: reader.requireInteger ("Type"),
         discount: reader.requireInteger ("Discount"),
         minPrice: reader.requireFloat ("MinPrice"),
-        maxDiscount: reader.requireFloat ("MaxDiscount")
+        maxDiscount: reader.requireFloat ("MaxDiscount"),
+        used: reader.requireBoolean ("Used"),
     };
     return result;
 }
@@ -133,6 +134,7 @@ export interface BasicFetch
     discount: number;
     minPrice: number;
     maxDiscount: number;
+    used: boolean;
 }
 
 /**
@@ -176,3 +178,5 @@ export interface BasicCreateResult
  * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
 */
 export type BasicId = string;
+
+export default content;

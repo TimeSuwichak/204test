@@ -181,12 +181,12 @@ content.NavBar = function PresetNavBar ()
           text="ช่วยเหลือ" 
           onClick={toDoc}
           hideOnWidth={640}/>
-        <NavBar.MenuItem 
+        {/* <NavBar.MenuItem 
           icon={<Info/>}
           text="เกี่ยวกับ"
           onClick={toAbout}
           hideOnWidth={768}
-        />
+        /> */}
       </NavBar.Menu>
       {authSigned ? 
         <NavBar.Profile onClick={toProfile}/> : 

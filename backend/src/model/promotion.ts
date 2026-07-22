@@ -1,7 +1,7 @@
 import sql              from "#core/sql.ts";
 import error            from "#core/error.ts";
 import objectReader     from "#core/object.reader.ts";
-
+import { type BasicId as AccountId } from "#model/account.ts";
 import { type InputCommand } from "#core/sql.ts";
 
 /**
@@ -60,6 +60,19 @@ content.getBasicList = async () =>
         return content.readBasic (x);
     }); 
     return item;
+}
+content.getUsedState = async (key: BasicId, accountId: AccountId) =>
+{
+    const cmd = `SELECT * FROM OrderList WHERE PromotionId = ? AND AccountId = ?`;
+    const param = [key, accountId];
+
+    return sql.select (cmd, param).then ((x) =>
+    {
+        if (x.length == 0) {
+            return false;
+        }
+        return true;
+    });
 }
 
 /**
