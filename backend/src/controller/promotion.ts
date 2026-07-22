@@ -27,14 +27,7 @@ const content = function ()
 
 content.getBasic = (request: Request, response: Response) =>
 {
-    const promotionId = Number (request.params ["id"]);
-
-    if (!Number.isSafeInteger (promotionId) || promotionId <= 0)
-    {
-        response.status (http.STATUS_BAD_REQUEST);
-        response.end ();
-        return;
-    }
+    const promotionId = String (request.params ["id"]);
 
     void model.getBasic (promotionId).then ((x) =>
     {
@@ -60,15 +53,8 @@ content.getBasicList = (request: Request, response: Response) =>
 
 content.putBasic = (request: Request, response: Response) =>
 {
-    const promotionId = Number (request.params ["id"]);
+    const promotionId = String (request.params ["id"]);
     let input: BasicUpdate;
-
-    if (!Number.isSafeInteger (promotionId) || promotionId <= 0 || !request.body)
-    {
-        response.status (http.STATUS_BAD_REQUEST);
-        response.end ();
-        return;
-    }
 
     try
     {
@@ -118,14 +104,7 @@ content.postBasic = (request: Request, response: Response) =>
 
 content.deleteBasic = (request: Request, response: Response) =>
 {
-    const promotionId = Number (request.params ["id"]);
-
-    if (!Number.isSafeInteger (promotionId) || promotionId <= 0)
-    {
-        response.status (http.STATUS_BAD_REQUEST);
-        response.end ();
-        return;
-    }
+    const promotionId = String (request.params ["id"]);
 
     void model.delete (promotionId).then (() =>
     {
@@ -157,6 +136,7 @@ content.inputPostBasic = (r: Request) : BasicCreate =>
     const reader = objectReader (r.body);
     const result: BasicCreate =
     {
+        id: reader.requireString ("Id"),
         expire: reader.requireDate ("Expire"),
         type: reader.requireInteger ("Type"),
         discount: reader.requireInteger ("Discount"),
@@ -170,9 +150,9 @@ content.outputGetBasic = (r: Response, x: BasicFetch) =>
 {
     r.status (http.STATUS_OK);
     r.json ({
-        "PromotionId": x.id,
-        "Created": x.created,
-        "Expire": x.expire,
+        "Id": x.id,
+        "Created": x.created.getTime (),
+        "Expire": x.expire.getTime (),
         "Type": x.type,
         "Discount": x.discount,
         "MinPrice": x.minPrice,
@@ -186,9 +166,9 @@ content.outputGetBasicList = (r: Response, x: BasicFetch []) =>
     r.status (http.STATUS_OK);
     r.json ({
         "Item": x.map ((item) => ({
-            "PromotionId": item.id,
-            "Created": item.created,
-            "Expire": item.expire,
+            "Id": item.id,
+            "Created": item.created.getTime (),
+            "Expire": item.expire.getTime (),
             "Type": item.type,
             "Discount": item.discount,
             "MinPrice": item.minPrice,

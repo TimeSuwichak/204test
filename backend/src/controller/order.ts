@@ -140,7 +140,7 @@ content.post = async (request: Request, response: Response) => {
         const orderId = await model.create(payload);
 
         response.status(http.STATUS_CREATED);
-        response.json({ OrderId: orderId });
+        response.json({ OrderId: orderId, Created: new Date () });
         response.end();
     } catch (e: unknown) {
         log.error(e);
