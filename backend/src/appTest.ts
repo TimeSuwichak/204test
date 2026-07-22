@@ -147,6 +147,17 @@ content.setupPromotion = async () =>
 
         try
         {
+            await modelPromotion.getBasic (pid);
+            log.info (`Skipped: ${pid}`);
+            continue;
+        }
+        catch
+        {
+            ;
+        }
+
+        try
+        {
             const id = await modelPromotion.create ({
                 id: pid,
                 expire: new Date (expire),
@@ -159,7 +170,7 @@ content.setupPromotion = async () =>
         }
         catch (e: unknown)
         {
-            log.error (`Promotion cannot be created, ignored: ${expire.toLocaleString ()}`);
+            log.error (`Promotion cannot be created, ignored: ${pid}`);
             log.error (e);
         }
     }

@@ -147,7 +147,7 @@ content.readBasic = (column: Record<string, unknown>) =>
     const reader = objectReader (column);
     const result: BasicFetch =
     {
-        id: reader.requireString ("PromotionId"),
+        id: reader.requireString ("Id"),
         created: reader.requireDate ("Created"),
         expire: reader.requireDate ("Expire"),
         type: reader.requireInteger ("Type"),
