@@ -4,6 +4,7 @@ import modelAuth        from "#model/auth.ts";
 import modelAccount     from "#model/account.ts";
 import modelProd        from "#model/product.ts";
 import modelStorage     from "#model/storage.ts";
+import modelPromotion   from "#model/promotion.ts";
 
 import path from "node:path";
 import fs from "node:fs";
@@ -114,6 +115,56 @@ content.setupProduct = async () =>
     }
 
     log.info ("Setting up test products completed");
+    return;
+}
+content.setupPromotion = async () =>
+{
+    log.info ("Setting up test promotions ...");
+
+    const cwd = process.cwd ();
+    const filename = "promotion.json";
+    const folder = path.resolve (path.join (cwd, "data", "sample"));
+    const location = path.resolve (path.join (folder, filename));
+
+    if (!fs.existsSync (location))
+    {
+        log.warn (`File not found, skipped: ${location}`);
+        return;
+    }
+
+    const json = objectReader (JSON.parse (fs.readFileSync (location, "utf8")));
+    const item = json.requireArrayRecord ("Item");
+
+    for (const x of item)
+    {
+        const read = objectReader (x);
+        const pid = read.requireString ("Id");
+        const expire = read.requireString ("Expire");
+        const type = read.requireInteger ("Type");
+        const discount = read.requireInteger ("Discount");
+        const minPrice = read.requireFloat ("MinPrice");
+        const maxDiscount = read.requireFloat ("MaxDiscount");
+
+        try
+        {
+            const id = await modelPromotion.create ({
+                id: pid,
+                expire: new Date (expire),
+                type: type,
+                discount: discount,
+                minPrice: minPrice,
+                maxDiscount: maxDiscount
+            });
+            log.info (`Created Promotion ID: ${id}`);
+        }
+        catch (e: unknown)
+        {
+            log.error (`Promotion cannot be created, ignored: ${expire.toLocaleString ()}`);
+            log.error (e);
+        }
+    }
+
+    log.info ("Setting up test promotions completed");
     return;
 }
 content.setupAccountFor = async (

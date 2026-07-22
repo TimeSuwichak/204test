@@ -13,11 +13,13 @@ import routerAccount        from "#router/account.ts";
 import routerProduct        from "#router/product.ts";
 import routerOrder          from "#router/order.ts";
 import routerStorage        from "#router/storage.ts";
+import routerPromotion      from "#router/promotion.ts"
 
 import modelAuth            from "#model/auth.ts";
 import modelAccount         from "#model/account.ts";
 import modelProduct         from "#model/product.ts";
 import modelStorage         from "#model/storage.ts";
+import modelPromotion       from "#model/promotion.ts"
 
 import testMode             from "./appTest.ts";
 
@@ -49,6 +51,7 @@ content.start = async () =>
         http.routeTo ("/product-comment", routerProduct.getRouteComment ());
         http.routeTo ("/product-review", routerProduct.getRouteReview ());
         http.routeTo ("/product-stock", routerProduct.getRouteStock ());
+        http.routeTo ("/promotion", routerPromotion.getRoute ());
         http.routeTo ("/order", routerOrder.getRoute ());
         http.routeTo ("/storage", routerStorage.getRoute ());
         return;
@@ -61,6 +64,7 @@ content.start = async () =>
     await modelAuth.init ();
     await modelAccount.init ();
     await modelProduct.init ();
+    await modelPromotion.init ();
     await modelStorage.init ();
 
     //
@@ -68,6 +72,7 @@ content.start = async () =>
     //
     await testMode.setupAccount ();
     await testMode.setupProduct ();
+    await testMode.setupPromotion ();
 
     //
     // Finalize Stage ...
