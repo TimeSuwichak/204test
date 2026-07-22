@@ -1,7 +1,8 @@
 import styled           from "styled-components";
 import ctx              from "#context/common.ts";
-import ctxUI              from "#context/common.ui.ts";
+import ctxUI            from "#context/common.ui.ts";
 import ctxCustomer      from "#context/customer.ts";
+import apiAuth          from "#util/api.auth.ts";
 import apiAccount       from "#util/api.account.ts";
 import apiStorage       from "#util/api.storage.ts";
 
@@ -10,6 +11,7 @@ import { useSearchParams } from "react-router";
 import type { MouseEvent } from "react";
 
 import { ShoppingCart, Share2Icon, Heart, StarIcon, MessageSquare } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * ส่วนประกอบแสดงรายละเอียดสินค้าที่ผู้ใช้กำลังเลือก
@@ -37,7 +39,9 @@ content.Main = function ProductMainContent ()
   const auth = ctx.useAuth ();
   const toast = ctxUI.useToast ();
   const queryBasic = ctxCustomer.useProduct (Number (id));
+  const queryReview = ctxCustomer.useProductReviewList (Number (id));
   const basic = queryBasic.data;
+  const review = queryReview.data;
 
   /**
    * เพิ่มสินค้านี้ลงในตะกร้าของผู้ใช้งานระบบ
@@ -105,7 +109,6 @@ content.Main = function ProductMainContent ()
     event.stopPropagation ();
   }
 
-
   const name = basic ? basic.name : "";
   const sub = "";
   const desc = basic ? basic.description : "";
@@ -125,8 +128,23 @@ content.Main = function ProductMainContent ()
             {desc}
           </StyleMainDesc>
           <StyleMainReview>
-            <iframe src="https://www.youtube.com/embed/Ux0YNqhaw0I?si=cDRJRNh5VdQ27VLX" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
-            <iframe src="https://www.youtube.com/embed/9W_8_IR51FM?si=ewYauLVedOMaZ1vD" title="YouTube video player"allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
+            { (!review) ?
+              (<></>) :
+              (review.map ((x) => {
+                if (x.mime === "text/html") {
+                  return <iframe
+                    key={x.reviewId} 
+                    src={x.link}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen={true}
+                    />
+                }
+                if (x.mime === "image/jpeg" || x.mime === "image/png") {
+                  return <img key={x.reviewId} src={x.link}/>
+                }
+              }))
+            }
           </StyleMainReview>
           <StyleMainOption>
             <StyleMainPrice>
@@ -155,6 +173,35 @@ content.Main = function ProductMainContent ()
 }
 content.Comment = function ProductComment ()
 {
+  const [param] = useSearchParams ();
+  const id = param.get ("id");
+  const auth = ctx.useAuth ();
+  const queryList = ctxCustomer.useProductCommentList (Number (id));
+  const queryData = queryList.data;
+
+  const toast = ctxUI.useToast ();
+  const rating = (queryData ? 
+      queryData.length > 0 ?
+      queryData.reduce ((x, y) => x += y.rating, 0) / queryData.length : 0.0 : 0.0).toFixed (1);
+  const empty = queryData ? queryData.length === 0 : true;
+
+  const onClickComment = (event: MouseEvent) =>
+  {
+    event.preventDefault ();
+    event.stopPropagation ();
+
+    if (ctx.authSigned (auth))
+    {
+      return;
+    }
+    else
+    {
+      toast.setDuration (5000);
+      toast.setText ("คุณจำเป็นต้องลงชื่อเข้าใช้ก่อนจึงจะสามารถแสดงความคิดเห็นได้");
+      toast.setVisible (true);
+    }
+  } 
+
   return (
     <StyleComment>
       <StyleCommentTitle>ความคิดเห็น</StyleCommentTitle>
@@ -166,29 +213,49 @@ content.Comment = function ProductComment ()
           <StarIcon/>
           <StarIcon/>
         </StyleCommentStar>
-        <p>4.7 / 5.0 จากทั้งหมด 1000 คน</p>
-        <StyleCommentAdd>
+        <p>{rating} / 5.0 จากทั้งหมด 1000 คน</p>
+        <StyleCommentAdd onClick={onClickComment}>
           <MessageSquare size={24}/>
           <span>ให้คะแนนเลย</span>
         </StyleCommentAdd>
       </StyleCommentSummary>
       <StyleCommentBody>
-        <p>สินค้ายังไม่ใครรีวิวเลย เป็นคนแรกที่รีวิวเลย</p>
-        <content.CommentItem/>    
-        <content.CommentItem/>    
-        <content.CommentItem/>    
-        <content.CommentItem/>    
+        { (empty) ?
+          <p>สินค้ายังไม่ใครรีวิวเลย เป็นคนแรกที่รีวิวเลย</p> : <></>
+        }
+        { (queryData) ? 
+          (queryData.map ((x) => <content.CommentItem id={x.commentId}/>)) : <></>
+        }
       </StyleCommentBody>
     </StyleComment>
   );
 }
-content.CommentItem = function ProductCommentItem ()
+content.CommentItem = function ProductCommentItem ({id}: {id: number;})
 {
+  const auth = ctx.useAuth ();
+  const queryComment = ctxCustomer.useProductComment (id);
+  const queryAccount = useQuery ({
+    queryKey: ["Account", "Basic"],
+    queryFn: () => apiAccount.getBasic (auth.session),
+    enabled: apiAuth.checkSession ({
+      secret: auth.session,
+      issued: auth.sessionIssued,
+      expire: auth.sessionExpire
+    })
+  });
+
+  const comment = queryComment.data;
+  const account = queryAccount.data;
+
+  const icon = account ? account.icon : "";
+  const name = account ? account.name : "";
+  const text = comment ? comment.text : "";
+
   return (
     <StyleCommentItem>
-      <StyleCommentItemIcon/>
-      <StyleCommentItemTitle>[TITLE]</StyleCommentItemTitle>
-      <StyleCommentItemText>[TEXT]</StyleCommentItemText>
+      <StyleCommentItemIcon src={apiStorage.getUrlStream (icon)}/>
+      <StyleCommentItemTitle>{name}</StyleCommentItemTitle>
+      <StyleCommentItemText>{text}</StyleCommentItemText>
     </StyleCommentItem>
   );
 }

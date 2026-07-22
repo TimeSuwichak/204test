@@ -8,6 +8,8 @@ import ApiProduct from "#util/api.product.ts";
 
 import { 
     type BasicId as ProductId,
+    type CommentId as ProductCommentId,
+    type ReviewId as ProductReviewId,
     type BasicFetchOption as ProductSearchOption
 } from "#util/api.product.ts";
 
@@ -78,6 +80,47 @@ const useProductList = (option: ProductSearchOption) =>
         throwOnError: false
     });
 }
+const useProductComment = (id: ProductCommentId) =>
+{
+    const auth = Ctx.useAuth ();
+    return useQuery ({
+        queryKey: ["Product", "Comment", id],
+        queryFn: () => ApiProduct.getComment (auth.session, id),
+        enabled: true,
+        throwOnError: false
+    });
+}
+const useProductCommentList = (id: ProductId) =>
+{
+    const auth = Ctx.useAuth ();
+    return useQuery ({
+        queryKey: ["Product", "CommentList", id],
+        queryFn: () => ApiProduct.getCommentList (auth.session, id),
+        enabled: true,
+        throwOnError: false
+    });
+}
+const useProductReview = (id: ProductReviewId) =>
+{
+    const auth = Ctx.useAuth ();
+    return useQuery ({
+        queryKey: ["Product", "Review", id],
+        queryFn: () => ApiProduct.getReview (auth.session, id),
+        enabled: true,
+        throwOnError: false
+    });
+}
+const useProductReviewList = (id: ProductId) =>
+{
+    const auth = Ctx.useAuth ();
+    return useQuery ({
+        queryKey: ["Product", "ReviewList", id],
+        queryFn: () => ApiProduct.getReviewList (auth.session, id),
+        enabled: true,
+        throwOnError: false
+    });
+}
+
 
 const Content = () => { return; }
 const ContextCart = createContext<ContextCart> (defCart ());
@@ -89,5 +132,9 @@ Content.useCartQuery = useCartQuery;
 Content.useProduct = useProduct;
 Content.useProducts = useProducts;
 Content.useProductList = useProductList;
+Content.useProductComment = useProductComment;
+Content.useProductCommentList = useProductCommentList;
+Content.useProductReview = useProductReview;
+Content.useProductReviewList = useProductReviewList;
 
 export default Content;

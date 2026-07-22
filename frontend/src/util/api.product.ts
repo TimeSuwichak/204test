@@ -65,7 +65,7 @@ content.getCategory = async (session: string, key: CategoryId)
     return result; 
 }
 /**
- * ทำการดึงข้อมูลความคิดเห็นพื้นฐานของสินค้า
+ * ทำการดึงข้อมูลความคิดเห็นของสินค้า
  * 
  * @param session ชุดรหัสยืนยันตัวตน
  * @param key รหัสความคิดเห็นที่ถูกต้อง
@@ -77,6 +77,18 @@ content.getComment = async (session: string, key: CommentId)
     const endpoint = `${content.NET_URL_COMMENT}/${id}`;
     const data = await common.getJson (session, endpoint);
     const result = content.readComment (data);
+
+    return result;
+}
+/**
+ * ทำการดึงข้อมูลรายการความคิดเห็นของสินค้า
+*/
+content.getCommentList = async (session: string, key: BasicId) =>
+{
+    const id = String (key);
+    const endpoint = `${content.NET_URL_COMMENT}/${id}`;
+    const data = await common.getJson (session, endpoint);
+    const result = content.readCommentList (data);
 
     return result;
 }
@@ -93,6 +105,18 @@ content.getReview = async (session: string, key: CommentId)
     const endpoint = `${content.NET_URL_REVIEW}/${id}`;
     const data = await common.getJson (session, endpoint);
     const result = content.readReview (data);
+
+    return result;
+}
+/**
+ * ทำการดึงข้อมูลรายการตัวอย่างของสินค้า
+*/
+content.getReviewList = async (session: string, key: BasicId) =>
+{
+    const id = String (key);
+    const endpoint = `${content.NET_URL_REVIEW_LIST}/${id}`;
+    const data = await common.getJson (session, endpoint);
+    const result = content.readReviewList (data);
 
     return result;
 }
@@ -374,6 +398,13 @@ content.readComment = (reader: ObjectReader) : CommentFetch =>
         rating: reader.requireInteger ("Rating"),
     };
 }
+content.readCommentList = (reader: ObjectReader) : CommentFetch[] =>
+{
+    return reader.requireArrayRecord ("Item").map ((x) =>
+    {
+        return content.readComment (objectReader (x));
+    })
+}
 content.readReview = (reader: ObjectReader) : ReviewFetch =>
 {
     return {
@@ -382,6 +413,13 @@ content.readReview = (reader: ObjectReader) : ReviewFetch =>
         mime: reader.requireString ("Mime"),
         link: reader.requireString ("Link"),
     };
+}
+content.readReviewList = (reader: ObjectReader) : ReviewFetch[] =>
+{
+    return reader.requireArrayRecord ("Item").map ((x) =>
+    {
+        return content.readReview (objectReader (x));
+    })
 }
 content.readBasicCreate = (reader: ObjectReader) : BasicCreateResult =>
 {
@@ -444,9 +482,17 @@ content.NET_PREFIX_CATEGORY = "/product-category";
 */
 content.NET_PREFIX_COMMENT = "/product-comment";
 /**
+ * เส้นทางนำหน้าหลังจากที่อยู่ของเซิร์ฟเวอร์ สำหรับระบบความคิดเห็นแบบรายการ
+*/
+content.NET_PREFIX_COMMENT_LIST = "/product-comment-list";
+/**
  * เส้นทางนำหน้าหลังจากที่อยู่ของเซิร์ฟเวอร์ สำหรับระบบตัวอย่าง
 */
 content.NET_PREFIX_REVIEW = "/product-review";
+/**
+ * เส้นทางนำหน้าหลังจากที่อยู่ของเซิร์ฟเวอร์ สำหรับระบบตัวอย่างแบบรายการ
+*/
+content.NET_PREFIX_REVIEW_LIST = "/product-review-list";
 /**
  * เส้นทางนำหน้าหลังจากที่อยู่ของเซิร์ฟเวอร์ สำหรับระบบสต็อก
 */
@@ -468,9 +514,17 @@ content.NET_URL_CATEGORY = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${S
 */
 content.NET_URL_COMMENT = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (content.NET_PORT)}${content.NET_PREFIX_COMMENT}`;
 /**
+ * ลิงค์เต็มของที่อยู่เซิร์ฟเวอร์ สำหรับระบบความคิดเห็นแบบรายการ
+*/
+content.NET_URL_COMMENT_LIST = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (content.NET_PORT)}${content.NET_PREFIX_COMMENT_LIST}`;
+/**
  * ลิงค์เต็มของที่อยู่เซิร์ฟเวอร์ สำหรับระบบตัวอย่าง
 */
 content.NET_URL_REVIEW = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (content.NET_PORT)}${content.NET_PREFIX_REVIEW}`;
+/**
+ * ลิงค์เต็มของที่อยู่เซิร์ฟเวอร์ สำหรับระบบตัวอย่างแบบรายการ
+*/
+content.NET_URL_REVIEW_LIST = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (content.NET_PORT)}${content.NET_PREFIX_REVIEW_LIST}`;
 /**
  * ลิงค์เต็มของที่อยู่เซิร์ฟเวอร์ สำหรับระบบสต็อกสินค้า
 */

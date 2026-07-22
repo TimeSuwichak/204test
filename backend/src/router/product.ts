@@ -43,6 +43,14 @@ content.getRouteComment = () =>
 
     return router;
 }
+content.getRouteCommentList = () =>
+{
+    const router = http.router ();
+
+    router.get ("/:id", control.getCommentList);
+
+    return router;
+}
 content.getRouteReview = () =>
 {
     const router = http.router ();
@@ -52,6 +60,14 @@ content.getRouteReview = () =>
     router.put ("/:id", authManager, control.putReview);
     router.post ("/", authManager, control.postReview);
     router.delete ("/:id", authManager, control.deleteReview);
+
+    return router;
+}
+content.getRouteReviewList = () =>
+{
+    const router = http.router ();
+
+    router.get ("/:id", control.getReviewList);
 
     return router;
 }
