@@ -45,11 +45,14 @@ content.start = async () =>
         http.routeTo ("/account", routerAccount.getRoute ());
         http.routeTo ("/account-list", routerAccount.getRouteList ());
         http.routeTo ("/account-cart", routerAccount.getRouteCart ());
+        http.routeTo ("/account-contact", routerAccount.getRouteContact ());
         http.routeTo ("/account-order", routerAccount.getRouteOrder ());
         http.routeTo ("/product", routerProduct.getRoute ());
         http.routeTo ("/product-category", routerProduct.getRouteCategory ());
         http.routeTo ("/product-comment", routerProduct.getRouteComment ());
+        http.routeTo ("/product-comment-list", routerProduct.getRouteCommentList ());
         http.routeTo ("/product-review", routerProduct.getRouteReview ());
+        http.routeTo ("/product-review-list", routerProduct.getRouteReviewList ());
         http.routeTo ("/product-stock", routerProduct.getRouteStock ());
         http.routeTo ("/promotion", routerPromotion.getRoute ());
         http.routeTo ("/order", routerOrder.getRoute ());

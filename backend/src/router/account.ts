@@ -47,6 +47,18 @@ content.getRouteCart = () =>
 
     return router;
 }
+content.getRouteContact = () =>
+{
+    const router = http.router ();
+    const authUser = controlAuth.validateLeastUser ();
+
+    router.get ("/", authUser, control.getContact);
+    router.get ("/:id", authUser, control.getContactOf);
+    router.put ("/", authUser, control.putContact);
+    router.put ("/:id", authUser, control.putContactOf);
+
+    return router;
+}
 content.getRouteOrder = () =>
 {
     const router = http.router ();

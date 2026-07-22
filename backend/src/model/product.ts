@@ -4,6 +4,7 @@ import objectReader     from "#core/object.reader.ts";
 
 import { type BasicId as AccountId } from "#model/account.ts";
 import { type InputValue, type InputCommand } from "#core/sql.ts";
+import { type ObjectReader }     from "#core/object.reader.ts";
 
 /**
  * ระบบจัดการข้อมูลสินค้า
@@ -50,7 +51,7 @@ content.getBasic = async (key: BasicId) =>
         if (!x [0]) {
             throw new error.BadData ();
         }
-        return content.readBasic (x [0]);
+        return content.readBasic (objectReader (x [0]));
     });
 }
 /**
@@ -90,7 +91,7 @@ content.getBasicList = async (option ?: BasicFetchOption) =>
     const query = await sql.select (cmd, param);
     const item: BasicFetch [] = query.map ((x) =>
     {
-        return content.readBasic (x);
+        return content.readBasic (objectReader (x));
     }); 
     return item;
 }
@@ -112,7 +113,7 @@ content.getBasicByName = (key: string) =>
         }
         return x.map ((x) =>
         {
-            return content.readBasic (x);
+            return content.readBasic (objectReader (x));
         })
     });
 }
@@ -134,7 +135,7 @@ content.getBasicByDescription = (key: string) =>
         }
         return x.map ((x) =>
         {
-            return content.readBasic (x);
+            return content.readBasic (objectReader (x));
         })
     });
 }
@@ -187,16 +188,30 @@ content.getComment = (key: CommentId) =>
         }
 
         const reader = objectReader (x.at (0));
-        const result: CommentFetch =
-        {
-            commentId: reader.requireInteger ("CommentId") ,
-            productId: reader.requireInteger ("ProductId"),
-            author: reader.requireInteger ("Author"),
-            title: reader.requireString ("Title"),
-            text: reader.requireString ("Text"),
-            rating: reader.requireInteger ("Rating"),
-        };
+        const result = content.readComment (reader);
+
         return result;
+    });
+}
+/**
+ * ดึงข้อมูลรายการความคิดเห็นของสินค้า
+ * 
+ * @param key รหัสความคิดเห็นสินค้า
+*/
+content.getCommentList = (key: BasicId) =>
+{
+    const cmd = `SELECT * FROM ProductComment WHERE ProductId = ?`;
+    const param = [key];
+    
+    return sql.select (cmd, param).then ((x) =>
+    {
+        if (x.length == 0) {
+            throw new error.NotFound ();
+        }
+        return x.map ((x) =>
+        {
+            return content.readComment (objectReader (x));
+        });
     });
 }
 /**
@@ -227,6 +242,28 @@ content.getReview = (key: ReviewId) =>
             link: reader.requireString ("Link")
         };
         return result;
+    });
+}
+/**
+ * ดึงข้อมูลรายการตัวอย่างของสินค้า
+ * 
+ * @param key รหัสความคิดเห็นสินค้า
+*/
+content.getReviewList = (key: BasicId) =>
+{
+    const cmd = `SELECT * FROM ProductReview WHERE ProductId = ?`;
+    const param = [key];
+    
+    return sql.select (cmd, param).then ((x) =>
+    {
+        if (x.length == 0) {
+            throw new error.NotFound ();
+        }
+
+        return x.map ((x) =>
+        {
+            return content.readReview (objectReader (x));
+        });
     });
 }
 /**
@@ -623,9 +660,8 @@ content.deleteReview = (key: ReviewId) =>
     });
 }
 
-content.readBasic = (column: Record<string, unknown>) =>
+content.readBasic = (reader: ObjectReader) =>
 {
-    const reader = objectReader (column);
     const result: BasicFetch =
     {
         id: reader.requireInteger ("Id"),
@@ -639,7 +675,30 @@ content.readBasic = (column: Record<string, unknown>) =>
     };
     return result;
 }
-
+content.readComment = (reader: ObjectReader) =>
+{
+    const result: CommentFetch =
+    {
+        commentId: reader.requireInteger ("CommentId") ,
+        productId: reader.requireInteger ("ProductId"),
+        author: reader.requireInteger ("Author"),
+        title: reader.requireString ("Title"),
+        text: reader.requireString ("Text"),
+        rating: reader.requireInteger ("Rating"),
+    };
+    return result;
+}
+content.readReview = (reader: ObjectReader) =>
+{
+    const result: ReviewFetch =
+    {
+        reviewId: reader.requireInteger ("ReviewId") ,
+        productId: reader.requireInteger ("ProductId"),
+        mime: reader.requireString ("Mime"),
+        link: reader.requireString ("Link")
+    };
+    return result;
+}
 /**
  * ไม่มีแพลตฟอร์ม
 */

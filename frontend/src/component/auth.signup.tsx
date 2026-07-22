@@ -97,10 +97,10 @@ const [page, setPage] = prop.staPage;
   {
     switch (authStep)
     {
-      case api.STEP_IDENTIFIER: setPage (base.PAGE_SIGN_IN_ID); break;
-      case api.STEP_PASSWORD: setPage (base.PAGE_SIGN_IN_PWD); break;
-      case api.STEP_MFA: setPage (base.PAGE_SIGN_IN_TOTP); break;
-      case api.STEP_COMPLETE:
+      case api.STEP_CHALLENGE_ID: setPage (base.PAGE_SIGN_IN_ID); break;
+      case api.STEP_CHALLENGE_PASSWORD: setPage (base.PAGE_SIGN_IN_PWD); break;
+      case api.STEP_CHALLENGE_TOTP: setPage (base.PAGE_SIGN_IN_TOTP); break;
+      case api.STEP_CHALLENGE_COMPLETED:
         onComplete ();
         break;
     }

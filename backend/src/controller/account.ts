@@ -5,7 +5,7 @@ import error            from "#core/error.ts";
 import objectReader     from "#core/object.reader.ts";
 import auth             from "#controller/auth.ts";
 import controlOrder     from "#controller/order.ts";
-import model            from "#model/account.ts";
+import model, { type ContactFetch, type ContactUpdate }            from "#model/account.ts";
 import modelOrder       from "#model/order.ts";
 import modelStorage     from "#model/storage.ts";
 import 
@@ -119,6 +119,48 @@ content.getCart = (request: Request, response: Response) =>
     void model.getCartByAccount (accountId).then ((x) =>
     {
         content.outputGetCart (response, x);
+    });
+}
+/**
+ * ดึงข้อมูลติดต่อของบัญชีที่ตนเองกำลังใช้งานอยู่
+ * 
+ * @param request คำขอ
+ * @param response คำตอบ
+*/
+content.getContact = (request: Request, response: Response) =>
+{
+    const authenticate = auth.validateResult (response);
+    const accountId = authenticate.id;
+
+    request.params ["id"] = String (accountId);
+    content.getContactOf (request, response);
+}
+/**
+ * ดึงข้อมูลติดต่อของบัญชีดังกล่าวด้วย `id` ที่กำหนดไว้
+ * 
+ * @param request คำขอ
+ * @param response คำตอบ
+*/
+content.getContactOf = (request: Request, response: Response) =>
+{
+    const authenticate = auth.validateResult (response);
+    const authId = authenticate.id;
+    const queryId = Number (request.params ["id"]);
+
+    if ((authId !== queryId) && 
+        (authenticate.role !== model.ROLE_MANAGER))
+    {
+        response.status (http.STATUS_FORBIDDEN);
+        response.end ();
+        return;    
+    }
+    void model.getContact (queryId).then ((x) =>
+    {
+        content.outputGetContact (response, x);
+    })
+    .catch ((e: unknown) =>
+    {
+        content.errorGetContact (response, e);
     });
 }
 /**
@@ -243,6 +285,70 @@ content.putCart = (request: Request, response: Response) =>
     .catch ((e: unknown) =>
     {
         content.errorPutCart (response, e);
+    });
+}
+/**
+ * ปรับเปลี่ยนข้อมูลติดต่อบัญชีของตนเอง
+ * 
+ * @param request คำขอ
+ * @param response คำตอบ
+*/
+content.putContact = async (request: Request, response: Response) =>
+{
+    const authenticate = auth.validateResult (response);
+    const accountId = authenticate.id;
+
+    request.params ["id"] = String (accountId);
+    return content.putBasicOf (request, response);
+}
+/**
+ * ปรับเปลี่ยนข้อมูลติดต่อบัญชีดังกล่าวด้วย `id` ที่กำหนดไว้
+ * 
+ * @param request คำขอ
+ * @param response คำตอบ
+*/
+content.putContactOf = async (request: Request, response: Response) =>
+{
+    const authenticate = auth.validateResult (response);
+    const accountId = authenticate.id;
+    const queryId =  Number (request.params ["id"]);
+
+    if ((accountId != queryId) &&
+        (authenticate.role !== model.ROLE_MANAGER))
+    {
+        response.status (http.STATUS_FORBIDDEN);
+        response.end ();
+        return;
+    }
+
+    if (!Number.isSafeInteger (queryId) || queryId <= 0)
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    let input: ContactUpdate;
+    
+    try
+    {
+        input = content.inputPutContact (request, queryId);
+    }
+    catch (e: unknown)
+    {
+        log.warn (e);
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    void model.updateContact (input).then (() =>
+    {
+        content.outputPutContact (response);
+    })
+    .catch ((e: unknown) =>
+    {
+        content.errorPutContact (response, e);
     });
 }
 
@@ -393,6 +499,17 @@ content.inputPutCart = (
     }
     return result;
 }
+content.inputPutContact = (request: Request, accountId: BasicId) : ContactUpdate  =>
+{
+    const reader = objectReader (request.body);
+    const result: ContactUpdate = {
+        id: accountId,
+        email: reader.optionalString ("Email"),
+        phone: reader.optionalString ("Phone"),
+        address: reader.optionalString ("Address"),
+    };
+    return result;
+}
 content.inputPostBasic = async (
     iconId: ResourceId, 
     request: Request
@@ -488,12 +605,28 @@ content.outputGetCart = (r: Response, x: CartFetch []) =>
     });
     r.end ();
 }
+content.outputGetContact = (r: Response, x: ContactFetch) =>
+{
+    r.status (http.STATUS_OK);
+    r.json ({
+        "Id": x.id,
+        "Email": x.email,
+        "Phone": x.phone,
+        "Address": x.address,
+    });
+    r.end ();
+}
 content.outputPutBasic = (r: Response) =>
 {
     r.status (http.STATUS_NO_CONTENT);
     r.end ();
 }
 content.outputPutCart = (r: Response) =>
+{
+    r.status (http.STATUS_NO_CONTENT);
+    r.end ();
+}
+content.outputPutContact = (r: Response) =>
 {
     r.status (http.STATUS_NO_CONTENT);
     r.end ();
@@ -535,6 +668,18 @@ content.errorGetBasic = (r: Response, e: unknown) =>
     r.status (http.STATUS_SERVICE_UNAVAILABLE);
     r.end ();
 }
+content.errorGetContact = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
 content.errorPutBasic = (r: Response, e: unknown) =>
 {
     if (e instanceof error.NotFound)
@@ -548,6 +693,18 @@ content.errorPutBasic = (r: Response, e: unknown) =>
     r.end ();
 }
 content.errorPutCart = (r: Response, e: unknown,) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorPutContact = (r: Response, e: unknown,) =>
 {
     if (e instanceof error.NotFound)
     {

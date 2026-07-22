@@ -53,6 +53,16 @@ content.getCart = async (session: string) =>
     });
     return result;
 }
+content.getContact = async (session: string, id ?: BasicId) =>
+{    
+    const url = content.NET_URL_CONTACT + (id ? `/${String (id)}` : "");
+    const reader = await common.getJson (session, url);
+    const result = reader.requireArrayRecord ("Item").map ((x) =>
+    {
+        return content.outputGetCart (objectReader (x));
+    });
+    return result;
+}
 content.getOrder = async (session: string) =>
 {
     const url = content.NET_URL_ORDER;
@@ -96,6 +106,20 @@ content.updateCart = async (session: string, data: CartUpdate) =>
     await common.putJson (session, url, {
         "ItemId": data.itemId,
         "Quantity": data.quantity
+    });
+}
+/**
+ * ปรับเปลี่ยนข้อมูลติดต่อของตนเอง
+*/
+content.updateContact = async (session: string, data: ContactUpdate) =>
+{
+    const id = data.id;
+    const url = content.NET_URL_CONTACT + (id ? `/${String (id)}` : "");
+
+    await common.putJson (session, url, {
+        "Email": data.email,
+        "Phone": data.phone,
+        "Address": data.address
     });
 }
 /**
@@ -209,6 +233,18 @@ content.outputGetCart = (reader: ObjectReader) : CartFetch =>
 /**
  * (ฟังก์ชั่นภายใน)
 */
+content.outputGetContact = (reader: ObjectReader) : ContactFetch =>
+{
+    return {
+        id: reader.requireInteger ("Id"),
+        email: reader.requireString ("Email"),
+        phone: reader.requireString ("Phone"),
+        address: reader.requireString ("Address"),
+    }
+}
+/**
+ * (ฟังก์ชั่นภายใน)
+*/
 content.outputGetOrder = (reader: ObjectReader) : OrderFetch =>
 {
     const result: OrderFetch =
@@ -277,6 +313,10 @@ content.NET_PREFIX = "/account";
 */
 content.NET_PREFIX_CART = "/account-cart";
 /**
+ * เส้นทางนำหน้าหลังจากที่อยู่ของเซิร์ฟเวอร์ สำหรับข้อมูลติดต่อ
+*/
+content.NET_PREFIX_CONTACT = "/account-cart";
+/**
  * เส้นทางนำหน้าหลังจากที่อยู่ของเซิร์ฟเวอร์ สำหรับข้อมูลคำสั่งซื้อ
 */
 content.NET_PREFIX_ORDER = "/account-order";
@@ -292,6 +332,10 @@ content.NET_URL = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (co
  * ลิงค์เต็มของที่อยู่เซิร์ฟเวอร์ สำหรับระบบตะกร้า
 */
 content.NET_URL_CART = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (content.NET_PORT)}${content.NET_PREFIX_CART}`;
+/**
+ * ลิงค์เต็มของที่อยู่เซิร์ฟเวอร์ สำหรับข้อมูลติดต่อ
+*/
+content.NET_URL_CONTACT = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (content.NET_PORT)}${content.NET_PREFIX_CONTACT}`;
 /**
  * ลิงค์เต็มของที่อยู่เซิร์ฟเวอร์ สำหรับระบบคำสั่งซื้อ
 */
@@ -449,6 +493,45 @@ export interface CartCreate
      * จำนวนของในตะกร้า
     */
     quantity: number;
+}
+
+export interface ContactFetch
+{
+    /**
+     * รหัสเอกลักษณ์บัญชี
+    */
+    id: BasicId;
+    /**
+     * อีเมล
+    */
+    email: string;
+    /**
+     * เบอร์โทรศัพท์
+    */
+    phone: string;
+    /**
+     * ที่อยู่
+    */
+    address: string;
+}
+export interface ContactUpdate
+{
+    /**
+     * รหัสเอกลักษณ์บัญชี
+    */
+    id: BasicId;
+    /**
+     * อีเมล
+    */
+    email ?: string | undefined;
+    /**
+     * เบอร์โทรศัพท์
+    */
+    phone ?: string | undefined;
+    /**
+     * ที่อยู่
+    */
+    address ?: string | undefined;
 }
 
 export interface OrderFetch

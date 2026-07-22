@@ -150,6 +150,32 @@ content.getComment = (request: Request, response: Response) =>
     });
 }
 /**
+ * ดึงข้อมูลรายการความคิดเห็นของสินค้าดังกล่าว
+ * 
+ * @param request คำขอ
+ * @param response คำตอบ
+*/
+content.getCommentList = (request: Request, response: Response) =>
+{
+    const productId = Number (request.params ["id"]);
+
+    if (!Number.isSafeInteger (productId) || productId <= 0)
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    void model.getCommentList (productId).then ((x) =>
+    {
+        content.outputGetCommentList (response, x);
+    })
+    .catch ((e: unknown) =>
+    {
+        content.errorGetCommentList (response, e);
+    });
+}
+/**
  * ดึงข้อมูลรีวิวของสินค้าดังกล่าว
  * 
  * @param request คำขอ
@@ -175,7 +201,32 @@ content.getReview = (request: Request, response: Response) =>
         content.errorGetReview (response, e);
     });
 }
+/**
+ * ดึงข้อมูลรายการตัวอย่างของสินค้าดังกล่าว
+ * 
+ * @param request คำขอ
+ * @param response คำตอบ
+*/
+content.getReviewList = (request: Request, response: Response) =>
+{
+    const productId = Number (request.params ["id"]);
 
+    if (!Number.isSafeInteger (productId) || productId <= 0)
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    void model.getReviewList (productId).then ((x) =>
+    {
+        content.outputGetReviewtList (response, x);
+    })
+    .catch ((e: unknown) =>
+    {
+        content.errorGetReviewList (response, e);
+    });
+}
 /**
  * ดึงข้อมูลสต็อกของสินค้าดังกล่าว
  * 
@@ -872,6 +923,25 @@ content.outputGetComment = (r: Response, x: CommentFetch) =>
     });
     r.end ();
 }
+content.outputGetCommentList = (r: Response, x: CommentFetch []) =>
+{
+    r.status (http.STATUS_OK);
+    r.json ({
+        "Item": x.map ((y) =>
+        {
+            return {
+                "CommentId": y.commentId,
+                "ProductId": y.productId,
+                "Author": y.author,
+                "Title": y.title,
+                "Text": y.text,
+                "Rating": y.rating,
+            }    
+        })
+        
+    });
+    r.end ();
+}
 content.outputGetReview = (r: Response, x: ReviewFetch) =>
 {
     r.status (http.STATUS_OK);
@@ -880,6 +950,23 @@ content.outputGetReview = (r: Response, x: ReviewFetch) =>
         "ProductId": x.productId,
         "Mime": x.mime,
         "Link": x.link,
+    });
+    r.end ();
+}
+content.outputGetReviewtList = (r: Response, x: ReviewFetch []) =>
+{
+    r.status (http.STATUS_OK);
+    r.json ({
+        "Item": x.map ((y) =>
+        {
+            return {
+                "ReviewId": y.reviewId,
+                "ProductId": y.productId,
+                "Mime": y.mime,
+                "Link": y.link,
+            }    
+        })
+        
     });
     r.end ();
 }
@@ -1011,6 +1098,12 @@ content.errorGetComment = (r: Response, e: unknown) =>
     r.status (http.STATUS_SERVICE_UNAVAILABLE);
     r.end ();
 }
+content.errorGetCommentList = (r: Response, e: unknown) =>
+{
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
 content.errorGetReview = (r: Response, e: unknown) =>
 {
     if (e instanceof error.NotFound)
@@ -1019,6 +1112,12 @@ content.errorGetReview = (r: Response, e: unknown) =>
         r.end ();
         return;
     }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorGetReviewList = (r: Response, e: unknown) =>
+{
     log.error (e);
     r.status (http.STATUS_SERVICE_UNAVAILABLE);
     r.end ();
