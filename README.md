@@ -38,7 +38,7 @@
 
 - ระบบตะกร้าสินค้า (Add / Edit / Delete)
 
-- ระบบการชำระเงินออนไลน์
+- ระบบการชำระเงิน (Mock Payment)
 
 - ระบบติดตามสถานะการจัดส่งพัสดุ (Mock Shipping API)
 
@@ -155,7 +155,7 @@ Use Cases Diagram, Sequences Diagram
 
 •	ระบบตะกร้าสินค้า (Add / Edit / Delete)
 
-•	ระบบการชำระเงินออนไลน์
+•	ระบบการชำระเงิน (Mock Payment)
 
 •	ระบบติดตามสถานะการจัดส่งพัสดุ (Mock Shipping API)
 
