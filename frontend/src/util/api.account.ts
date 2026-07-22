@@ -223,7 +223,7 @@ content.outputGetOrder = (reader: ObjectReader) : OrderFetch =>
         shipPhone: reader.requireString ("ShipPhone"),
         shipEmail: reader.requireString ("ShipEmail"),
         paymentType: reader.requireInteger ("PaymentType"),
-        promotionId: reader.requireString ("PromotionId"),
+        promotionId: reader.requireStringOrNull ("PromotionId"),
         item: reader.requireArrayRecord ("Item").map ((x) =>
         {
             const inner = objectReader (x);
@@ -496,7 +496,7 @@ export interface OrderFetch
     /**
      * รหัสโปรโมชั่น
     */
-    readonly promotionId: PromotionId;
+    readonly promotionId: PromotionId | null;
     /**
      * รายการสินค้า
     */
@@ -536,7 +536,7 @@ export interface OrderCreate
     /**
      * รหัสโปรโมชั่น
     */
-    readonly promotionId: PromotionId;
+    readonly promotionId: PromotionId | null;
     /**
      * รายการสินค้าในคำสั้งซื้อสินค้า
     */

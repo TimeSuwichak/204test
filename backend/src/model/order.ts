@@ -197,9 +197,14 @@ content.create = async (info: BasicCreate): Promise<BasicId> => {
         // บันทึกข้อมูลคำสั่งซื้อ
         //
         const orderId = (await transaction.insert(
-            `INSERT INTO OrderList (AccountId, Created, Delivered, Status)
-             VALUES (?, ?, ?, ?)`,
-            [info.accountId, info.created, info.delivered, info.status]
+            `INSERT INTO OrderList (AccountId, Created, Delivered, 
+            Status, ShipName, ShipAddress, ShipPhone, ShipEmail, PaymentType, PromotionId)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                info.accountId, info.created, info.delivered, info.status,
+                info.shipName, info.shipAddress, info.shipPhone, info.shipEmail,
+                info.paymentType, info.promotionId
+            ]
         )) as BasicId;
         //
         // บันทึกรายการสินค้าในคำสั่งซื้อ
@@ -269,7 +274,7 @@ content.readBasic = (root: ObjectReader, item: ObjectReader []) : BasicFetch =>
         shipPhone: root.requireString ("ShipPhone"),
         shipEmail: root.requireString ("ShipEmail"),
         paymentType: root.requireInteger ("PaymentType"),
-        promotionId: root.requireString ("PromotionId"),
+        promotionId: root.requireStringOrNull ("PromotionId"),
         item: item.map ((x) =>
         {
             return {
@@ -328,7 +333,7 @@ export interface BasicFetch
     /**
      * รหัสโปรโมชั่น
     */
-    readonly promotionId: PromotionId;
+    readonly promotionId: PromotionId | null;
     /**
      * รายการสินค้า
     */
@@ -405,25 +410,20 @@ export interface BasicCreate
     /**
      * รหัสโปรโมชั่น
     */
-    readonly promotionId: PromotionId;
+    readonly promotionId: PromotionId | null;
     /**
      * รายการสินค้าในคำสั้งซื้อสินค้า
     */
-    readonly item: DataCreateItem [];
-}
-/**
- * รายการสินค้าที่มีในคำสั่งซื้อ
-*/
-export interface DataCreateItem
-{
-    /**
-     * รหัสสินค้า
-    */
-    productId: ProductId;
-    /**
-     * จำนวนสินค้าที่สั่งซื้อ
-    */
-    quantity: number;
+    readonly item: {
+        /**
+         * รหัสสินค้า
+        */
+        productId: ProductId;
+        /**
+         * จำนวนสินค้าที่สั่งซื้อ
+        */
+        quantity: number;
+    } [];
 }
 /**
  * รหัสของชุดรหัสข้อมูล

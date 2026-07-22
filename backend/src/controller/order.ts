@@ -11,6 +11,7 @@ import
     type Response,
 } 
 from "#core/http.ts";
+import  { type BasicId as AccountId } from "#model/account.ts";
 import
 {
     type BasicCreate,
@@ -70,49 +71,7 @@ content.getList = (request: Request, response: Response) =>
     })
 }
 
-content.outputGet = (r: Response, x: BasicFetch) =>
-{
-    r.status (http.STATUS_OK);
-    r.json ({
-        "OrderId": x.orderId,
-        "AccountId": x.accountId,
-        "Created": x.created,
-        "Delivered": x.delivered,
-        "Status": x.status,
-        "Item": x.item.map ((x) =>
-        {
-            return {
-                "ProductId": x.productId,
-                "Quantity": x.quantity
-            }
-        })
-    });
-    r.end ();
-}
-content.outputGetList = (r: Response, x: BasicFetch []) =>
-{
-    r.status (http.STATUS_OK);
-    r.json ({
-        "Item": x.map ((y) =>
-        {
-            return {
-                "OrderId": y.orderId,
-                "AccountId": y.accountId,
-                "Created": y.created,
-                "Delivered": y.delivered,
-                "Status": y.status,
-                "Item": y.item.map ((x) =>
-                {
-                    return {
-                        "ProductId": x.productId,
-                        "Quantity": x.quantity
-                    }
-                })
-            }
-        })
-    });
-    r.end ();
-}
+
 content.errorGet = (r: Response, e: unknown) =>
 {
     if (e instanceof error.NotFound)
@@ -135,8 +94,12 @@ content.errorGetList = (r: Response, e: unknown) =>
  * สร้างคำสั่งซื้อ
  **/
 content.post = async (request: Request, response: Response) => {
+
+    const authenticate = auth.validateResult (response);
+    const accountId = authenticate.id;
+
     try {
-        const payload = content.inputPost(request);
+        const payload = content.inputPost(request, accountId);
         const orderId = await model.create(payload);
 
         response.status(http.STATUS_CREATED);
@@ -149,12 +112,12 @@ content.post = async (request: Request, response: Response) => {
     }
 };
 
-content.inputPost = (request: Request): BasicCreate => {
+content.inputPost = (request: Request, accountId: AccountId): BasicCreate => {
     const reader = objectReader(request.body);
     const rawItems = reader.requireArrayRecord("Item");
 
     return {
-        accountId: reader.requireInteger("AccountId"),
+        accountId: accountId,
         created: new Date(),
         delivered: null,
         status: reader.requireInteger("Status"),
@@ -163,7 +126,7 @@ content.inputPost = (request: Request): BasicCreate => {
         shipPhone: reader.requireString ("ShipPhone"),
         shipEmail: reader.requireString ("ShipEmail"),
         paymentType: reader.requireInteger ("PaymentType"),
-        promotionId: reader.requireString ("PromotionId"),
+        promotionId: reader.requireStringOrNull ("PromotionId"),
         item: rawItems.map((item) => {
             const itemReader = objectReader(item);
             return {
