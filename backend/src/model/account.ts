@@ -94,6 +94,18 @@ content.getContact = async (key: BasicId) =>
     }
     return content.readContact (objectReader (query [0]));
 }
+content.getFavoriteByAccount = async (key: BasicId) 
+    : Promise<FavoriteFetch[]> =>
+{
+    const cmd = `SELECT * FROM Favorite WHERE AccountId = ?`;
+    const param = [key];
+    const query = await sql.select (cmd, param);
+
+    return query.map ((x) =>
+    {
+        return content.readFavorite (objectReader (x));
+    });
+}
 
 /**
  * แก้ไขข้อมูลบัญชีดังกล่าว
@@ -234,6 +246,17 @@ content.createCart = (info: CartCreate)
         ]
     ) as Promise<CartId>;
 }
+content.createFavorite = (info: FavoriteCreate) 
+    : Promise<FavoriteId> =>
+{
+    return sql.insert (`
+        INSERT INTO Favorite (AccountId, ProductId)
+        VALUES (?, ?)`,
+        [
+            info.accountId, info.productId
+        ]
+    ) as Promise<FavoriteId>;
+}
 
 /**
  * ลบบัญชีดังกล่าวออกจากระบบ 
@@ -269,7 +292,21 @@ content.deleteCart = (itemId: CartId, accountId: BasicId) =>
         }
     });
 }
-
+content.deleteFavorite = (favoriteId: FavoriteId, accountId: BasicId) =>
+{
+    return sql.delete (`
+        DELETE FROM Favorite 
+        WHERE FavoriteId = ? AND AccountId = ?`,
+        [favoriteId, accountId]
+    )
+    .then ((x) =>
+    {
+        if (x === 0)
+        {
+            throw new error.NotFound (`ไม่พบข้อมูลรายการโปรด: ${String (favoriteId)}`);
+        }
+    });
+}
 content.readBasic = (reader: ObjectReader) : BasicFetch =>
 {
     return {
@@ -298,6 +335,14 @@ content.readContact = (reader: ObjectReader) : ContactFetch =>
         email: reader.requireString ("Email"),
         phone: reader.requireString ("Phone"),
         address: reader.requireString ("Address"),
+    }
+}
+content.readFavorite = (reader: ObjectReader) : FavoriteFetch =>
+{
+    return {
+        favoriteId: reader.requireInteger ("FavoriteId"),
+        accountId: reader.requireInteger ("AccountId"),
+        productId: reader.requireInteger ("ProductId")
     }
 }
 
@@ -486,6 +531,32 @@ export interface ContactUpdate
     */
     address ?: string | undefined;
 }
+export interface FavoriteFetch
+{
+    /**
+     * รหัสสินค้าที่ชอบ
+     */
+    favoriteId: FavoriteId;
+    /**
+     * บัญชีผู้ใช้
+     */
+    accountId: BasicId;
+    /**
+     * รหัสสินค้า
+     */
+    productId: ProductId;
+}
+export interface FavoriteCreate
+{
+    /**
+     * บัญชีผู้ใช้
+     */
+    accountId: BasicId;
+    /**
+     * รหัสสินค้า
+     */
+    productId: ProductId;
+}
 
 /**
  * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
@@ -495,6 +566,10 @@ export type BasicId = number;
  * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
 */
 export type CartId = number;
+/**
+ * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
+*/
+export type FavoriteId = number;
 
 /**
  * ส่งออกตัวแปร

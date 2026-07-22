@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS `project`.`Product`
 )
 ENGINE = InnoDB 
 COMMENT = 'ข้อมูลสินค้า';
+
 -- #
 -- # ข้อมูลการรีวิวสินค้าจากนักรีวิวเกม
 -- #
@@ -304,3 +305,24 @@ CREATE TABLE IF NOT EXISTS `project`.`AccountCart`
 )
 ENGINE = InnoDB 
 COMMENT = 'ข้อมูลตะกร้าสินค้า';
+
+-- #
+-- # ข้อมูลสินค้าที่ชื่นชอบ
+-- #
+CREATE TABLE IF NOT EXISTS `project`.`Favorite`
+(
+    `FavoriteId` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'รหัสสินค้าที่ชอบ' ,
+    `AccountId`  BIGINT NOT NULL COMMENT 'เจ้าของ' ,
+    `ProductId`  BIGINT NOT NULL COMMENT 'สินค้าที่เลือก' ,
+
+    CONSTRAINT   UK_Favorite UNIQUE (`AccountId`, `ProductId`) ,
+    CONSTRAINT   PK_Favorite_FavoriteId PRIMARY KEY (`FavoriteId`) ,
+    CONSTRAINT   FK_Favorite_AccountId 
+        FOREIGN KEY (`AccountId`) 
+        REFERENCES Account (`Id`) ,
+    CONSTRAINT   FK_Favorite_ProductId
+        FOREIGN KEY (`ProductId`) 
+        REFERENCES Product (`Id`)
+)
+ENGINE = InnoDB
+COMMENT = 'ข้อมูลสินค้าที่ชื่นชอบ';

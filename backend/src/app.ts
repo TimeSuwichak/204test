@@ -47,6 +47,7 @@ content.start = async () =>
         http.routeTo ("/account-list", routerAccount.getRouteList ());
         http.routeTo ("/account-cart", routerAccount.getRouteCart ());
         http.routeTo ("/account-contact", routerAccount.getRouteContact ());
+        http.routeTo ("/account-favorite", routerAccount.getRouteFavorite ());
         http.routeTo ("/account-order", routerAccount.getRouteOrder ());
         http.routeTo ("/product", routerProduct.getRoute ());
         http.routeTo ("/product-category", routerProduct.getRouteCategory ());

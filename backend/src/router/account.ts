@@ -69,6 +69,17 @@ content.getRouteOrder = () =>
 
     return router;
 }
+content.getRouteFavorite = () =>
+{
+    const router = http.router ();
+    const authUser = controlAuth.validateLeastUser ();
+
+    router.get ("/", authUser, control.getFavorite);
+    router.post ("/", authUser, control.postFavorite);
+    router.delete ("/:id", authUser, control.deleteFavorite);
+
+    return router;
+}
 /**
  * ส่งออกตัวแปร
 */

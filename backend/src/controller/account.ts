@@ -24,7 +24,10 @@ import
     type CartId,
     type CartFetch,
     type CartUpdate,
-    type CartCreate
+    type CartCreate,
+
+    type FavoriteFetch,
+    type FavoriteCreate
 }
 from "#model/account.ts";
 import 
@@ -163,6 +166,26 @@ content.getContactOf = (request: Request, response: Response) =>
         content.errorGetContact (response, e);
     });
 }
+/**
+ * ดึงข้อมูลสินค้าที่ชอบของบัญชีตนเอง
+ * 
+ * @param request คำขอ
+ * @param response คำตอบ
+*/
+content.getFavorite = (request: Request, response: Response) =>
+    {
+        const authenticate = auth.validateResult (response);
+        const accountId = authenticate.id;
+    
+        void model.getFavoriteByAccount (accountId).then ((x) =>
+        {
+            content.outputGetFavorite (response, x);
+        })
+        .catch ((e: unknown) =>
+        {
+            content.errorGetFavorite (response, e);
+        });
+    }
 /**
  * ดึงข้อมูลคำสั่งซื้อสินค้าของบัญชีตนเองที่กำลังใช้งานอยู่ 
  * 
@@ -406,6 +429,35 @@ content.postCart = (request: Request, response: Response) =>
         content.errorPostCart (response, e);
     });
 }
+//
+// เพิ่มสินค้าที่ชอบเข้าบัญชีตัวเอง
+//
+content.postFavorite = (request: Request, response: Response) =>
+    {
+        const authenticate = auth.validateResult (response);
+        const accountId = authenticate.id;
+        let create: FavoriteCreate;
+    
+        try
+        {
+           create = content.inputPostFavorite (request, accountId);
+        }
+        catch
+        {
+            response.status (http.STATUS_BAD_REQUEST);
+            response.end ();
+            return;
+        }
+    
+        void model.createFavorite (create).then ((x) =>
+        {
+            content.outputPostFavorite (response, x);
+        })
+        .catch ((e: unknown) =>
+        {
+            content.errorPostFavorite (response, e);
+        });
+    }
 /**
  * ลบข้อมูลบัญชีของตนเอง
 */
@@ -439,7 +491,31 @@ content.deleteCart = (request: Request, response: Response) =>
         content.errorDeleteCart (response, e);
     });
 }
-
+//
+// ลบสินค้าที่ชอบออก
+//
+content.deleteFavorite = (request: Request, response: Response) =>
+    {
+        const authenticate = auth.validateResult (response);
+        const accountId = authenticate.id;
+        const favoriteId = Number (request.params ["id"]);
+    
+        if (!Number.isSafeInteger (favoriteId) || favoriteId <= 0)
+        {
+            response.status (http.STATUS_BAD_REQUEST);
+            response.end ();
+            return;
+        }
+    
+        void model.deleteFavorite (favoriteId, accountId).then (() =>
+        {
+            content.outputDeleteFavorite (response);
+        })
+        .catch ((e: unknown) =>
+        {
+            content.errorDeleteFavorite (response, e);
+        });
+    }
 
 content.inputPutBasic = async (
     iconId: ResourceId, 
@@ -561,7 +637,15 @@ content.inputPostCart = (request: Request, accountId: number) : CartCreate =>
     }
     return result;
 }
-
+content.inputPostFavorite = (request: Request, accountId: number) : FavoriteCreate =>
+    {
+        const reader = objectReader (request.body);
+        const result = {
+            accountId: accountId,
+            productId: reader.requireInteger ("ProductId")
+        };
+        return result;
+    }
 
 content.outputGetBasic = (r: Response, x: BasicFetch) =>
 {
@@ -616,6 +700,17 @@ content.outputGetContact = (r: Response, x: ContactFetch) =>
     });
     r.end ();
 }
+content.outputGetFavorite = (r: Response, x: FavoriteFetch []) =>
+{
+    r.status (http.STATUS_OK);
+    r.json ({
+        "Item": x.map ((x) => { return {
+            "FavoriteId": x.favoriteId,
+            "ProductId": x.productId
+        }})
+    });
+    r.end ();
+}
 content.outputPutBasic = (r: Response) =>
 {
     r.status (http.STATUS_NO_CONTENT);
@@ -649,12 +744,25 @@ content.outputPostCart = (r: Response, id: CartId) =>
     });
     r.end ()
 }
+content.outputPostFavorite = (r: Response, id: number) =>
+{
+    r.status (http.STATUS_CREATED);
+    r.json ({
+        "Id": id,
+        "Created": new Date ().getTime ()
+    });
+    r.end ();
+}
 content.outputDeleteCart = (r: Response) =>
 {
     r.status (http.STATUS_NO_CONTENT);
     r.end ();
 }
-
+content.outputDeleteFavorite = (r: Response) =>
+{
+    r.status (http.STATUS_NO_CONTENT);
+    r.end ();
+}
 
 content.errorGetBasic = (r: Response, e: unknown) =>
 {
@@ -676,6 +784,12 @@ content.errorGetContact = (r: Response, e: unknown) =>
         r.end ();
         return;
     }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
+content.errorGetFavorite = (r: Response, e: unknown) =>
+{
     log.error (e);
     r.status (http.STATUS_SERVICE_UNAVAILABLE);
     r.end ();
@@ -740,6 +854,24 @@ content.errorPostCart = (r: Response, e: unknown) =>
     r.status (http.STATUS_SERVICE_UNAVAILABLE);
     r.end ();
 }
+content.errorPostFavorite = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    if (e instanceof error.Constraint)
+    {
+        r.status (http.STATUS_BAD_REQUEST);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
 content.errorDeleteCart = (r: Response, e: unknown) =>
 {
     if (e instanceof error.NotFound)
@@ -752,7 +884,18 @@ content.errorDeleteCart = (r: Response, e: unknown) =>
     r.status (http.STATUS_SERVICE_UNAVAILABLE);
     r.end ();
 }
-
+content.errorDeleteFavorite = (r: Response, e: unknown) =>
+{
+    if (e instanceof error.NotFound)
+    {
+        r.status (http.STATUS_NOT_FOUND);
+        r.end ();
+        return;
+    }
+    log.error (e);
+    r.status (http.STATUS_SERVICE_UNAVAILABLE);
+    r.end ();
+}
 /**
  * ส่งออกตัวแปร
 */
