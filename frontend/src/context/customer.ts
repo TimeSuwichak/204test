@@ -74,6 +74,20 @@ const useAccountContact = () =>
         throwOnError: false
     });
 }
+const useAccountOrder = () =>
+{
+    const auth = Ctx.useAuth ();
+    return useQuery ({
+        queryKey: ["Account", "Order"],
+        queryFn: () => ApiAccount.getOrder (auth.session),
+        enabled: () => ApiAuth.checkSession ({
+            secret: auth.session,
+            issued: auth.sessionIssued,
+            expire: auth.sessionExpire
+        }),
+        throwOnError: false
+    });
+}
 const useProduct = (id: ProductId) =>
 {
     const auth = Ctx.useAuth ();
@@ -170,6 +184,7 @@ Content.useCart = useCart;
 Content.useCartQuery = useCartQuery;
 Content.useAccountBasic = useAccountBasic;
 Content.useAccountContact = useAccountContact;
+Content.useAccountOrder = useAccountOrder;
 Content.useProduct = useProduct;
 Content.useProducts = useProducts;
 Content.useProductList = useProductList;
