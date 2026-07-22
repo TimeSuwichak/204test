@@ -264,6 +264,26 @@ ENGINE = InnoDB
 COMMENT = 'สินค้าที่อยู่ในคำสั่งซื้อสินค้า';
 
 -- #
+-- # ข้อมูลการร้องเรียน
+-- #
+CREATE TABLE IF NOT EXISTS `project`.`Inquiry`
+(
+    `InquiryId`     BIGINT NOT NULL AUTO_INCREMENT COMMENT 'รหัสร้องเรียน',
+    `OrderId`       BIGINT NULL COMMENT 'รหัสคำสั่งซื้อ',
+    `Type`          INT NOT NULL COMMENT 'ประเภทการสอบถาม' ,
+    `Title`         CHAR(255) NOT NULL COMMENT 'เรื่องที่สอบถาม' ,
+    `Text`          VARCHAR(255) NOT NULL COMMENT 'เนื้อหา',
+    `Status`        INT NOT NULL COMMENT 'สถานะ',
+
+    CONSTRAINT PK_Inquiry_InquiryId PRIMARY KEY (`InquiryId`),
+    CONSTRAINT FK_Inquiry_OrderId 
+        FOREIGN KEY (`OrderId`)
+        REFERENCES OrderList (`OrderId`)
+)
+ENGINE = InnoDB
+COMMENT = 'ข้อมูลการร้องเรียน';
+
+-- #
 -- # ข้อมูลตะกร้าสินค้าของผู้ใช้
 -- #
 CREATE TABLE IF NOT EXISTS `project`.`AccountCart`

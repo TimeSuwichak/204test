@@ -11,15 +11,16 @@ import sql                  from "#core/sql.ts";
 import routerAuth           from "#router/auth.ts";
 import routerAccount        from "#router/account.ts";
 import routerProduct        from "#router/product.ts";
-import routerOrder          from "#router/order.ts";
-import routerStorage        from "#router/storage.ts";
 import routerPromotion      from "#router/promotion.ts"
+import routerOrder          from "#router/order.ts";
+import routerInquiry        from "#router/inquiry.ts";
+import routerStorage        from "#router/storage.ts";
 
 import modelAuth            from "#model/auth.ts";
 import modelAccount         from "#model/account.ts";
 import modelProduct         from "#model/product.ts";
-import modelStorage         from "#model/storage.ts";
 import modelPromotion       from "#model/promotion.ts"
+import modelStorage         from "#model/storage.ts";
 
 import testMode             from "./appTest.ts";
 
@@ -55,6 +56,7 @@ content.start = async () =>
         http.routeTo ("/product-review-list", routerProduct.getRouteReviewList ());
         http.routeTo ("/product-stock", routerProduct.getRouteStock ());
         http.routeTo ("/promotion", routerPromotion.getRoute ());
+        http.routeTo ("/inquiry", routerInquiry.getRoute ());
         http.routeTo ("/order", routerOrder.getRoute ());
         http.routeTo ("/storage", routerStorage.getRoute ());
         return;
