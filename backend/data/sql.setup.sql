@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS `project`.`AccountContact`
 (
     `Id`        BIGINT NOT NULL COMMENT 'รหัสบัญชี' , 
     `Email`     CHAR(32) DEFAULT "" COMMENT 'อีเมล' ,
+    `Phone`     CHAR(16) DEFAULT "" COMMENT 'เบอร์โทรศัพท์' ,
+    `Address`   CHAR(255) DEFAULT "" COMMENT 'ที่อยู่จัดส่ง' ,
 
     CONSTRAINT  PK_AccountContact_Id PRIMARY KEY (`Id`),
     CONSTRAINT  UK_AccountContact_Id UNIQUE (`Id`) ,
@@ -190,6 +192,26 @@ ENGINE = InnoDB
 COMMENT = 'ข้อมูลหมวดหมู่สินค้า';
 
 -- #
+-- # ข้อมูลโปรโมชั่น
+-- #
+CREATE TABLE IF NOT EXISTS `project`.`Promotion`
+(
+    `PromotionId` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'รหัสสินค้า' ,
+    `Created`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+                  COMMENT 'วันที่สร้าง' ,
+    `Expire`      DATETIME NOT NULL COMMENT 'วันหมดอายุ' , 
+    `Type`        INT NOT NULL COMMENT 'ประเภท' ,
+    `Discount`    INT NOT NULL COMMENT 'ส่วนลด' ,
+    `MinPrice`    FLOAT NOT NULL COMMENT 'ขั้นต่ำการใช้งาน' ,
+    `MaxDiscount` FLOAT NOT NULL COMMENT 'ลดสูงสุด' ,
+
+    CONSTRAINT PK_Promotion_PromotionId PRIMARY KEY (`PromotionId`)
+)
+ENGINE = InnoDB 
+COMMENT = 'ข้อมูลโปรโมชั่น';
+
+
+-- #
 -- # ข้อมูลคำสั่งซื้อสินค้า
 -- #
 CREATE TABLE IF NOT EXISTS `project`.`OrderList`
@@ -200,15 +222,25 @@ CREATE TABLE IF NOT EXISTS `project`.`OrderList`
                 COMMENT 'วันที่สั่งซื้อ' ,
     `Delivered` DATETIME COMMENT 'วันที่รับสินค้า' , 
     `Status`    INT NOT NULL COMMENT 'สถานะคำ' ,
+    `ShipName`  CHAR(255) NOT NULL COMMENT 'ชื่อผู้รับ' ,
+    `ShipAddress` CHAR(255) NOT NULL COMMENT 'ที่อยู่จัดส่งผู้รับ' ,
+    `ShipPhone` CHAR(16) NOT NULL COMMENT 'เบอร์โทรศัพท์ผู้รับ' ,
+    `ShipEmail` CHAR(32) NOT NULL COMMENT 'อีเมลของผู้รับ' ,
+    `PaymentType` INT NOT NULL COMMENT 'รูปแบบชำระเงิน' ,
+    `PromotionId` BIGINT NOT NULL COMMENT 'รหัสโปรโมชั่น' ,
 
     CONSTRAINT PK_Order_OrderId PRIMARY KEY (`OrderId`) ,
     CONSTRAINT UK_Order_OrderId UNIQUE (`OrderId`) ,
     CONSTRAINT FK_Order_AccountId
         FOREIGN KEY (`AccountId`)
-        REFERENCES Account (`Id`)
+        REFERENCES Account (`Id`),
+    CONSTRAINT FK_Order_PromotionId
+        FOREIGN KEY (`PromotionId`)
+        REFERENCES Promotion (`PromotionId`)
 )
 ENGINE = InnoDB 
 COMMENT = 'รายการคำสั่งซื้อ';
+
 -- #
 -- # สินค้าที่อยู่ในคำสั่งซื้อสินค้า
 -- #
