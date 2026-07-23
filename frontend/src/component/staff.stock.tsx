@@ -19,16 +19,15 @@ export default function Stock() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const session = auth.session;
 
-      const productList = await productApi.getBasicList(session);
+      const productList = await productApi.getBasicList(auth.session);
       setProducts(productList);
 
       const stockMap: Record<number, number> = {};
       await Promise.all(
         productList.map(async (item) => {
           try {
-            const stockData = await productApi.getStock(session, item.id);
+            const stockData = await productApi.getStock(auth.session, item.id);
             stockMap[item.id] = stockData.quantity;
           } catch {
             stockMap[item.id] = 0;
