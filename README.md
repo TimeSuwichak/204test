@@ -308,5 +308,3 @@ flowchart TD
 ```
 
 เอกสารเพิ่มเติม : https://ikla47.github.io/UniversityCSI204/doc/
-
-Wireframe / Prototype : https://www.figma.com/design/4axEENmLrWcVgOkUc0Uxis/Untitled?node-id=0-1&t=HhGGfBS68qEH2CRZ-1
