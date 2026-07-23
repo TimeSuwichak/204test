@@ -24,7 +24,6 @@ content.Root = function CartRoot(prop: PropRoot)
 {
   const auth = useAuth ();
   const cart = useCartQuery ();
-  const toast = useToast ();
   const [dialog] = useDialog ();
   const [code, setCode] = useState ("");
   const [window, setWindow] = useState (1);
@@ -74,7 +73,7 @@ content.Root = function CartRoot(prop: PropRoot)
             .then (() =>
             {
               setCode ("");
-              
+
               dialog.reset ();
               dialog.setTitle ("ยืนยันคำสั่งซื้อสินค้า");
               dialog.setMessage ("ดำเนินการสั่งซื้อสินค้าเรียบร้อยแล้ว คุณสามารถดูรายละเอียดและประวัติได้ที่โปรไฟล์ของคุณ");
