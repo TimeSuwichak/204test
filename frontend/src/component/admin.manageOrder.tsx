@@ -80,7 +80,7 @@ export const ManageOrdersPage: React.FC = () => {
   // เปิด Modal ดูรายละเอียด
   const handleOpenDetail = (order: OrderItem) => {
     setSelectedOrder(order);
-    setTrackingInput(order.trackingNumber || '');
+    setTrackingInput(order.trackingNumber ?? '');
   };
 
   // เปลี่ยนสถานะเป็น "จัดส่งแล้ว" หรือ "ยกเลิกออเดอร์"
@@ -139,7 +139,7 @@ export const ManageOrdersPage: React.FC = () => {
             type="text" 
             placeholder="ค้นหาด้วยรหัสคำสั่งซื้อ (ORD-...) หรือชื่อลูกค้า..." 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); }}
             className="w-full bg-[#16223f]/40 border border-slate-800/80 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 placeholder-slate-500"
           />
         </div>
@@ -147,7 +147,7 @@ export const ManageOrdersPage: React.FC = () => {
           <Filter className="absolute left-3 top-2.5 text-slate-500" size={16} />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => { setStatusFilter(e.target.value); }}
             className="w-full bg-[#16223f]/40 border border-slate-800/80 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none cursor-pointer"
           >
             <option value="ALL">ทุกสถานะการจัดส่ง</option>
@@ -235,7 +235,7 @@ export const ManageOrdersPage: React.FC = () => {
                     {/* Action */}
                     <td className="py-3.5 px-4 text-center">
                       <button 
-                        onClick={() => handleOpenDetail(order)}
+                        onClick={() => { handleOpenDetail(order); }}
                         className="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 hover:text-white rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5"
                       >
                         <Eye size={14} /> ดู/จัดการ
@@ -265,7 +265,7 @@ export const ManageOrdersPage: React.FC = () => {
                 </h2>
               </div>
               <button 
-                onClick={() => setSelectedOrder(null)}
+                onClick={() => { setSelectedOrder(null); }}
                 className="text-slate-500 hover:text-slate-300 p-1 rounded-lg"
               >
                 <X size={18} />
@@ -326,7 +326,7 @@ export const ManageOrdersPage: React.FC = () => {
                   type="text" 
                   placeholder="เช่น TH1234567890 (จำเป็นต้องใส่เมื่อกด 'จัดส่งแล้ว')"
                   value={trackingInput}
-                  onChange={(e) => setTrackingInput(e.target.value)}
+                  onChange={(e) => { setTrackingInput(e.target.value); }}
                   className="w-full bg-[#16223f] border border-slate-700/80 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500 placeholder-slate-500 font-mono"
                 />
               </div>
@@ -338,15 +338,15 @@ export const ManageOrdersPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2">
                   <button 
                     type="button" 
-                    onClick={() => handleUpdateStatus('SHIPPED')}
+                    onClick={() => { handleUpdateStatus('SHIPPED'); }}
                     className="py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5 transition-all"
                   >
-                    <Truck size={16} /> ยืนยัน "จัดส่งแล้ว"
+                    <Truck size={16} /> ยืนยันจัดส่งแล้ว
                   </button>
 
                   <button 
                     type="button" 
-                    onClick={() => handleUpdateStatus('CANCELLED')}
+                    onClick={() => { handleUpdateStatus('CANCELLED'); }}
                     className="py-2.5 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all"
                   >
                     <XCircle size={16} /> ยกเลิกออเดอร์

@@ -1,14 +1,14 @@
-import styled from "styled-components";
 import error from "#util/common.error.ts";
 import apiAccount from "#util/api.account.ts";
 
 import PageList from "#component/customer.cart.list.tsx";
 import PageCheckout from "#component/customer.cart.checkout.tsx";
 
-import { useRef, useState, useEffect } from "react";
+import { styled } from "styled-components";
 import { useAuth } from "#context/common.ts";
+import { useDialog } from "#context/common.ui.ts";
+import { useRef, useState, useEffect } from "react";
 import { useCart, useCartQuery } from "#context/customer.ts";
-import { useDialog, useToast } from "#context/common.ui.ts";
 
 /**
  * ส่วนประกอบการแสดงผลรายการในตะกร้าและการสั่งซื้อสินค้า
@@ -102,6 +102,7 @@ content.Root = function CartRoot(prop: PropRoot)
               {
                 dialog.setVisible (false);
               });
+              dialog.setVisible (true);
             })
           }}/>
         </StyleViewPanel>

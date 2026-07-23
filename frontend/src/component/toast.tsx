@@ -1,5 +1,4 @@
-import styled from "styled-components";
-
+import { styled } from "styled-components";
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "#context/common.ui.ts";
 

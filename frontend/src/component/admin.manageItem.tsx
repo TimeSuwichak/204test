@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Disc, Plus, Search, Filter, Trash2, X, AlertTriangle, Edit3 } from 'lucide-react';
-import productApi from "../util/api.product";
-import type { BasicFetch } from '#util/api.product';
-import { useAuth } from "#context/common.js";
-import { useProductList } from '#context/customer.js';
-
 import apiStorage from "#util/api.storage.ts";
+import { useState } from 'react';
+import { useProductList } from '#context/customer.js';
+import { type SubmitEvent } from 'react';
+import 
+{ 
+  Disc, Plus, Search, Filter, Trash2, X, AlertTriangle, Edit3 
+} 
+from 'lucide-react';
 
 interface GameItem {
   id: string;
@@ -83,23 +84,25 @@ export const ManageItemsPage: React.FC = () => {
   const [editingGame, setEditingGame] = useState<GameItem | null>(null);
 
   // ฟังก์ชันเพิ่มเกมใหม่
-  const handleAddGame = (e: React.FormEvent) => {
+  const handleAddGame = (e: SubmitEvent) => 
+  {
     e.preventDefault();
+    e.stopPropagation ();
+
     if (!newGame.title || newGame.price <= 0) {
       alert('กรุณากรอกชื่อเกมและราคาให้ถูกต้อง');
       return;
     }
 
-    const createdGame: GameItem = {
-      ...newGame,
-      id: `GAME-${String(games.length + 1).padStart(3, '0')}`,
-      coverUrl: newGame.coverUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=300&q=80',
-    };
+    // const createdGame: GameItem = 
+    // {
+    //   ...newGame,
+    //   id: `GAME-${String(games.length + 1).padStart(3, '0')}`,
+    //   coverUrl: newGame.coverUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=300&q=80',
+    // };
 
-    setGames([createdGame, ...games]);
     setIsAddModalOpen(false); // ปิด Modal
-    // Reset Form
-    setNewGame({
+    setNewGame ({
       title: '',
       platform: 'PS5',
       genre: 'Action RPG',
@@ -109,29 +112,41 @@ export const ManageItemsPage: React.FC = () => {
     });
   };
 
+  //
   // 🔴 ฟังก์ชันเปิด Modal แก้ไขข้อมูล (ดึงข้อมูลเกมแถวนั้นเข้า State)
+  //
   const handleOpenEditModal = (game: GameItem) => {
     setEditingGame(game);
     setIsChangeModalOpen(true);
   };
 
+  //
   // 🔴 ฟังก์ชันบันทึกการแก้ไขเกม
-  const handleEditGame = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingGame || !editingGame.title || editingGame.price <= 0) {
+  //
+  const handleEditGame = (e: SubmitEvent) => 
+  {
+    e.preventDefault ();
+    e.stopPropagation ();
+
+    if (!editingGame?.title || editingGame.price <= 0) 
+    {
       alert('กรุณากรอกข้อมูลให้ถูกต้อง');
       return;
     }
 
-    setGames(games.map(g => g.id === editingGame.id ? editingGame : g));
+    // setGames(games.map(g => g.id === editingGame.id ? editingGame : g));
     setIsChangeModalOpen(false);
     setEditingGame(null);
   };
 
+  //
   // ฟังก์ชันลบเกม
-  const handleDeleteGame = (id: string) => {
+  //
+  const handleDeleteGame = (id: string) => 
+  {
+    void id;
     if (confirm('คุณต้องการลบรายการเกมนี้ใช่หรือไม่?')) {
-      setGames(games.filter(g => g.id !== id));
+      // setGames(games.filter(g => g.id !== id));
     }
   };
 
@@ -157,7 +172,9 @@ export const ManageItemsPage: React.FC = () => {
 
         {/* ปุ่มเปิด Modal เพิ่มเกม */}
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => {
+            setIsAddModalOpen(true); 
+          }}
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 shrink-0 active:scale-95"
         >
           <Plus size={18} />
@@ -173,7 +190,9 @@ export const ManageItemsPage: React.FC = () => {
             type="text" 
             placeholder="ค้นหาชื่อเกม หรือ ID..." 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { 
+              setSearchQuery(e.target.value); 
+            }}
             className="w-full bg-[#16223f]/40 border border-slate-800/80 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 placeholder-slate-500"
           />
         </div>
@@ -181,7 +200,9 @@ export const ManageItemsPage: React.FC = () => {
           <Filter className="absolute left-3 top-2.5 text-slate-500" size={16} />
           <select
             value={selectedPlatform}
-            onChange={(e) => setSelectedPlatform(e.target.value)}
+            onChange={(e) => {
+              setSelectedPlatform(e.target.value);
+            }}
             className="w-full bg-[#16223f]/40 border border-slate-800/80 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none cursor-pointer"
           >
             <option value="All">ทุกแพลตฟอร์ม (All Platforms)</option>
@@ -245,13 +266,17 @@ export const ManageItemsPage: React.FC = () => {
                     <div className="flex items-center justify-center gap-2">
                       {/* 🔴 แก้ไขปุ่ม onClick แก้ไขเกม */}
                       <button
-                        onClick={() => handleOpenEditModal(game)}  
+                        onClick={() =>  {
+                          handleOpenEditModal(game); 
+                        }}  
                         className="px-2 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 hover:text-indigo-200 rounded-md border border-slate-700 flex items-center gap-1 transition-colors"
                       >
                         <Edit3 size={13} />
                       </button>
                       <button 
-                        onClick={() => handleDeleteGame(game.id)}
+                        onClick={() => {
+                          handleDeleteGame(game.id);
+                        }}
                         className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
                         title="ลบเกม"
                       >
@@ -277,7 +302,9 @@ export const ManageItemsPage: React.FC = () => {
                 เพิ่มแผ่น/ตลับเกมใหม่
               </h2>
               <button 
-                onClick={() => setIsAddModalOpen(false)}
+                onClick={() => { 
+                  setIsAddModalOpen(false); 
+                }}
                 className="text-slate-500 hover:text-slate-300 p-1 rounded-lg"
               >
                 <X size={18} />
@@ -294,7 +321,9 @@ export const ManageItemsPage: React.FC = () => {
                   required
                   placeholder="เช่น Final Fantasy XVI"
                   value={newGame.title}
-                  onChange={(e) => setNewGame({ ...newGame, title: e.target.value })}
+                  onChange={(e) => {
+                    setNewGame({ ...newGame, title: e.target.value }); 
+                  }}
                   className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -304,7 +333,9 @@ export const ManageItemsPage: React.FC = () => {
                   <label className="block text-slate-400 mb-1 font-medium">แพลตฟอร์ม</label>
                   <select
                     value={newGame.platform}
-                    onChange={(e) => setNewGame({ ...newGame, platform: e.target.value as any })}
+                    onChange={(e) => {
+                      setNewGame({ ...newGame, platform: e.target.value as "PS5"});
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="PS5">PlayStation 5</option>
@@ -318,7 +349,9 @@ export const ManageItemsPage: React.FC = () => {
                   <label className="block text-slate-400 mb-1 font-medium">แนวเกม (Genre)</label>
                   <select
                     value={newGame.genre}
-                    onChange={(e) => setNewGame({ ...newGame, genre: e.target.value })}
+                    onChange={(e) => {
+                      setNewGame({ ...newGame, genre: e.target.value });
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="Action RPG">Action RPG</option>
@@ -340,7 +373,9 @@ export const ManageItemsPage: React.FC = () => {
                     min="1"
                     placeholder="1990"
                     value={newGame.price || ''}
-                    onChange={(e) => setNewGame({ ...newGame, price: Number(e.target.value) })}
+                    onChange={(e) => {
+                      setNewGame({ ...newGame, price: Number(e.target.value) });
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -353,7 +388,9 @@ export const ManageItemsPage: React.FC = () => {
                     min="0"
                     placeholder="10"
                     value={newGame.stock}
-                    onChange={(e) => setNewGame({ ...newGame, stock: Number(e.target.value) })}
+                    onChange={(e) => {
+                      setNewGame({ ...newGame, stock: Number(e.target.value) });
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -365,7 +402,9 @@ export const ManageItemsPage: React.FC = () => {
                   type="url" 
                   placeholder="https://example.com/cover.jpg"
                   value={newGame.coverUrl}
-                  onChange={(e) => setNewGame({ ...newGame, coverUrl: e.target.value })}
+                  onChange={(e) => {
+                    setNewGame({ ...newGame, coverUrl: e.target.value }); 
+                  }}
                   className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -393,7 +432,9 @@ export const ManageItemsPage: React.FC = () => {
               <div className="flex gap-2 pt-2">
                 <button 
                   type="button" 
-                  onClick={() => setIsAddModalOpen(false)}
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                  }}
                   className="w-1/2 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold"
                 >
                   ยกเลิก
@@ -421,7 +462,9 @@ export const ManageItemsPage: React.FC = () => {
                 แก้ไขข้อมูลเกม ({editingGame.id})
               </h2>
               <button 
-                onClick={() => setIsChangeModalOpen(false)}
+                onClick={() => { 
+                  setIsChangeModalOpen(false); 
+                }}
                 className="text-slate-500 hover:text-slate-300 p-1 rounded-lg"
               >
                 <X size={18} />
@@ -435,7 +478,9 @@ export const ManageItemsPage: React.FC = () => {
                   type="text" 
                   required
                   value={editingGame.title}
-                  onChange={(e) => setEditingGame({ ...editingGame, title: e.target.value })}
+                  onChange={(e) => {
+                    setEditingGame({ ...editingGame, title: e.target.value }); 
+                  }}
                   className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -445,7 +490,10 @@ export const ManageItemsPage: React.FC = () => {
                   <label className="block text-slate-400 mb-1 font-medium">แพลตฟอร์ม</label>
                   <select
                     value={editingGame.platform}
-                    onChange={(e) => setEditingGame({ ...editingGame, platform: e.target.value as any })}
+                    onChange={(e) => {
+                      setEditingGame({ 
+                        ...editingGame, platform: e.target.value as "PS5" });
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="PS5">PlayStation 5</option>
@@ -459,7 +507,9 @@ export const ManageItemsPage: React.FC = () => {
                   <label className="block text-slate-400 mb-1 font-medium">แนวเกม (Genre)</label>
                   <select
                     value={editingGame.genre}
-                    onChange={(e) => setEditingGame({ ...editingGame, genre: e.target.value })}
+                    onChange={(e) => {
+                      setEditingGame({ ...editingGame, genre: e.target.value });
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="Action RPG">Action RPG</option>
@@ -480,7 +530,9 @@ export const ManageItemsPage: React.FC = () => {
                     required
                     min="1"
                     value={editingGame.price}
-                    onChange={(e) => setEditingGame({ ...editingGame, price: Number(e.target.value) })}
+                    onChange={(e) => {
+                      setEditingGame({ ...editingGame, price: Number(e.target.value) });
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -492,7 +544,8 @@ export const ManageItemsPage: React.FC = () => {
                     required
                     min="0"
                     value={editingGame.stock}
-                    onChange={(e) => setEditingGame({ ...editingGame, stock: Number(e.target.value) })}
+                    onChange={(e) => { setEditingGame({ ...editingGame, stock: Number(e.target.value) });
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -503,7 +556,9 @@ export const ManageItemsPage: React.FC = () => {
                 <input 
                   type="url" 
                   value={editingGame.coverUrl}
-                  onChange={(e) => setEditingGame({ ...editingGame, coverUrl: e.target.value })}
+                  onChange={(e) => {
+                    setEditingGame({ ...editingGame, coverUrl: e.target.value });
+                  }}
                   className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -527,7 +582,7 @@ export const ManageItemsPage: React.FC = () => {
               <div className="flex gap-2 pt-2">
                 <button 
                   type="button" 
-                  onClick={() => setIsChangeModalOpen(false)}
+                  onClick={() => { setIsChangeModalOpen (false); }}
                   className="w-1/2 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold"
                 >
                   ยกเลิก

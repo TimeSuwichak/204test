@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, type SubmitEvent } from 'react';
 import { 
   MessageSquareWarning, 
   Search, 
@@ -78,12 +78,12 @@ export const ManageComplaintsPage: React.FC = () => {
   // เปิด Modal ดูรายละเอียด
   const handleOpenDetail = (item: ComplaintItem) => {
     setSelectedComplaint(item);
-    setReplyNote(item.adminNote || '');
+    setReplyNote(item.adminNote ?? '');
     setNewStatus(item.status);
   };
 
   // บันทึกการอัปเดตสถานะและคำตอบ
-  const handleSaveResolution = (e: React.FormEvent) => {
+  const handleSaveResolution = (e: SubmitEvent) => {
     e.preventDefault();
     if (!selectedComplaint) return;
 
@@ -138,7 +138,9 @@ export const ManageComplaintsPage: React.FC = () => {
             type="text" 
             placeholder="ค้นหาตามเลขเคส (CMP), รหัสคำสั่งซื้อ (ORD), ชื่อลูกค้า หรือหัวข้อ..." 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value); 
+            }}
             className="w-full bg-[#16223f]/40 border border-slate-800/80 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 placeholder-slate-500"
           />
         </div>
@@ -146,7 +148,9 @@ export const ManageComplaintsPage: React.FC = () => {
           <Filter className="absolute left-3 top-2.5 text-slate-500" size={16} />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => {
+              setStatusFilter(e.target.value); 
+            }}
             className="w-full bg-[#16223f]/40 border border-slate-800/80 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none cursor-pointer"
           >
             <option value="ALL">ทุกสถานะ (All Status)</option>
@@ -238,7 +242,7 @@ export const ManageComplaintsPage: React.FC = () => {
                     {/* Actions */}
                     <td className="py-3.5 px-4 text-center">
                       <button 
-                        onClick={() => handleOpenDetail(item)}
+                        onClick={() => { handleOpenDetail(item); }}
                         className="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 hover:text-white rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5"
                       >
                         <Eye size={14} /> ดูรายละเอียด
@@ -267,7 +271,7 @@ export const ManageComplaintsPage: React.FC = () => {
                 </h2>
               </div>
               <button 
-                onClick={() => setSelectedComplaint(null)}
+                onClick={() => { setSelectedComplaint(null); }}
                 className="text-slate-500 hover:text-slate-300 p-1 rounded-lg"
               >
                 <X size={18} />
@@ -302,7 +306,7 @@ export const ManageComplaintsPage: React.FC = () => {
                   <label className="block text-slate-400 mb-1 font-bold">อัปเดตสถานะเคส</label>
                   <select
                     value={newStatus}
-                    onChange={(e) => setNewStatus(e.target.value as any)}
+                    onChange={(e) => { setNewStatus(e.target.value as "PENDING"); }}
                     className="w-full bg-[#16223f] border border-slate-700/80 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="PENDING">🔴 รอดำเนินการ (Pending)</option>
@@ -318,7 +322,7 @@ export const ManageComplaintsPage: React.FC = () => {
                     rows={3}
                     placeholder="เช่น จัดส่งสินค้าชิ้นใหม่ทดแทนให้แล้ว / จัดส่งโค้ดผ่านทางอีเมล..."
                     value={replyNote}
-                    onChange={(e) => setReplyNote(e.target.value)}
+                    onChange={(e) => { setReplyNote(e.target.value); }}
                     className="w-full bg-[#16223f] border border-slate-700/80 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-indigo-500 placeholder-slate-500"
                   />
                 </div>
@@ -326,7 +330,7 @@ export const ManageComplaintsPage: React.FC = () => {
                 <div className="flex gap-2 pt-2">
                   <button 
                     type="button" 
-                    onClick={() => setSelectedComplaint(null)}
+                    onClick={() => { setSelectedComplaint(null) }}
                     className="w-1/2 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold"
                   >
                     ยกเลิก

@@ -12,7 +12,7 @@ import apiAuth      from "#util/api.auth.ts";
 import cmmNavi      from "#util/common.navigation.ts";
 
 import { styled } from "styled-components";
-import { useMenuContext, useSettings } from "#context/common.ui.ts";
+import { useMenuContext } from "#context/common.ui.ts";
 import 
 { 
   useState, useEffect, useRef, useCallback,
@@ -28,7 +28,7 @@ from "react";
 import 
 {
   ArrowLeftCircleIcon, XIcon, Cuboid, PackageSearchIcon, ShieldUser,
-  SettingsIcon, LogOut
+  LogOut
 }
 from "lucide-react";
 
@@ -39,22 +39,22 @@ from "lucide-react";
 export default function Console ()
 {
   const menuCtx = useMenuContext ();
-  const settings = useSettings ();
+  // const settings = useSettings ();
   
   const toProfile = () => 
   {
     /**
      * เปิดหน้าการตั้งค่า
     */
-    const onSettings = () =>
-    {
-      settings.setClose (() =>
-      {
-        settings.setVisible (false);
-      });
-      settings.setVisible (true);
-      menuCtx.setVisible (false);
-    }
+    // const onSettings = () =>
+    // {
+    //   settings.setClose (() =>
+    //   {
+    //     settings.setVisible (false);
+    //   });
+    //   settings.setVisible (true);
+    //   menuCtx.setVisible (false);
+    // }
     /**
      * ลงชื่อผู้ใช้ออก 
     */
@@ -62,13 +62,14 @@ export default function Console ()
     {
       apiAuth.saveSetPrefered (-1);
       apiAuth.saveWrite ();
-      void cmmNavi.toIndex ();
+
+      void cmmNavi.toAuth ({ replace: true });
     }
     menuCtx.setChildren (<>
-      <MenuContext.Item 
+      {/* <MenuContext.Item 
         text="การตั้งค่า" 
         icon={<SettingsIcon/>}
-        onClick={onSettings}/>
+        onClick={onSettings}/> */}
       <MenuContext.Item 
         text="ลงชื่อออก" 
         icon={<LogOut/>}
@@ -78,6 +79,10 @@ export default function Console ()
     menuCtx.setCancel (() => { menuCtx.setVisible (false); });
     menuCtx.setVisible (true);
   }
+  // if (!account.data || account.data.role !== apiAccount.ROLE_STAFF)
+  // {
+  //   void cmmNavi.toIndex ();
+  // }
   
   return (
     <>

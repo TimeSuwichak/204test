@@ -12,79 +12,7 @@ import
 from "lucide-react";
 
 
-/**
- * โครงสร้างคุณสมบัติของส่วนประกอบหลัก
-*/
-interface PropRoot
-{
-  /**
-   * ระบุหน้าที่กำลังแสดงผล
-  */
-  staPage: [number, react.Dispatch<react.SetStateAction<number>>];
-  /**
-   * ระบุว่าระบบกำลังทำงาน
-  */
-  staPending: [boolean, react.Dispatch<react.SetStateAction<boolean>>];
-  /**
-   * ระบุการตอบกลับของระบบ
-  */
-  staFeedback: [
-    PropTemplateFeedback, 
-    react.Dispatch<react.SetStateAction<PropTemplateFeedback>>
-  ];
-  /**
-   * ที่อ้างอิงชุดรหัสยืนยัน
-  */
-  refSession: react.RefObject<Session>;
-  /**
-   * ที่อ้างอิงข้อมูลรหัสประจำตัว
-  */
-  refId: react.RefObject<string>;
-  /**
-   * ข้อความหัวเรื่อง
-  */
-  title ?: string;
-  /**
-   * ข้อความอธิบาย
-  */
-  description ?: string;
-  /**
-   * ทำงานเมื่อผู้ใช้ทำการลงชื่อเข้าใช้สำเร็จ
-  */
-  onComplete ?: () => void;
-}
-interface PropCreate
-{
-  /**
-   * ระบุสถานะการแสดงผล (แสดง/ซ่อน)
-  */
-  visible ?: boolean;
-  /**
-   * ข้อความหัวเรื่อง
-  */
-  title ?: string;
-  /**
-   * ข้อความอธิบาย
-  */
-  description ?: string;
-  /**
-   * ระบุว่าระบบกำลังทำงาน
-  */
-  pending ?: boolean;
-  /**
-   * ระบุการตอบกลับของระบบ
-  */
-  feedback ?: PropTemplateFeedback;
-  /**
-   * ทำงานเมื่อผู้ใช้ทำการกดปุ่มย้อนกลับ
-  */
-  onBack ?: () => void;
-  /**
-   * ทำงานเมื่อผู้ใช้ทำการกดปุ่มส่งข้อมูล
-  */
-  onSubmit ?: (name: string, pwd: string, email: string) => void;
-}
-const content = function AuthSignUp (prop: PropRoot)
+export default function AuthSignUp (prop: PropRoot)
 {
 const [page, setPage] = prop.staPage;
   const [pending, setPending] =  prop.staPending;
@@ -141,7 +69,7 @@ const [page, setPage] = prop.staPage;
 
   return (
     <react.Activity>
-       <content.Create
+       <AuthFormCreate
           visible={page === base.PAGE_SIGN_UP} 
           title={prop.title} 
           description={prop.description}
@@ -152,7 +80,7 @@ const [page, setPage] = prop.staPage;
     </react.Activity>
   );
 }
-content.Create = function AuthFormCreate (prop: PropCreate)
+function AuthFormCreate (prop: PropCreate)
 {
   const name = react.useRef (HTMLInputElement.prototype);
   const password = react.useRef (HTMLInputElement.prototype);
@@ -238,11 +166,76 @@ content.Create = function AuthFormCreate (prop: PropCreate)
     </base.TemplateDiv>
   );
 }
+
 /**
- * แข็งวัตถุ (ความปลอดภัย)
+ * โครงสร้างคุณสมบัติของส่วนประกอบหลัก
 */
-Object.freeze (content);
-/**
- * ส่งออกตัวแปร
-*/
-export default content;
+interface PropRoot
+{
+  /**
+   * ระบุหน้าที่กำลังแสดงผล
+  */
+  staPage: [number, react.Dispatch<react.SetStateAction<number>>];
+  /**
+   * ระบุว่าระบบกำลังทำงาน
+  */
+  staPending: [boolean, react.Dispatch<react.SetStateAction<boolean>>];
+  /**
+   * ระบุการตอบกลับของระบบ
+  */
+  staFeedback: [
+    PropTemplateFeedback, 
+    react.Dispatch<react.SetStateAction<PropTemplateFeedback>>
+  ];
+  /**
+   * ที่อ้างอิงชุดรหัสยืนยัน
+  */
+  refSession: react.RefObject<Session>;
+  /**
+   * ที่อ้างอิงข้อมูลรหัสประจำตัว
+  */
+  refId: react.RefObject<string>;
+  /**
+   * ข้อความหัวเรื่อง
+  */
+  title ?: string;
+  /**
+   * ข้อความอธิบาย
+  */
+  description ?: string;
+  /**
+   * ทำงานเมื่อผู้ใช้ทำการลงชื่อเข้าใช้สำเร็จ
+  */
+  onComplete ?: () => void;
+}
+interface PropCreate
+{
+  /**
+   * ระบุสถานะการแสดงผล (แสดง/ซ่อน)
+  */
+  visible ?: boolean;
+  /**
+   * ข้อความหัวเรื่อง
+  */
+  title ?: string;
+  /**
+   * ข้อความอธิบาย
+  */
+  description ?: string;
+  /**
+   * ระบุว่าระบบกำลังทำงาน
+  */
+  pending ?: boolean;
+  /**
+   * ระบุการตอบกลับของระบบ
+  */
+  feedback ?: PropTemplateFeedback;
+  /**
+   * ทำงานเมื่อผู้ใช้ทำการกดปุ่มย้อนกลับ
+  */
+  onBack ?: () => void;
+  /**
+   * ทำงานเมื่อผู้ใช้ทำการกดปุ่มส่งข้อมูล
+  */
+  onSubmit ?: (name: string, pwd: string, email: string) => void;
+}

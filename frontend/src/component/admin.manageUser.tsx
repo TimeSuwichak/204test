@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, type SubmitEvent } from 'react';
 import { Users, Lock, Search, Filter, Key, X, UserPlus, UserCheck, UserX, Mail, User } from 'lucide-react';
 
 // โครงสร้างขอบเขตสิทธิ์ในระบบ
@@ -73,7 +73,7 @@ export const ManageUsersPage: React.FC = () => {
   });
 
   // ฟังก์ชันเพิ่มพนักงานใหม่
-  const handleAddUser = (e: React.FormEvent) => {
+  const handleAddUser = (e: SubmitEvent) => {
     e.preventDefault();
     if (!newUser.name || !newUser.email) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
@@ -152,7 +152,7 @@ export const ManageUsersPage: React.FC = () => {
 
         {/* ปุ่มเปิด Modal เพิ่มพนักงานใหม่ */}
         <button
-          onClick={() => setIsAddUserModalOpen(true)}
+          onClick={() => { setIsAddUserModalOpen(true); }}
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 shrink-0 active:scale-95"
         >
           <UserPlus size={18} />
@@ -168,7 +168,7 @@ export const ManageUsersPage: React.FC = () => {
             type="text" 
             placeholder="ค้นหาชื่อ, อีเมล หรือ ID..." 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); }}
             className="w-full bg-[#16223f]/40 border border-slate-800/80 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 placeholder-slate-500"
           />
         </div>
@@ -176,7 +176,7 @@ export const ManageUsersPage: React.FC = () => {
           <Filter className="absolute left-3 top-2.5 text-slate-500" size={16} />
           <select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            onChange={(e) => { setRoleFilter(e.target.value); }}
             className="w-full bg-[#16223f]/40 border border-slate-800/80 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none cursor-pointer"
           >
             <option value="All">ทุกบทบาท (All Roles)</option>
@@ -228,7 +228,7 @@ export const ManageUsersPage: React.FC = () => {
                       <span className="text-xs text-slate-500 italic">เข้าถึงได้ทั้งหมด (Full Override)</span>
                     ) : u.role === 'STAFF' ? (
                       <button 
-                        onClick={() => setSelectedUserForPerms({ ...u })}
+                        onClick={() => { setSelectedUserForPerms({ ...u }); }}
                         className="px-3 py-1 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5"
                       >
                         <Key size={14} /> ตั้งค่าสิทธิ์เข้าถึง
@@ -239,7 +239,7 @@ export const ManageUsersPage: React.FC = () => {
                   </td>
                   <td className="py-3.5 px-4 text-center">
                     <button
-                      onClick={() => toggleUserStatus(u.id)}
+                      onClick={() => { toggleUserStatus(u.id); }}
                       className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
                         u.status === 'ACTIVE' 
                           ? 'text-slate-400 hover:text-rose-400 hover:bg-rose-500/10' 
@@ -268,7 +268,7 @@ export const ManageUsersPage: React.FC = () => {
                 เพิ่มพนักงาน / ผู้ใช้ใหม่
               </h2>
               <button 
-                onClick={() => setIsAddUserModalOpen(false)}
+                onClick={() => { setIsAddUserModalOpen(false); }}
                 className="text-slate-500 hover:text-slate-300 p-1 rounded-lg"
               >
                 <X size={18} />
@@ -287,7 +287,9 @@ export const ManageUsersPage: React.FC = () => {
                     required
                     placeholder="เช่น สมชาย สายเกม"
                     value={newUser.name}
-                    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                    onChange={(e) => {
+                      setNewUser({ ...newUser, name: e.target.value }); 
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -303,7 +305,9 @@ export const ManageUsersPage: React.FC = () => {
                     required
                     placeholder="staff@gamestore.com"
                     value={newUser.email}
-                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    onChange={(e) => {
+                      setNewUser({ ...newUser, email: e.target.value }); 
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -319,7 +323,9 @@ export const ManageUsersPage: React.FC = () => {
                     required
                     placeholder="••••••••"
                     value={newUser.password}
-                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    onChange={(e) => {
+                      setNewUser({ ...newUser, password: e.target.value });
+                    }}
                     className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -330,7 +336,9 @@ export const ManageUsersPage: React.FC = () => {
                 <label className="block text-slate-400 mb-1 font-medium">บทบาทในระบบ (Role)</label>
                 <select
                   value={newUser.role}
-                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value as any })}
+                  onChange={(e) => {
+                    setNewUser({ ...newUser, role: e.target.value as "STAFF" });
+                  }}
                   className="w-full bg-[#16223f]/60 border border-slate-700/80 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
                 >
                   <option value="STAFF">พนักงาน (Staff)</option>
@@ -343,7 +351,7 @@ export const ManageUsersPage: React.FC = () => {
               <div className="flex gap-2 pt-2">
                 <button 
                   type="button" 
-                  onClick={() => setIsAddUserModalOpen(false)}
+                  onClick={() => { setIsAddUserModalOpen(false); }}
                   className="w-1/2 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold"
                 >
                   ยกเลิก
@@ -375,7 +383,7 @@ export const ManageUsersPage: React.FC = () => {
                 <p className="text-xs text-slate-400 mt-0.5">{selectedUserForPerms.email}</p>
               </div>
               <button 
-                onClick={() => setSelectedUserForPerms(null)}
+                onClick={() => { setSelectedUserForPerms(null); }}
                 className="text-slate-500 hover:text-slate-300 p-1 rounded-lg"
               >
                 <X size={18} />
@@ -405,7 +413,9 @@ export const ManageUsersPage: React.FC = () => {
                           <input 
                             type="checkbox" 
                             checked={perm.canView} 
-                            onChange={() => togglePermission(perm.moduleKey, 'canView')}
+                            onChange={() => {
+                              togglePermission(perm.moduleKey, 'canView');
+                            }}
                             className="w-4 h-4 rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-0 cursor-pointer"
                           />
                         </td>
@@ -414,7 +424,9 @@ export const ManageUsersPage: React.FC = () => {
                           <input 
                             type="checkbox" 
                             checked={perm.canEdit} 
-                            onChange={() => togglePermission(perm.moduleKey, 'canEdit')}
+                            onChange={() => {
+                              togglePermission(perm.moduleKey, 'canEdit');
+                            }}
                             className="w-4 h-4 rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-0 cursor-pointer"
                           />
                         </td>
@@ -423,7 +435,9 @@ export const ManageUsersPage: React.FC = () => {
                           <input 
                             type="checkbox" 
                             checked={perm.canDelete} 
-                            onChange={() => togglePermission(perm.moduleKey, 'canDelete')}
+                            onChange={() => {
+                              togglePermission(perm.moduleKey, 'canDelete');
+                            }}
                             className="w-4 h-4 rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-0 cursor-pointer"
                           />
                         </td>
@@ -438,7 +452,7 @@ export const ManageUsersPage: React.FC = () => {
             <div className="flex gap-2 pt-2">
               <button 
                 type="button" 
-                onClick={() => setSelectedUserForPerms(null)}
+                onClick={() => { setSelectedUserForPerms(null); }}
                 className="w-1/2 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold text-xs"
               >
                 ยกเลิก

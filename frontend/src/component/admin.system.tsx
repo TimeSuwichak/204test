@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, type SubmitEvent } from 'react';
 import { Settings, Plus, Trash2, Disc, Layers, CheckCircle2 } from 'lucide-react';
 
 interface MasterItem {
@@ -31,7 +31,7 @@ export const SystemSettingsPage: React.FC = () => {
   const [newGenreName, setNewGenreName] = useState('');
 
   // ฟังก์ชันเพิ่ม แพลตฟอร์ม
-  const handleAddPlatform = (e: React.FormEvent) => {
+  const handleAddPlatform = (e: SubmitEvent) => {
     e.preventDefault();
     if (!newPlatformName.trim()) return;
     const newItem: MasterItem = {
@@ -45,7 +45,7 @@ export const SystemSettingsPage: React.FC = () => {
   };
 
   // ฟังก์ชันเพิ่ม แนวเกม
-  const handleAddGenre = (e: React.FormEvent) => {
+  const handleAddGenre = (e: SubmitEvent) => {
     e.preventDefault();
     if (!newGenreName.trim()) return;
     const newItem: MasterItem = {
@@ -102,14 +102,14 @@ export const SystemSettingsPage: React.FC = () => {
                 type="text" 
                 placeholder="ชื่อแพลตฟอร์ม (เช่น PS5)" 
                 value={newPlatformName}
-                onChange={(e) => setNewPlatformName(e.target.value)}
+                onChange={(e) => { setNewPlatformName(e.target.value); }}
                 className="col-span-2 bg-[#16223f] border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
               />
               <input 
                 type="text" 
                 placeholder="Code (ย่อ)" 
                 value={newPlatformCode}
-                onChange={(e) => setNewPlatformCode(e.target.value)}
+                onChange={(e) =>{ setNewPlatformCode(e.target.value); }}
                 className="col-span-1 bg-[#16223f] border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
               />
             </div>
@@ -131,7 +131,7 @@ export const SystemSettingsPage: React.FC = () => {
                   {p.code && <span className="text-[11px] font-mono bg-slate-800 text-indigo-300 px-2 py-0.5 rounded-md border border-slate-700">{p.code}</span>}
                 </div>
                 <button 
-                  onClick={() => handleDeletePlatform(p.id)}
+                  onClick={() => { handleDeletePlatform(p.id); }}
                   className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
                   title="ลบรายการ"
                 >
@@ -162,7 +162,7 @@ export const SystemSettingsPage: React.FC = () => {
                 type="text" 
                 placeholder="ชื่อแนวเกม (เช่น Survival Horror)" 
                 value={newGenreName}
-                onChange={(e) => setNewGenreName(e.target.value)}
+                onChange={(e) => { setNewGenreName(e.target.value); }}
                 className="flex-1 bg-[#16223f] border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
               />
               <button 
@@ -183,7 +183,7 @@ export const SystemSettingsPage: React.FC = () => {
                   <span className="text-sm text-slate-200 font-medium">{g.name}</span>
                 </div>
                 <button 
-                  onClick={() => handleDeleteGenre(g.id)}
+                  onClick={() => { handleDeleteGenre(g.id); }}
                   className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
                   title="ลบรายการ"
                 >

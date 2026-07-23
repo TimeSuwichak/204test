@@ -42,6 +42,7 @@ content.toAuth = (option ?:
     redirectSignIn ?: string;
     redirectSignUp ?: string;
     reason ?: number;
+    replace ?: boolean;
 }) =>
 {
     function encodeContext(value: string) 
@@ -63,7 +64,9 @@ content.toAuth = (option ?:
     const paramOut = param.toString ();
     const paramFormatted = paramOut.length !== 0 ? `?${paramOut}` : ``;
 
-    return router (content.PATH_AUTH + paramFormatted);
+    return router (content.PATH_AUTH + paramFormatted, {
+        replace: option ? option.replace : false
+    });
 }
 content.toAdmin = () =>
 {

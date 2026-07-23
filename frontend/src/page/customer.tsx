@@ -1,15 +1,19 @@
-import apiAuth from "#util/api.auth.ts";
-import apiAccount from "#util/api.account.ts";
-import cmmNavi from "#util/common.navigation.ts";
-
-import Branding from "#asset/image/favicon.ico";
+import apiAuth      from "#util/api.auth.ts";
+import apiAccount   from "#util/api.account.ts";
+import cmmNavi      from "#util/common.navigation.ts";
+import Branding     from "#asset/image/favicon.ico";
 import MenuContext  from "#component/menu.context.tsx";
 import Toast        from "#component/toast.tsx";
 import Settings     from "#component/settings.tsx";
 import NavBar       from "#component/navbar.tsx";
 import CartUI       from "#component/customer.cart";
 
-import { useDialog, useMenuContext, useSettings } from "#context/common.ui.ts";
+import { useAuth } from "#context/common.ts";
+import { DialogInputProvider, DialogProvider } from "#component/common.tsx";
+
+import { useDialog, useMenuContext, useSettings } 
+from "#context/common.ui.ts";
+
 import { defaultCart, Cart, useCart, useAccountBasic } 
 from "#context/customer.ts";
 
@@ -21,8 +25,7 @@ import
   ShoppingBasket, Truck, SquareChevronRight
 } 
 from "lucide-react";
-import { DialogInputProvider, DialogProvider } from "#component/common.tsx";
-import { useAuth } from "#context/common.ts";
+
 
 
 /**
@@ -33,7 +36,6 @@ const content = function Customer ()
   const cart = useRef (defaultCart ());
 
   return (
-  <>
     <Cart.Provider value={cart.current}>
       <Outlet/>
       <content.NavBar/>
@@ -45,7 +47,6 @@ const content = function Customer ()
       <DialogInputProvider/>
       <MenuContext.Provider/>
     </Cart.Provider>
-  </>
   );
 }
 content.NavBar = function PresetNavBar ()
