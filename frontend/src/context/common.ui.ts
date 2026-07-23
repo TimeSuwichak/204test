@@ -141,7 +141,7 @@ export function defaultDialog () : Dialog
         reset: () => { return; },
     }
 }
-export function defaultDialogInput () : Dialog
+export function defaultDialogInput () : DialogInput
 {
     return {
         setVisible: () => { return; },
@@ -226,6 +226,10 @@ export const CtxToast = createContext (defaultToast ());
 export const CtxDialog = createContext<CtxType<Dialog>> ([
     defaultDialog (),
     function (value: Dialog) { void value; }
+]);
+export const CtxDialogInput = createContext<CtxType<DialogInput>> ([
+    defaultDialogInput (),
+    function (value: DialogInput) { void value; }
 ]);
 export const CtxPreview = createContext<CtxType<Preview>> ([
     defaultPreview (),
