@@ -10,6 +10,7 @@ const content = function ()
 }
 content.PATH_INDEX = "/";
 content.PATH_ABOUT = "/about";
+content.PATH_ADMIN = "/admin";
 content.PATH_AUTH = "/auth";
 content.PATH_CONSOLE = "/console";
 content.PATH_DOC = "/doc";
@@ -63,6 +64,10 @@ content.toAuth = (option ?:
     const paramFormatted = paramOut.length !== 0 ? `?${paramOut}` : ``;
 
     return router (content.PATH_AUTH + paramFormatted);
+}
+content.toAdmin = () =>
+{
+    return router (content.PATH_ADMIN);
 }
 content.toConsole = () =>
 {

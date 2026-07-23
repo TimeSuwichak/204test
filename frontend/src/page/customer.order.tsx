@@ -1,131 +1,124 @@
-import { useState } from "react";
-import { HistoryIcon, BoxIcon, TruckIcon, HashIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import styled from "styled-components";
-import ctx from "#context/common.ts"
-import ctxCustomer from "#context/customer.ts";
+import { useEffect, useState, useMemo } from "react";
+import { styled } from "styled-components";
+import { useAuth } from "#context/common.js";
+import { 
+  HistoryIcon, BoxIcon, TruckIcon, HashIcon, 
+  ChevronDownIcon, ChevronUpIcon, PackageXIcon, CheckCircle2Icon,
+  ClockIcon, AlertCircleIcon, Loader2Icon
+} 
+from "lucide-react";
+import orderApi from "../util/api.order";
+import productApi from "../util/api.product";
+import type { BasicFetch as RawOrder } from "../util/api.order";
+import type { BasicFetch as ProductFetch } from "../util/api.product";
 
-/**
- * Item structure within an order
- */
-interface ProductItem {
+/* ==========================================================================
+   Interfaces
+   ========================================================================== 
+*/
+interface OrderProduct {
+  productId: number;
   name: string;
-  qty: number;
-  price: string;
+  price: number;
+  quantity: number;
 }
 
-/**
- * Interface / Types for Order Receipt Items
- */
-interface OrderItemProps {
-  orderNumber: string;
-  status: string;
-  shippingDate: string;
-  items: ProductItem[];
-  totalPrice: string;
+interface OrderItem 
+{
+  id: number;
+  orderDate: Date;
+  deliveryDate: Date | null;
+  status: number;
+  items: OrderProduct[];
 }
 
-/**
- * Order History Page Component
- */
-const content = function Order() {
-  return <content.Root />;
+interface OrderCardProps 
+{
+  order: OrderItem;
+}
+
+/* ==========================================================================
+   Helpers
+   ========================================================================== 
+*/
+const formatCurrency = (amount: number) => 
+{
+  return new Intl.NumberFormat("th-TH", {
+    style: "currency",
+    currency: "THB",
+    minimumFractionDigits: 2,
+  }).format(amount);
 };
 
-content.Root = function OrderRoot() {
-
-  const queryList = ctxCustomer.useAccountOrder ();
-
-  const list = queryList.data;
-
-
-  return (
-    <StyleRoot>
-      <StyleInner>
-        <StyleView>
-          <StyleViewContainer>
-            <StyleTitle>ประวัติคำสั่งซื้อ</StyleTitle>
-
-            {/* Active Orders Section */}
-            <StyleSub>
-              <BoxIcon />
-              <span>กำลังดำเนินการ</span>
-            </StyleSub>
-            <StyleList>
-              {(!list) ?
-                (<></>) :
-                (list.map ((x) =>
-                {
-                  const status = 
-                    x.status === 1 ?"กำลังจัดส่ง" :
-                    x.status === 2 ? "ส่งแล้ว" :
-                    x.status === 3 ? "ล่าช้า" :
-                    x.status === 4 ? "ยกเลิก" :
-                    "";
-                  const shippingDate = x.delivered ? 
-                    `${x.delivered.getDate ().toString ().padStart (2, "0")}-${x.delivered.getMonth ().toString ().padStart (2, "0")}-{${x.delivered.getFullYear ().toString ().padStart (4, "0")}} ` : ``;
-
-                  return <content.Item
-                    orderNumber={`ORD-2026-${x.orderId}`}
-                    status={status}
-                    shippingDate={shippingDate}
-                    totalPrice={`0 ฿"`}
-                    items={[
-                      { name: "Battlefield 1", qty: 1, price: "฿ 1,290.00" },
-                      { name: "Cyberpunk 2077", qty: 1, price: "฿ 1,790.00" },
-                      { name: "Steam Gift Card 500 THB", qty: 2, price: "฿ 1,800.00" },
-                    ]}
-                  />
-                }))
-              }
-            </StyleList>
-
-            {/* Past Orders Section */}
-            <StyleSub>
-              <HistoryIcon />
-              <span>ข้อมูลย้อนหลัง</span>
-            </StyleSub>
-            <StyleList>
-            </StyleList>
-          </StyleViewContainer>
-        </StyleView>
-      </StyleInner>
-    </StyleRoot>
-  );
+const formatDate = (date: Date | null) => 
+{
+  if (!date) return "อยู่ระหว่างจัดเตรียม";
+  const d = new Date(date);
+  return isNaN(d.getTime()) ? "อยู่ระหว่างจัดเตรียม" : d.toLocaleDateString("th-TH", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 };
 
-content.Item = function OrderItem({
-  orderNumber,
-  status,
-  shippingDate,
-  items,
-  totalPrice,
-}: OrderItemProps) {
+const getStatusInfo = (status: number) => 
+{
+  switch (status) {
+    case 1:
+      return { label: "กำลังจัดส่ง", icon: <TruckIcon size={13} />, bg: "#cce5ff", text: "#004085" };
+    case 2:
+      return { label: "จัดส่งสำเร็จแล้ว", icon: <CheckCircle2Icon size={13} />, bg: "#d4edda", text: "#155724" };
+    case 3:
+      return { label: "ล่าช้า", icon: <AlertCircleIcon size={13} />, bg: "#fff3cd", text: "#856404" };
+    case 0:
+    case 4:
+      return { label: "ยกเลิกแล้ว", icon: <PackageXIcon size={13} />, bg: "#f8d7da", text: "#721c24" };
+    default:
+      return { label: "รอดำเนินการ", icon: <ClockIcon size={13} />, bg: "#e2e8f0", text: "#334155" };
+  }
+};
+
+/* ==========================================================================
+   Card Component (การ์ดแสดงผลสไตล์เดียวกับ Modal Admin)
+   ========================================================================== */
+const OrderCard = ({ order }: OrderCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const isCompleted = status === "จัดส่งสำเร็จแล้ว";
-  const hasMultipleItems = items.length > 1;
 
-  // Header display title
-  const summaryTitle = hasMultipleItems
-    ? `${items[0].name} และอีก ${items.length - 1} รายการ`
-    : items[0]?.name;
+  const hasMultipleItems = order.items.length > 1;
+  const statusInfo = getStatusInfo(order.status);
+
+  // คำนวณยอดรวมราคาทั้งหมด
+  const totalPrice = useMemo(() => {
+    return order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  }, [order.items]);
+
+  // สรุปชื่อสินค้า
+  const summaryTitle = useMemo(() => {
+    if (order.items.length === 0) return "ไม่มีรายการสินค้า";
+    const firstName = order.items[0].name;
+    return hasMultipleItems
+      ? `${firstName} และอีก ${String (order.items.length - 1)} รายการ`
+      : firstName;
+  }, [order.items, hasMultipleItems]);
 
   return (
     <StyleReceiptItem>
-      <StyleReceiptTopBorder />
-
       <StyleReceiptBody>
-        {/* Receipt Top Meta */}
+        {/* Header: ORD ID & Badge */}
         <StyleOrderHeader>
           <StyleOrderMeta>
             <HashIcon size={14} />
-            <span>{orderNumber}</span>
+            <span>ORD{String(order.id).padStart(3, "0")}</span>
           </StyleOrderMeta>
-          <StyleBadge $isCompleted={isCompleted}>{status}</StyleBadge>
+          <StyleBadge $bg={statusInfo.bg} $color={statusInfo.text}>
+            {statusInfo.icon}
+            <span>{statusInfo.label}</span>
+          </StyleBadge>
         </StyleOrderHeader>
 
-        {/* Primary Summary Bar or Toggle Button */}
-        <StyleSummaryRow 
-          onClick={() => hasMultipleItems && setIsOpen(!isOpen)} 
+        {/* Toggle / Main Summary */}
+        <StyleSummaryRow
+          onClick={() => hasMultipleItems && setIsOpen((prev) => !prev)}
           $isClickable={hasMultipleItems}
         >
           <StyleItemTitle>{summaryTitle}</StyleItemTitle>
@@ -137,30 +130,31 @@ content.Item = function OrderItem({
           )}
         </StyleSummaryRow>
 
-        {/* Collapsible Section (Shown directly if only 1 item, or when expanded) */}
-        {(isOpen || !hasMultipleItems) && (
-          <StyleItemList>
-            {items.map((item, index) => (
-              <StyleProductRow key={index}>
-                <StyleProductName>
-                  <span>{item.name}</span>
-                  <StyleQty>x{item.qty}</StyleQty>
-                </StyleProductName>
-                <StyleProductPrice>{item.price}</StyleProductPrice>
-              </StyleProductRow>
+        {/* Item List Detail (โครงสร้างเหมือนใน Modal) */}
+        {(isOpen || !hasMultipleItems) && order.items.length > 0 && (
+          <ProductListContainer>
+            {order.items.map((item, index) => (
+              <ProductItemRow key={item.productId || index}>
+                <span className="p-name">
+                  {item.name} <StyleQty>x{item.quantity}</StyleQty>
+                </span>
+                <span className="p-price">
+                  {formatCurrency(item.price * item.quantity)}
+                </span>
+              </ProductItemRow>
             ))}
-          </StyleItemList>
+          </ProductListContainer>
         )}
 
-        {/* Receipt Footer */}
+        {/* Footer */}
         <StyleReceiptFooter>
           <StyleFooterMeta>
             <TruckIcon size={14} />
-            <span>วันจัดส่ง: <strong>{shippingDate}</strong></span>
+            <span>วันจัดส่ง: <strong>{formatDate(order.deliveryDate)}</strong></span>
           </StyleFooterMeta>
           <StyleTotalGroup>
             <StyleTotalLabel>ยอดรวมสุทธิ</StyleTotalLabel>
-            <StylePrice>{totalPrice}</StylePrice>
+            <StylePrice>{formatCurrency(totalPrice)}</StylePrice>
           </StyleTotalGroup>
         </StyleReceiptFooter>
       </StyleReceiptBody>
@@ -169,22 +163,174 @@ content.Item = function OrderItem({
 };
 
 /* ==========================================================================
-   Styled Components
+   Main Customer Order Page
+   ========================================================================== */
+export default function CustomerOrder() {
+  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const auth = useAuth ();
+
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        setLoading(true);
+        setErrorMsg(null);
+        const session = auth.session;
+  
+        // 1. ดึง Order และ Product List ทั้งหมดแบบ Parallel เพียง 2 requests
+        const [rawOrders, rawProducts] = await Promise.all([
+          orderApi.getBasicList(session).catch((err) => {
+            console.error("Order API Error:", err);
+            return [] as RawOrder[];
+          }),
+          productApi.getBasicList(session).catch((err) => {
+            console.error("Product API Error:", err);
+            return [] as ProductFetch[];
+          }),
+        ]);
+  
+        // 2. ทำ Product Cache (Map) เพื่อให้ค้นหาข้อมูลสินค้าได้เร็ว ไม่ต้องยิง API เพิ่ม
+        const productMap = new Map<number, ProductFetch>();
+        if (Array.isArray(rawProducts)) {
+          rawProducts.forEach((p) => productMap.set(p.id, p));
+        }
+  
+        // 3. Map ข้อมูล Order เข้ากับข้อมูลสินค้า
+        const extendedOrders: OrderItem[] = (rawOrders || []).map((ord) => {
+          const itemsWithDetails: OrderProduct[] = (ord.item || []).map((it) => {
+            const prod = productMap.get(it.productId);
+            return {
+              productId: it.productId,
+              name: prod ? prod.name : `สินค้า ID: ${it.productId}`,
+              price: prod ? prod.price : 0,
+              quantity: it.quantity,
+            };
+          });
+  
+          return {
+            id: ord.orderId,
+            orderDate: new Date(ord.created),
+            deliveryDate: ord.delivered ? new Date(ord.delivered) : null,
+            status: ord.status,
+            items: itemsWithDetails,
+          };
+        });
+  
+        setOrders(extendedOrders);
+      } catch (err: any) {
+        console.error("Failed to load orders:", err);
+        setErrorMsg(err?.message || "เกิดข้อผิดพลาดในการดึงข้อมูลคำสั่งซื้อ");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    void loadOrders();
+  }, [auth.session]);
+
+  // แยก Active Orders & Past Orders
+  const { activeOrders, pastOrders } = useMemo(() => {
+    return {
+      activeOrders: orders.filter((x) => x.status === 1 || x.status === 3),
+      pastOrders: orders.filter((x) => x.status === 2 || x.status === 0 || x.status === 4),
+    };
+  }, [orders]);
+
+  if (loading) {
+    return (
+      <StyleRoot>
+        <StyleLoadingBox>
+          <Loader2Icon className="spin" size={36} />
+          <p>กำลังโหลดข้อมูลคำสั่งซื้อ...</p>
+        </StyleLoadingBox>
+      </StyleRoot>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <StyleRoot>
+        <StyleEmptyBox style={{ color: "#ef4444" }}>
+          <AlertCircleIcon size={32} />
+          <p>{errorMsg}</p>
+        </StyleEmptyBox>
+      </StyleRoot>
+    );
+  }
+
+  return (
+    <StyleRoot>
+      <StyleInner>
+        <StyleView>
+          <StyleViewContainer>
+            <StyleHeaderGroup>
+              <StyleTitle>ประวัติคำสั่งซื้อ</StyleTitle>
+              <StyleSubtitle>ติดตามสถานะคำสั่งซื้อและเรียกดูประวัติการสั่งซื้อของคุณ</StyleSubtitle>
+            </StyleHeaderGroup>
+
+            {/* Section: กำลังดำเนินการ */}
+            <StyleSub>
+              <BoxIcon size={20} />
+              <span>กำลังดำเนินการ ({activeOrders.length})</span>
+            </StyleSub>
+
+            <StyleList>
+              {activeOrders.length === 0 ? (
+                <StyleEmptyBox>
+                  <ClockIcon size={32} color="#64748b" />
+                  <p>ไม่มีคำสั่งซื้อที่อยู่ระหว่างดำเนินการ</p>
+                </StyleEmptyBox>
+              ) : (
+                activeOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} />
+                ))
+              )}
+            </StyleList>
+
+            {/* Section: ประวัติย้อนหลัง */}
+            <StyleSub>
+              <HistoryIcon size={20} />
+              <span>ประวัติย้อนหลัง ({pastOrders.length})</span>
+            </StyleSub>
+
+            <StyleList>
+              {pastOrders.length === 0 ? (
+                <StyleEmptyBox>
+                  <PackageXIcon size={32} color="#64748b" />
+                  <p>ไม่มีประวัติคำสั่งซื้อย้อนหลัง</p>
+                </StyleEmptyBox>
+              ) : (
+                pastOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} />
+                ))
+              )}
+            </StyleList>
+          </StyleViewContainer>
+        </StyleView>
+      </StyleInner>
+    </StyleRoot>
+  );
+}
+
+/* ==========================================================================
+   Styled Components (Dark Theme - ตรงกับ Theme Modal Admin ของคุณ)
    ========================================================================== */
 
 const StyleRoot = styled.div`
-  margin: 32px 0 0 0;
-  color: #374151;
+  background: #0b1220;
+  min-height: 100vh;
+  padding: 24px 0 64px 0;
+  color: #ffffff;
+  margin-top: 48px;
 `;
 
 const StyleInner = styled.div`
-  position: relative;
   width: 100%;
-  height: 100%;
 `;
 
 const StyleView = styled.div`
-  padding: 16px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -197,26 +343,31 @@ const StyleViewContainer = styled.div`
   box-sizing: border-box;
 `;
 
+const StyleHeaderGroup = styled.div`
+  margin-bottom: 28px;
+`;
+
 const StyleTitle = styled.h1`
-  font-size: 2.25rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  margin-bottom: 24px;
-  color: #111827;
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  color: #ffffff;
+`;
+
+const StyleSubtitle = styled.p`
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin: 0;
 `;
 
 const StyleSub = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.2rem;
+  font-weight: 700;
   margin: 32px 0 16px 0;
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #374151;
-
-  & > svg {
-    color: #2563eb;
-  }
+  color: #38bdf8;
 `;
 
 const StyleList = styled.div`
@@ -225,33 +376,66 @@ const StyleList = styled.div`
   gap: 16px;
 `;
 
-const StyleReceiptItem = styled.div`
-  position: relative;
-  width: 100%;
-  background: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+const StyleEmptyBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #111827;
+  border: 1px dashed #334155;
+  border-radius: 12px;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  gap: 10px;
+
+  p {
+    margin: 0;
+  }
 `;
 
-const StyleReceiptTopBorder = styled.div`
-  height: 4px;
-  width: 100%;
-  background: repeating-linear-gradient(
-    90deg,
-    #2563eb,
-    #2563eb 12px,
-    #e5e7eb 12px,
-    #e5e7eb 24px
-  );
+const StyleLoadingBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #38bdf8;
+  gap: 16px;
+
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  p {
+    color: #94a3b8;
+    margin: 0;
+  }
+`;
+
+const StyleReceiptItem = styled.div`
+  background: #111827;
+  border-radius: 16px;
+  border: 1px solid #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    border-color: #334155;
+  }
 `;
 
 const StyleReceiptBody = styled.div`
-  padding: 16px 20px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 `;
 
 const StyleOrderHeader = styled.div`
@@ -264,20 +448,22 @@ const StyleOrderMeta = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.825rem;
+  font-size: 0.85rem;
   font-family: monospace;
   font-weight: 600;
-  color: #6b7280;
+  color: #94a3b8;
 `;
 
-const StyleBadge = styled.span<{ $isCompleted?: boolean }>`
-  padding: 2px 8px;
-  border-radius: 4px;
+const StyleBadge = styled.span<{ $bg: string; $color: string }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 600;
-  background-color: ${(props) => (props.$isCompleted ? "#f3f4f6" : "#eff6ff")};
-  color: ${(props) => (props.$isCompleted ? "#4b5563" : "#2563eb")};
-  border: 1px solid ${(props) => (props.$isCompleted ? "#e5e7eb" : "#bfdbfe")};
+  font-weight: 700;
+  background-color: ${(props) => props.$bg};
+  color: ${(props) => props.$color};
 `;
 
 const StyleSummaryRow = styled.div<{ $isClickable?: boolean }>`
@@ -290,8 +476,8 @@ const StyleSummaryRow = styled.div<{ $isClickable?: boolean }>`
 
 const StyleItemTitle = styled.h3`
   font-size: 1.05rem;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: #f8fafc;
   margin: 0;
 `;
 
@@ -299,77 +485,67 @@ const StyleToggleButton = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-size: 0.825rem;
-  font-weight: 500;
-  padding: 0;
-
-  &:hover {
-    text-decoration: underline;
-  }
+  color: #38bdf8;
+  font-size: 0.85rem;
+  font-weight: 600;
 `;
 
-const StyleItemList = styled.div`
+/* Container รายการสินค้า ดีไซน์เดียวกับ ProductListContainer ใน Modal */
+const ProductListContainer = styled.div`
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 14px;
-  background-color: #f9fafb;
-  border-radius: 6px;
-  border: 1px solid #f3f4f6;
-  margin-top: 4px;
+  gap: 10px;
 `;
 
-const StyleProductRow = styled.div`
+const ProductItemRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.875rem;
-`;
+  font-size: 0.9rem;
 
-const StyleProductName = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #374151;
+  .p-name {
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .p-price {
+    color: #ffffff;
+    font-weight: 600;
+  }
 `;
 
 const StyleQty = styled.span`
   font-size: 0.75rem;
-  color: #6b7280;
-  background: #e5e7eb;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
   padding: 1px 6px;
   border-radius: 4px;
   font-weight: 600;
-`;
-
-const StyleProductPrice = styled.span`
-  font-size: 0.875rem;
-  color: #4b5563;
-  font-weight: 500;
 `;
 
 const StyleReceiptFooter = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 4px;
   padding-top: 12px;
-  border-top: 1px dashed #e5e7eb;
+  border-top: 1px dashed #334155;
 `;
 
 const StyleFooterMeta = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.8rem;
-  color: #4b5563;
+  font-size: 0.825rem;
+  color: #94a3b8;
 
   strong {
-    color: #111827;
-    font-weight: 600;
+    color: #f8fafc;
   }
 `;
 
@@ -380,14 +556,12 @@ const StyleTotalGroup = styled.div`
 `;
 
 const StyleTotalLabel = styled.span`
-  font-size: 0.75rem;
-  color: #6b7280;
+  font-size: 0.8rem;
+  color: #94a3b8;
 `;
 
 const StylePrice = styled.span`
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #111827;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #3b82f6;
 `;
-
-export default content;

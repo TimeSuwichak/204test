@@ -87,7 +87,15 @@ content.NavBar = function PresetNavBar ()
     const onConsole = () =>
     {
       menuCtx.setVisible (false);
-      void cmmNavi.toConsole ();
+
+      if (account.data && account.data.role == apiAccount.ROLE_STAFF)
+      {
+        void cmmNavi.toConsole ();        
+      }
+      if (account.data && account.data.role == apiAccount.ROLE_MANAGER)
+      {
+        void cmmNavi.toAdmin ();
+      }
       return;
     }
     /**

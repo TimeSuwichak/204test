@@ -117,7 +117,8 @@ content.updateContact = async (session: string, data: ContactUpdate) =>
     await common.putJson (session, url, {
         "Email": data.email,
         "Phone": data.phone,
-        "Address": data.address
+        "Address": data.address,
+        "Name": data.name
     });
 }
 /**
@@ -239,6 +240,7 @@ content.outputGetContact = (reader: ObjectReader) : ContactFetch =>
         email: reader.requireString ("Email"),
         phone: reader.requireString ("Phone"),
         address: reader.requireString ("Address"),
+        name: reader.requireString ("Name"),
     }
 }
 /**
@@ -513,6 +515,10 @@ export interface ContactFetch
      * ที่อยู่
     */
     address: string;
+    /**
+     * ชื่อผู้รับ
+    */
+    name: string;
 }
 export interface ContactUpdate
 {
@@ -532,6 +538,10 @@ export interface ContactUpdate
      * ที่อยู่
     */
     address ?: string | undefined;
+    /**
+     * ชื่อผู้รับ
+    */
+    name ?: string | undefined;
 }
 
 export interface OrderFetch
