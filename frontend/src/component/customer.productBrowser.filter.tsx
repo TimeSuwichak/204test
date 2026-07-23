@@ -152,7 +152,16 @@ const content = function CustomerProductBrowserFilterSidebar (prop: Props)
                             <PriceInput
                                 inputMode="numeric"
                                 value={String(state.price.min)}
-                                onChange={e => onPrice("min", e.target.value)}
+                                onChange={e => 
+                                {
+                                    if (Number (e.target.value) > state.price.max)
+                                    {
+                                        e.preventDefault ();
+                                        e.stopPropagation ();
+                                        return;
+                                    }
+                                    onPrice("min", e.target.value);
+                                }}
                             />
                         </PriceInputWrap>
                     </PriceField>
@@ -164,7 +173,16 @@ const content = function CustomerProductBrowserFilterSidebar (prop: Props)
                             <PriceInput
                                 inputMode="numeric"
                                 value={String(state.price.max)}
-                                onChange={e => onPrice("max", e.target.value)}
+                                onChange={e => 
+                                {
+                                    if (Number (e.target.value) < state.price.min)
+                                    {
+                                        e.preventDefault ();
+                                        e.stopPropagation ();
+                                        return;
+                                    }
+                                    onPrice("max", e.target.value);
+                                }}
                             />
                         </PriceInputWrap>
                     </PriceField>

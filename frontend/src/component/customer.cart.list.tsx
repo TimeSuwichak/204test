@@ -374,6 +374,7 @@ content.Summary = function CartSummary({
   // const total = subtotal - discount + tax;
 
   discount -= Math.max (0, promotion ? promotion.minPrice - subtotal : 0);
+  discount = Math.min (discount, promotion ? promotion?.maxDiscount : discount);
 
   if (promotion && promotion.minPrice > subtotal)
   {

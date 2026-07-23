@@ -237,174 +237,209 @@
 ```mermaid
 classDiagram
 
-class User{
-    +String userId
+class Account{
+    +long id
     +String name
+    +String icon
+    +int role
+    +Date created
+    +Date modified
+    +int status
+
+    +login(email,password)
+    +logout()
+    +updateProfile(name,icon)
+    +changeRole(role)
+}
+
+class Auth{
+    +String id
+    +String password
+    +long link
+
+    +authenticate(password)
+    +changePassword(oldPwd,newPwd)
+    +resetPassword()
+}
+
+class AccountContact{
+    +long id
     +String email
     +String phone
-    +String password
-    +String role
-    +login(email:String,password:String): boolean
-    +logout(): boolean
-    +editProfile(name:String,email:String,phone:String): User
+    +String address
+
+    +updateEmail(email)
+    +updatePhone(phone)
+    +updateAddress(address)
 }
 
-class Customer{
-    +String customerId
-    +search(keyword:String): Game[]
-    +viewItem(gameId:String): Game
-    +addToCart(gameId:String,qty:int): Cart
-    +editCart(cartId:String): Cart
-    +placeOrder(cartId:String): Order
-    +checkOrderStatus(orderId:String): String
-    +viewOrderHistory(): Order[]
-    +addReview(gameId:String,rating:int,comment:String): Review
-    +addFavorite(gameId:String): Favorite
-    +submitInquiry(subject:String,message:String): Inquiry
-}
-
-class Staff{
-    +String staffId
-    +viewOrders(): Order[]
-    +verifyOrder(orderId:String): Order
-    +updateOrderStatus(orderId:String,status:String): Order
-    +cancelOrder(orderId:String): boolean
-    +editStock(gameId:String,qty:int): Stock
-}
-
-class Admin{
-    +String adminId
-    +checkDashboard(): Dashboard
-    +manageItems(): boolean
-    +manageUsers(): boolean
-    +managePromotion(): boolean
-    +manageShipment(): boolean
-    +manageReview(): boolean
-    +manageWebsite(): boolean
-}
-
-class Game{
-    +String gameId
-    +String title
-    +String platform
-    +String category
+class Product{
+    +long id
+    +String name
+    +String description
     +double price
-    +viewInformation(): Game
-    +updateInformation(): boolean
-    +checkStock(): int
+    +int priceCode
+    +int platform
+    +String background
+    +String cover
+
+    +viewProduct()
+    +search(keyword)
+    +updateProduct()
+    +deleteProduct()
 }
 
-class Cart{
-    +String cartId
-    +double totalPrice
-    +addItem(gameId:String,qty:int): CartItem
-    +removeItem(gameId:String): boolean
-    +updateQuantity(gameId:String,qty:int): CartItem
-    +calculateTotal(): double
-    +applyDiscount(code:String): double
-}
-
-class CartItem{
-    +String cartItemId
+class ProductStock{
+    +long productId
     +int quantity
-    +double price
-    +calculateSubtotal(): double
+
+    +updateStock(qty)
+    +checkStock()
+    +checkLowStock()
+    +generateLowStockAlert()
 }
 
-class Order{
-    +String orderId
-    +Date orderDate
-    +String status
-    +double totalAmount
-    +createOrder(): Order
-    +confirmOrder(): boolean
-    +cancelOrder(): boolean
-    +updateStatus(status:String): boolean
-    +calculateTotal(): double
+class ProductCategory{
+    +long categoryId
+    +long productId
+    +int value
+
+    +assignCategory()
+    +updateCategory()
+    +removeCategory()
 }
 
-class Shipment{
-    +String shipmentId
-    +String trackingNumber
-    +String shipmentStatus
-    +updateShipmentStatus(status:String): boolean
+class AccountCart{
+    +long itemId
+    +long accountId
+    +long productId
+    +int quantity
+
+    +addItem(productId,qty)
+    +updateQuantity(qty)
+    +removeItem()
+    +calculateTotal()
+    +clearCart()
+}
+
+class OrderList{
+    +long orderId
+    +long accountId
+    +Date created
+    +Date delivered
+    +int status
+    +String shipName
+    +String shipAddress
+    +String shipPhone
+    +String shipEmail
+    +int paymentType
+    +String promotionId
+
+    +createOrder()
+    +confirmOrder()
+    +cancelOrder()
+    +updateStatus(status)
+    +calculateTotal()
+}
+
+class OrderItem{
+    +long itemId
+    +long orderId
+    +long productId
+    +int quantity
+
+    +addOrderItem()
+    +updateQuantity(qty)
+    +removeOrderItem()
+    +calculateSubtotal()
 }
 
 class Promotion{
-    +String promotionId
-    +String discountCode
-    +double discountPercent
-    +validateCode(code:String): boolean
-    +calculateDiscount(total:double): double
+    +String id
+    +Date created
+    +Date expire
+    +int type
+    +double discount
+    +double minPrice
+    +double maxDiscount
+
+    +validatePromotion()
+    +calculateDiscount(total)
+    +expirePromotion()
 }
 
-class Review{
-    +String reviewId
+class ProductComment{
+    +long commentId
+    +long productId
+    +long author
+    +String title
+    +String text
     +int rating
-    +String comment
-    +addReview(): boolean
-    +editReview(): boolean
-    +deleteReview(): boolean
+
+    +addComment()
+    +editComment()
+    +deleteComment()
+}
+
+class ProductReview{
+    +long reviewId
+    +long productId
+    +String mime
+    +String link
+
+    +uploadPhoto()
+    +viewPhoto()
+    +deletePhoto()
 }
 
 class Favorite{
-    +String favoriteId
-    +addFavorite(gameId:String): boolean
-    +removeFavorite(gameId:String): boolean
+    +long favoriteId
+    +long accountId
+    +long productId
+    +Date created
+
+    +addFavorite()
+    +removeFavorite()
+    +viewFavorites()
 }
 
 class Inquiry{
-    +String inquiryId
-    +String subject
-    +String message
-    +submitInquiry(): boolean
+    +long inquiryId
+    +long orderId
+    +int type
+    +String title
+    +String text
+    +int status
+
+    +submitInquiry()
+    +updateInquiry()
+    +closeInquiry()
 }
 
-class Stock{
-    +String stockId
-    +int quantity
-    +updateStock(qty:int): boolean
-}
+Account "1" --> "1" Auth
+Account "1" --> "1" AccountContact
 
-class Dashboard{
-    +double dailySales
-    +double monthlySales
-    +double quarterlySales
-    +double earnings
-    +viewSales(): double
-}
+Account "1" --> "0..*" AccountCart
+AccountCart "*" --> "1" Product
 
-User <|-- Customer
-User <|-- Staff
-User <|-- Admin
+Product "1" --> "1" ProductStock
+Product "1" --> "0..*" ProductCategory
 
-Customer "1" --> "1" Cart : owns
-Cart "1" --> "1..*" CartItem : contains
-CartItem "*" --> "1" Game : references
+Account "1" --> "0..*" OrderList
+OrderList "1" --> "1..*" OrderItem
+OrderItem "*" --> "1" Product
 
-Customer "1" --> "0..*" Order : places
-Order "1" --> "0..1" Shipment : shipped by
-Order "0..1" --> "0..1" Promotion : uses
+OrderList "0..1" --> "1" Promotion
 
-Customer "1" --> "0..*" Review : writes
-Review "*" --> "1" Game : reviews
+Product "1" --> "0..*" ProductComment
+ProductComment "*" --> "1" Account
 
-Customer "1" --> "0..*" Favorite : saves
-Favorite "*" --> "1" Game : references
+Product "1" --> "0..*" ProductReview
 
-Customer "1" --> "0..*" Inquiry : submits
+Account "1" --> "0..*" Favorite
+Favorite "*" --> "1" Product
 
-Game "1" --> "1" Stock : has
-
-Staff "1" --> "0..*" Order : manages
-Staff "1" --> "0..*" Stock : updates
-
-Admin "1" --> "1" Dashboard : views
-Admin "1" --> "0..*" Game : manages
-Admin "1" --> "0..*" User : manages
-Admin "1" --> "0..*" Promotion : manages
-Admin "1" --> "0..*" Shipment : manages
-Admin "1" --> "0..*" Review : manages
+OrderList "1" --> "0..*" Inquiry
 ```
 
 ### Sequence Diagram

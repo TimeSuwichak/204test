@@ -222,7 +222,7 @@ function ComRoot ({
   );
 }
 function ComView ({ 
-  transparent, width, widthMax, height, heightMax, margin, container
+  transparent, width, widthMax, height, heightMax, margin, container, children
 }:
 /**
  * โครงสร้างประกอบสำหรับส่วนประกอบแสดงองค์ประกอบ
@@ -246,6 +246,7 @@ function ComView ({
       $height={height}
       $heightMax={heightMax}
       $margin={margin}>
+        {children}
     </StlRoot>
   );
 }

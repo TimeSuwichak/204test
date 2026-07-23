@@ -45,6 +45,7 @@ content.getJson = async (session: string, endpoint: string) =>
         case 401: throw new error.NotAuthorized ();
         case 403: throw new error.Forbidden ();
         case 404: throw new error.NotFound ();
+        case 410: throw new error.Gone ();
         case 429: throw new error.NetworkLimit ();
         case 500: throw new error.NotAvailable ();
         case 503: throw new error.NotAvailable ();
@@ -95,6 +96,7 @@ content.putJson = async (
         case 401: throw new error.NotAuthorized ();
         case 403: throw new error.Forbidden ();
         case 404: throw new error.NotFound ();
+        case 410: throw new error.Gone ();
         case 429: throw new error.NetworkLimit ();
         case 500: throw new error.NotAvailable ();
         case 503: throw new error.NotAvailable ();
@@ -144,6 +146,7 @@ content.putForm = async (
         case 401: throw new error.NotAuthorized ();
         case 403: throw new error.Forbidden ();
         case 404: throw new error.NotFound ();
+        case 410: throw new error.Gone ();
         case 429: throw new error.NetworkLimit ();
         case 500: throw new error.NotAvailable ();
         case 503: throw new error.NotAvailable ();
@@ -194,6 +197,7 @@ content.postJson = async (
         case 401: throw new error.NotAuthorized ();
         case 403: throw new error.Forbidden ();
         case 404: throw new error.NotFound ();
+        case 410: throw new error.Gone ();
         case 429: throw new error.NetworkLimit ();
         case 500: throw new error.NotAvailable ();
         case 503: throw new error.NotAvailable ();
@@ -243,6 +247,7 @@ content.postForm = async (
         case 401: throw new error.NotAuthorized ();
         case 403: throw new error.Forbidden ();
         case 404: throw new error.NotFound ();
+        case 410: throw new error.Gone ();
         case 429: throw new error.NetworkLimit ();
         case 500: throw new error.NotAvailable ();
         case 503: throw new error.NotAvailable ();
@@ -290,6 +295,7 @@ content.delete = async (
         case 401: throw new error.NotAuthorized ();
         case 403: throw new error.Forbidden ();
         case 404: throw new error.NotFound ();
+        case 410: throw new error.Gone ();
         case 429: throw new error.NetworkLimit ();
         case 500: throw new error.NotAvailable ();
         case 503: throw new error.NotAvailable ();

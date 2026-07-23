@@ -1,11 +1,10 @@
-import { defineConfig } from 'vitepress';
-
+import { withMermaid } from "vitepress-plugin-mermaid";
 //
 // Reference link:
 // - https://vitepress.dev/reference/site-config
 // - https://vitepress.dev/reference/default-theme-config
 //
-export default defineConfig (
+export default withMermaid (
 {
     base: "/UniversityCSI204/doc", 
     title: "ร้านขายแผ่นและตลับเกม",
@@ -39,5 +38,15 @@ export default defineConfig (
                 link: 'https://github.com/iKla47/UniversityCSI204' 
             }
         ]
-    }
+    },
+    // your existing vitepress config...
+    // optionally, you can pass MermaidConfig
+    mermaid: {
+      // refer https://mermaid.js.org/config/setup/modules/mermaidAPI.html#mermaidapi-configuration-defaults for options
+    },
+    // optionally set additional config for plugin itself with MermaidPluginConfig
+    mermaidPlugin: {
+      class: "mermaid my-class", // set additional css classes for parent container 
+    },
+
 });

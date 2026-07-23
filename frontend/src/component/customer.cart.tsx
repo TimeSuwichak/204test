@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import error from "#util/common.error.ts";
 import apiAccount from "#util/api.account.ts";
 
 import PageList from "#component/customer.cart.list.tsx";
@@ -7,7 +8,7 @@ import PageCheckout from "#component/customer.cart.checkout.tsx";
 import { useRef, useState, useEffect } from "react";
 import { useAuth } from "#context/common.ts";
 import { useCart, useCartQuery } from "#context/customer.ts";
-import { useToast } from "#context/common.ui.ts";
+import { useDialog, useToast } from "#context/common.ui.ts";
 
 /**
  * ส่วนประกอบการแสดงผลรายการในตะกร้าและการสั่งซื้อสินค้า
@@ -23,7 +24,7 @@ content.Root = function CartRoot(prop: PropRoot)
 {
   const auth = useAuth ();
   const cart = useCartQuery ();
-  const toast = useToast ();
+  const [dialog] = useDialog ();
   const [code, setCode] = useState ("");
   const [window, setWindow] = useState (1);
 
@@ -71,19 +72,35 @@ content.Root = function CartRoot(prop: PropRoot)
             })
             .then (() =>
             {
-              toast.setText ("คำสั่งซื้อดำเนินการเรียบร้อย");
-              toast.setDuration (10000);
-              toast.setVisible (true);
+              setCode ("");
 
-              if (prop.onClose) {
-                prop.onClose ();
-              }
+              dialog.reset ();
+              dialog.setTitle ("ยืนยันคำสั่งซื้อสินค้า");
+              dialog.setMessage ("ดำเนินการสั่งซื้อสินค้าเรียบร้อยแล้ว คุณสามารถดูรายละเอียดและประวัติได้ที่โปรไฟล์ของคุณ");
+              dialog.setPrimary ("เรียบร้อย", () =>
+              {
+                dialog.setVisible (false);
+
+                if (prop.onClose) {
+                  prop.onClose ();
+                }
+              });
+              dialog.setVisible (true);
             })
-            .catch (() =>
+            .catch ((e: unknown) =>
             {
-              toast.setText ("เกิดข้อผิดพลาดในการดำเนินการ");
-              toast.setDuration (5000);
-              toast.setVisible (true);
+              const message = 
+                e instanceof error.Gone ? 
+                "ไม่สามารถดำเนินการสั่งซื้อสินค้าได้เนื่องจากสต็อกสินค้าหมด" :
+                "ไม่สามารถดำเนินการสั่งซื้อสินค้าได้ โปรดลองใหม่อีกครั้ง";
+
+              dialog.reset ();
+              dialog.setTitle ("ยืนยันคำสั่งซื้อสินค้า");
+              dialog.setMessage (message);
+              dialog.setPrimary ("เข้าใจแล้ว", () =>
+              {
+                dialog.setVisible (false);
+              });
             })
           }}/>
         </StyleViewPanel>

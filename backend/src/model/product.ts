@@ -59,6 +59,17 @@ content.getBasic = async (key: BasicId) =>
 */
 content.getBasicList = async (option ?: BasicFetchOption) =>
 {
+    const whereAnd = 
+    [
+        [
+            "Price >= ?",
+            option?.minPrice ? option.minPrice : undefined
+        ],
+        [
+            "Price <= ?",
+            option?.maxPrice ? option.maxPrice : undefined
+        ]
+    ];
     const whereOr = 
     [
         [
@@ -70,23 +81,34 @@ content.getBasicList = async (option ?: BasicFetchOption) =>
             option?.search ? `%${option.search}%` : undefined
         ]
     ];
-    const whereCmd = whereOr
+
+    const whereCmdAnd = whereAnd
+        .filter ((x) => x[1] !== undefined)
+        .map ((x) => x [0])
+        .join (" AND ");
+    const whereCmdOr = whereOr
         .filter ((x) => x[1] !== undefined)
         .map ((x) => x [0])
         .join (" OR ");
-    const whereParam = whereOr
+
+    const whereParamAnd = whereAnd
+        .map ((x) => x [1])
+        .filter ((x) => x !== undefined)
+
+    const whereParamOr = whereOr
         .map ((x) => x [1])
         .filter ((x) => x !== undefined)
 
     const cmd: InputCommand = `
         SELECT * FROM Product
-        ${whereCmd.length > 0 ? "WHERE" : ""} ${whereCmd}
+        ${whereCmdAnd.length || whereCmdOr.length > 0 ? "WHERE" : ""} ${whereCmdAnd} ${whereCmdOr}
     `;
     const param: InputValue = [
-        ... whereParam
+        ... whereParamAnd,
+        ... whereParamOr
     ];
-    // console.log (cmd);
-    // console.log (param);
+    console.log (cmd);
+    console.log (param);
 
     const query = await sql.select (cmd, param);
     const item: BasicFetch [] = query.map ((x) =>
@@ -806,6 +828,9 @@ export interface BasicFetch
 export interface BasicFetchOption
 {
     search ?: string | undefined;
+    category ?: number [] | undefined;
+    minPrice ?: number;
+    maxPrice ?: number;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการเปลี่ยนแปลงข้อมูลในฐานข้อมูล

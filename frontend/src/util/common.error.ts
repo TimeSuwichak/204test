@@ -121,6 +121,10 @@ content.Cancelled = class extends content.Base {};
 */
 content.BadAuth = class extends content.Base {};
 /**
+ * คลาสข้อผิดพลาด ในกรณีที่ระบบไมพบทรัพยากรอีกต่อไปแล้ว
+*/
+content.Gone = class extends content.Base {};
+/**
  * แข็งวัตถุ (ความปลอดภัย)
 */
 Object.freeze (content);
