@@ -1,4 +1,4 @@
-import { defaultDialog, useDialog } from "#context/common.ui.ts";
+import { defaultDialog, defaultPreview, useDialog, usePreview } from "#context/common.ui.ts";
 import { useState, useEffect, useRef }from "react";
 import { styled } from "styled-components";
 
@@ -118,7 +118,7 @@ export function DialogProvider ()
 
 export function Preview (property: Preview)
 {
-    const src = property.data?.src ?? undefined;
+    const src = property.data?.source ?? undefined;
     const cancel = property.data?.onCancel ?? function () { return; }
 
     return <>
@@ -132,32 +132,39 @@ export function Preview (property: Preview)
 
 export function PreviewProvider ()
 {
-    const [hidden, setHidden] = React.useState (true);
-    const [data, setData] = React.useState<PreviewData | undefined> (undefined);
-    const context = React.useContext (Context.context);
+    const [hidden, setHidden] = useState (true);
+    const [data, setData] = useState<PreviewData | undefined> (undefined);
+    const [, setContext] = usePreview ();
+    const temp = useRef<PreviewData | undefined> (undefined);
 
-    React.useEffect (() =>
+    useEffect (() =>
     {
-        context.requestPreview = (data) =>
+      setContext ({
+        setVisible: (value) => { setHidden (!value); },
+        setSource: (value) => 
         {
-            setHidden (false);
-            setData (data);
-        }
-        context.endPreview = () =>
+          temp.current = { 
+            ... temp.current, 
+            onCancel: () => { setHidden (false); },
+            source: value
+          };
+          setData (temp.current);
+        },
+        reset: () => 
         {
-            setHidden (true);
-            setData (undefined);
-        }
-        return () =>
-        {
-            context.requestDialog = () => { return; };
-            context.endDialog = () => { return; };
-        }
+          setData (undefined);
+        },
+      });
+
+      return () =>
+      {
+        setContext (defaultPreview ());
+      }
     },
-    [context]);
+    []);
 
     return <>
-      <content.Preview hidden={hidden} data={data}/>
+      <Preview hidden={hidden} data={data}/>
     </>
 }
 
@@ -335,7 +342,7 @@ export interface Preview
 }
 export interface PreviewData
 {
-    src: string;
+    source ?: string;
 
-    onCancel: () => void;
+    onCancel ?: () => void;
 }

@@ -128,6 +128,14 @@ export function defaultDialog () : Dialog
         reset: () => { return; },
     }
 }
+export function defaultPreview () : Preview
+{
+    return {
+        setVisible: () => { return; },
+        setSource: () => { return; },
+        reset: () => { return; },
+    }
+}
 export function defaultIrMenuBar () : IrMenuBar
 {
     return {
@@ -173,6 +181,10 @@ export function useDialog ()
 {
     return useContext (CtxDialog);
 }
+export function usePreview ()
+{
+    return useContext (CtxPreview);
+}
 export function useIrMenuBar ()
 {
     return useContext (CtxIrMenuBar);
@@ -190,6 +202,10 @@ export const CtxToast = createContext (defaultToast ());
 export const CtxDialog = createContext<CtxType<Dialog>> ([
     defaultDialog (),
     function (value: Dialog) { void value; }
+]);
+export const CtxPreview = createContext<CtxType<Preview>> ([
+    defaultPreview (),
+    function (value: Preview) { void value; }
 ]);
 export const CtxIrMenuBar = createContext (defaultIrMenuBar ());
 export const CtxIrNavBar = createContext (defaultIrNavBar ());

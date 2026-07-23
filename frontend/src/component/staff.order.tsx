@@ -4,7 +4,7 @@ import orderApi from "../util/api.order";
 import productApi from "../util/api.product";
 import type { BasicFetch as RawOrder } from "../util/api.order";
 import type { BasicFetch as ProductFetch } from "../util/api.product";
-import context from "#context/common.ts";
+import { useAuth } from "#context/common.ts";
 
 interface OrderProduct {
   productId: number;
@@ -30,7 +30,7 @@ export default function Order() {
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
   const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
 
-  const auth = context.useAuth();
+  const auth = useAuth ();
 
   const getStatusText = (status: number): string => {
     switch (status) {

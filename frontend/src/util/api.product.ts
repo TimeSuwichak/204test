@@ -39,6 +39,19 @@ content.getBasicList = async (session: string, option ?: BasicFetchOption)
     if (option?.search) {
         param.append ("search", option.search);
     }
+    if (option?.category) 
+    {
+        param.append ("category", option.category.join (","));
+    }
+    if (option?.minPrice)
+    {
+        param.append ("minPrice", String (option.minPrice));
+    }
+    if (option?.maxPrice)
+    {
+        param.append ("maxPrice", String (option.maxPrice));
+    }
+
     const paramOut = param.toString ();
     const paramOut2 = paramOut.length > 0 ? `?${paramOut}` : ``;
 
@@ -660,6 +673,9 @@ export interface BasicFetch
 export interface BasicFetchOption
 {
     search ?: string | undefined;
+    category ?: number [] | undefined;
+    minPrice ?: number;
+    maxPrice ?: number;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการเปลี่ยนแปลงข้อมูลพื้นฐานในฐานข้อมูล

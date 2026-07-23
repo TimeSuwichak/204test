@@ -7,11 +7,8 @@ import ApiStorage from "#util/api.storage.ts";
 import { useState, useEffect, useRef, useCallback } 
 from "react";
 
-import { useQuery } 
-from "@tanstack/react-query";
-
 import {
-  UserIcon, UserLock, Container, Coins, ArrowLeftCircleIcon, XIcon,
+  UserIcon, UserLock, Container, ArrowLeftCircleIcon, XIcon,
   UserCircleIcon
 } from "lucide-react";
 import { 

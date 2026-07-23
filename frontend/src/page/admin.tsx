@@ -7,7 +7,6 @@ import { ManagePromotionsPage} from '#component/admin.managePromotion.tsx';
 import { ManageOrdersPage } from '#component/admin.manageOrder.tsx';
 import { SystemSettingsPage } from '#component/admin.system.tsx';
 import { ManageComplaintsPage } from '#component/admin.manageComplain.tsx';
-import { X } from 'lucide-react';
 
 // สมมติว่า Navbar อยู่ในโฟลเดอร์เดียวกัน หากพาทไม่ตรงสามารถปรับตามพาทจริงได้ครับ
 // ตัวอย่าง: import { Navbar } from './components/admin/Navbar';

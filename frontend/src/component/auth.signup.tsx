@@ -1,6 +1,5 @@
 import react                  from "react";
 import api                    from "#util/api.auth.ts";
-import error                  from "#util/common.error.ts";
 import base                   from "#component/auth.tsx";
 import { type Session }       from "#util/api.auth.ts";
 import { type PropTemplateFeedback } from "#component/auth.tsx";
@@ -129,6 +128,8 @@ const [page, setPage] = prop.staPage;
     void name;
     void password;
     void email;
+
+    onTransition (base.PAGE_UNDEFINED);
   }
   const onCreateCancel = () =>
   {
