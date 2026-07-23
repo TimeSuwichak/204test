@@ -87,7 +87,7 @@ content.challengeId = async (key: BasicId) : Promise<Challenge> =>
     const issued = new Date ();
     const expired = new Date (Date.now () + model.getExpireChallenge ());
 
-    return model.createChallenge (
+    return model.newChallenge (
         issued, expired,
         link, key, 
         content.STEP_CHALLENGE_PASSWORD
@@ -173,7 +173,7 @@ content.challengeFacebook = async (
 
     try
     {
-        return await content.getDbFacebook (userId).then ((x) =>
+        return await content.retrieveDbFacebook (userId).then ((x) =>
         {
             return content.challengeFinalize (x.link);
         });
@@ -192,13 +192,13 @@ content.challengeFacebook = async (
             name: name,
             role: modelAccount.ROLE_USER,
             icon: icon,
-            status: modelAccount.RESTRICTION_NONE,
+            status: modelAccount.STATUS_NONE,
         });
         await modelAccount.updateContact ({
             id: accountId,
             email: email,
         });
-        await content.createDbFacebook (userId, accountId);
+        await content.insertDbFacebook (userId, accountId);
 
         return await content.challengeFinalize (accountId);
     }
@@ -234,16 +234,16 @@ content.challengeFinalize = async (authLink: AccountId)
         return result;
     });
     const isSuspended = 
-        ((query.status & modelAccount.RESTRICTION_SUSPENDED) != 0);
+        ((query.status & modelAccount.STATUS_SUSPENDED) != 0);
 
     const issued = new Date ();
     const expired = new Date (Date.now () + model.getExpireSession ());
-    const session = await model.createSession (
+    const session = await model.newSession (
         issued, expired,
         query.id, query.role, 
         isSuspended ? 
-            modelAccount.RESTRICTION_SUSPENDED : 
-            modelAccount.RESTRICTION_NONE
+            modelAccount.STATUS_SUSPENDED : 
+            modelAccount.STATUS_NONE
     );
     
     return {
@@ -256,9 +256,53 @@ content.challengeFinalize = async (authLink: AccountId)
 }
 
 /**
+ * สมัครบัญชี
+*/
+content.create = async (identifier: string, password: string, email: string) =>
+{
+    try
+    {
+        const accountId = await modelAccount.create ({
+            icon: "",
+            name: identifier,
+            role: modelAccount.ROLE_USER,
+            status: modelAccount.STATUS_NONE,
+        });
+        await modelAccount.updateContact ({
+            id: accountId,
+            name: identifier,
+            email: email
+        });
+        await content.insertDb (identifier, password, accountId);
+        return content.createFinalize (accountId, modelAccount.ROLE_USER);
+    }
+    catch (e: unknown)
+    {
+        throw new error.NotAvailable (e);
+    }
+}
+
+content.createFinalize = async (accountId: AccountId, accountRole: number) 
+    : Promise<Create> =>
+{
+    const issued = new Date ();
+    const expired = new Date (Date.now () + model.getExpireSession ());
+    const session = await model.newSession (
+        issued, expired,
+        accountId, accountRole, modelAccount.STATUS_NONE
+    );
+    
+    return {
+        ... session,
+        authId: "",
+        authStep: content.STEP_CREATE_COMPLETED 
+    }
+}
+
+/**
  * รับข้อมูลการลงชื่อเข้าใช้งานระบบ
 */
-content.getDb = async (id: BasicId) =>
+content.retriveDb = async (id: BasicId) =>
 {
     const cmd = "SELECT Id, Password, Link FROM Auth WHERE Id = ?";
     const param = [id];
@@ -286,7 +330,7 @@ content.getDb = async (id: BasicId) =>
 /**
  * รับข้อมูลการลงชื่อเข้าใช้งานระบบด้วย Facebook
 */
-content.getDbFacebook = async (id: FacebookId) =>
+content.retrieveDbFacebook = async (id: FacebookId) =>
 {
     const cmd = "SELECT Id, Link FROM AuthFacebook WHERE Id = ?";
     const param = [id];
@@ -313,7 +357,7 @@ content.getDbFacebook = async (id: FacebookId) =>
 /**
  * สร้างวิธีการลงชื่อเข้าใช้งานระบบด้วย: รหัสประจำตัวและรหัสผ่าน
 */
-content.createDb = async (id: BasicId, pwd: string, link: AccountId) =>
+content.insertDb = async (id: BasicId, pwd: string, link: AccountId) =>
 {
     const hashPwd = await bcrypt.hash (pwd, 16);
 
@@ -326,7 +370,7 @@ content.createDb = async (id: BasicId, pwd: string, link: AccountId) =>
 /**
  * สร้างวิธีการลงชื่อเข้าใช้งานระบบด้วย: Facebook
 */
-content.createDbFacebook = async (id: FacebookId, link: AccountId) =>
+content.insertDbFacebook = async (id: FacebookId, link: AccountId) =>
 {
     const cmd = "INSERT INTO AuthFacebook (Id, Link) VALUES (?, ?)";
     const param = [id, link];
@@ -343,7 +387,7 @@ content.createDbFacebook = async (id: FacebookId, link: AccountId) =>
  * @param accountRole บทบาท
  * @param accountRestriction ข้อจำกัด
 */
-content.createSession = async (
+content.newSession = async (
     issued: Date, 
     expire: Date | undefined,
     accountId: AccountId,
@@ -380,7 +424,7 @@ content.createSession = async (
  * @param accountRole บทบาท
  * @param restriction ข้อจำกัด
 */
-content.createChallenge = async (
+content.newChallenge = async (
     issued: Date, 
     expire: Date | undefined,
     accountId: AccountId,
@@ -560,19 +604,32 @@ content.STEP_CHALLENGE_TOTP = 4;
 /**
  * ขั้นตอนการลงชื่อเข้าใช้: เสร็จสิ้น
 */
-content.STEP_CHALLENGE_COMPLETED = 5;
+content.STEP_CHALLENGE_COMPLETED = 100;
+
+
+/**
+ * ขั้นตอนการสร้างบัญชี: ป้อนข้อมูลเบื้องต้น
+*/
+content.STEP_CREATE_BASIC = 101;
+/**
+ * ขั้นตอนการสร้างบัญชี: เสร็จสิ้น
+*/
+content.STEP_CREATE_COMPLETED = 1000;
+
+
 /**
  * ขั้นตอนการลงชื่อเข้าใช้: บัญชีถูกระงับ
 */
-content.STEP_CHALLENGE_SUSPENDED = 100;
+content.STEP_CHALLENGE_SUSPENDED = 1001;
 /**
  * ขั้นตอนการลงชื่อเข้าใช้: Facebook
 */
-content.STEP_CONNECT_FACEBOOK = 101;
+content.STEP_CONNECT_FACEBOOK = 10001;
 /**
  * ขั้นตอนการลงชื่อเข้าใช้: Facebook
 */
-content.STEP_CONNECT_GOOGLE = 102;
+content.STEP_CONNECT_GOOGLE = 10002;
+
 /**
  * ไม่มีข้อจำกัดใด ๆ ในการใช้งานระบบ
 */
@@ -621,9 +678,23 @@ export interface Session
     restriction: number;
 }
 /**
- * ใช้ในขณะที่ลงชื่อเข้าใช้/สมัคร
+ * ใช้ในขณะที่ลงชื่อเข้าใช้
 */
 export interface Challenge extends Session
+{
+    /**
+     * รหัสประจำตัว
+    */
+    authId: BasicId;
+    /**
+     * ขั้นตอนปัจจุบัน
+    */
+    authStep: number;
+}
+/**
+ * ใช้ในขณะที่ลงชื่อสมัคร
+*/
+export interface Create extends Session
 {
     /**
      * รหัสประจำตัว

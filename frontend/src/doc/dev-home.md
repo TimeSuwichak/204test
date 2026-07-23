@@ -427,88 +427,251 @@ OrderList "1" --> "0..*" Inquiry
 
 ### Sequence Diagram
 
+1. Customer
+
 ```mermaid
 sequenceDiagram
     actor Customer
     participant Frontend as React Frontend
     participant Backend as Node.js Server
     participant DB as MySQL Database
-    participant Shipping as Mock Shipping API
+    participant Shipping as Shipping API
 
     %% Browse Products
-    Customer->>Frontend: Search for a game
-    Frontend->>Backend: Request matching games
-    Backend->>DB: Retrieve game list
-    DB-->>Backend: Return available games
-    Backend-->>Frontend: Display search results
+    Customer->>Frontend: 1. Search for a game
+    Frontend->>Backend: 2. Request matching games
+    Backend->>DB: 3. Retrieve game list
+    DB-->>Backend: 4. Return available games
+    Backend-->>Frontend: 5. Display search results
 
-    Customer->>Frontend: View game details
-    Frontend->>Backend: Request game information
-    Backend->>DB: Retrieve game details and stock
-    DB-->>Backend: Return game information
-    Backend-->>Frontend: Display game details
+    Customer->>Frontend: 6. View game details
+    Frontend->>Backend: 7. Request game information
+    Backend->>DB: 8. Retrieve game details and stock
+    DB-->>Backend: 9. Return game information
+    Backend-->>Frontend: 10. Display game details
 
     %% Shopping Cart
-    Customer->>Frontend: Add game to cart
-    Frontend->>Backend: Submit selected game
-    Backend->>DB: Verify stock availability
-    DB-->>Backend: Stock available
-    Backend->>DB: Save cart item
-    DB-->>Backend: Cart updated
-    Backend-->>Frontend: Display updated cart
+    Customer->>Frontend: 11. Add game to cart
+    Frontend->>Backend: 12. Submit selected game
+    Backend->>DB: 13. Verify stock availability
+    DB-->>Backend: 14. Stock available
+    Backend->>DB: 15. Save cart item
+    DB-->>Backend: 16. Cart updated
+    Backend-->>Frontend: 17. Display updated cart
 
-    Customer->>Frontend: Modify cart and apply promotion
-    Frontend->>Backend: Submit updated cart
-    Backend->>DB: Update cart information
-    Backend->>DB: Validate promotion code
-    DB-->>Backend: Return updated total price
-    Backend-->>Frontend: Display updated cart
+    Customer->>Frontend: 18. Modify cart and apply promotion
+    Frontend->>Backend: 19. Submit updated cart
+    Backend->>DB: 20. Update cart information
+    Backend->>DB: 21. Validate promotion code
+    DB-->>Backend: 22. Return updated total price
+    Backend-->>Frontend: 23. Display updated cart
 
     %% Checkout
-    Customer->>Frontend: Proceed to checkout
-    Customer->>Frontend: Enter shipping address
-    Frontend->>Backend: Submit order information
-    Backend->>DB: Create new order
-    DB-->>Backend: Order created
-    Backend-->>Frontend: Display order summary
+    Customer->>Frontend: 24. Proceed to checkout
+    Customer->>Frontend: 25. Enter shipping address
+    Frontend->>Backend: 26. Submit order information
+    Backend->>DB: 27. Create new order
+    DB-->>Backend: 28. Order created
+    Backend-->>Frontend: 29. Display order summary
 
     %% Mock Payment
-    Customer->>Frontend: Confirm mock payment
-    Frontend->>Backend: Confirm order
-    Backend->>DB: Update order status to Confirmed
-    Backend->>DB: Deduct product stock
-    Backend->>DB: Check low stock level
+    Customer->>Frontend: 30. Confirm mock payment
+    Frontend->>Backend: 31. Confirm order
+    Backend->>DB: 32. Update order status to Confirmed
+    Backend->>DB: 33. Deduct product stock
+    Backend->>DB: 34. Check low stock level
 
     alt Stock is below minimum threshold
-        Backend->>DB: Generate low stock alert
+        Backend->>DB: 35. Generate low stock alert
     end
 
-    Backend->>Shipping: Create shipment request
-    Shipping-->>Backend: Return tracking number
-    Backend->>DB: Save shipment information
-    DB-->>Backend: Shipment recorded
-    Backend-->>Frontend: Display order confirmation
+    Backend->>Shipping: 36. Create shipment request
+    Shipping-->>Backend: 37. Return tracking number
+    Backend->>DB: 38. Save shipment information
+    DB-->>Backend: 39. Shipment recorded
+    Backend-->>Frontend: 40. Display order confirmation
 
     %% Track Order
-    Customer->>Frontend: Check order status
-    Frontend->>Backend: Request order status
-    Backend->>DB: Retrieve order and shipment information
-    DB-->>Backend: Return order status
-    Backend-->>Frontend: Display shipment status
+    Customer->>Frontend: 41. Check order status
+    Frontend->>Backend: 42. Request order status
+    Backend->>DB: 43. Retrieve order and shipment information
+    DB-->>Backend: 44. Return order status
+    Backend-->>Frontend: 45. Display shipment status
 
     %% Review
-    Customer->>Frontend: Submit product review
-    Frontend->>Backend: Send review information
-    Backend->>DB: Save review
-    DB-->>Backend: Review saved
-    Backend-->>Frontend: Display review confirmation
+    Customer->>Frontend: 46. Submit product review
+    Frontend->>Backend: 47. Send review information
+    Backend->>DB: 48. Save review
+    DB-->>Backend: 49. Review saved
+    Backend-->>Frontend: 50. Display review confirmation
 
     %% Favorite
-    Customer->>Frontend: Add game to favorites
-    Frontend->>Backend: Submit favorite game
-    Backend->>DB: Save favorite game
-    DB-->>Backend: Favorite saved
-    Backend-->>Frontend: Display favorite confirmation
+    Customer->>Frontend: 51. Add game to favorites
+    Frontend->>Backend: 52. Submit favorite game
+    Backend->>DB: 53. Save favorite game
+    DB-->>Backend: 54. Favorite saved
+    Backend-->>Frontend: 55. Display favorite confirmation
+```
+2. Staff
+
+```Mermaid
+sequenceDiagram
+    actor Staff
+    participant Frontend as React Frontend
+    participant Backend as Node.js Server
+    participant DB as MySQL Database
+
+    %% Order Management
+    Staff->>Frontend: 1. Open Order Management
+    Frontend->>Backend: 2. Request orders awaiting confirmation
+    Backend->>DB: 3. Retrieve pending orders
+    DB-->>Backend: 4. Return order list
+    Backend-->>Frontend: 5. Display orders
+
+    Staff->>Frontend: 6. View order details
+    Frontend->>Backend: 7. Request order information
+    Backend->>DB: 8. Retrieve order details
+    DB-->>Backend: 9. Return order information
+    Backend-->>Frontend: 10. Display order details
+
+    Staff->>Frontend: 11. Update order status
+    Frontend->>Backend: 12. Submit updated order status
+    Backend->>DB: 13. Save new order status
+    DB-->>Backend: 14. Status updated
+    Backend-->>Frontend: 15. Display confirmation
+
+    %% Inventory Management
+    Staff->>Frontend: 16. Open Inventory Management
+    Frontend->>Backend: 17. Request inventory list
+    Backend->>DB: 18. Retrieve inventory
+    DB-->>Backend: 19. Return inventory
+    Backend-->>Frontend: 20. Display inventory
+
+    Staff->>Frontend: 21. Update stock quantity
+    Frontend->>Backend: 22. Submit stock update
+    Backend->>DB: 23. Update product stock
+    Backend->>DB: 24. Check low stock threshold
+
+    alt Stock is below minimum threshold
+        Backend->>DB: 25. Generate low stock alert
+    end
+
+    DB-->>Backend: 26. Stock updated
+    Backend-->>Frontend: 27. Display updated inventory
+
+    %% Customer Inquiry
+    Staff->>Frontend: 28. Open Customer Inquiries
+    Frontend->>Backend: 29. Request inquiry list
+    Backend->>DB: 30. Retrieve inquiries
+    DB-->>Backend: 31. Return inquiries
+    Backend-->>Frontend: 32. Display inquiry list
+
+    Staff->>Frontend: 33. Respond to inquiry
+    Frontend->>Backend: 34. Submit inquiry response
+    Backend->>DB: 35. Save response and update inquiry status
+    DB-->>Backend: 36. Inquiry updated
+    Backend-->>Frontend: 37. Display confirmation
+```
+
+3. Manager
+
+```Mermaid
+sequenceDiagram
+    actor Manager
+    participant Frontend as React Frontend
+    participant Backend as Node.js Server
+    participant DB as MySQL Database
+
+    %% Order Management (Override Staff)
+    Manager->>Frontend: 1. Open Order Management
+    Frontend->>Backend: 2. Request orders awaiting confirmation
+    Backend->>DB: 3. Retrieve pending orders
+    DB-->>Backend: 4. Return order list
+    Backend-->>Frontend: 5. Display orders
+
+    Manager->>Frontend: 6. Update order status
+    Frontend->>Backend: 7. Submit updated order status
+    Backend->>DB: 8. Save order status
+    DB-->>Backend: 9. Status updated
+    Backend-->>Frontend: 10. Display confirmation
+
+    %% Inventory Management (Override Staff)
+    Manager->>Frontend: 11. Open Inventory Management
+    Frontend->>Backend: 12. Request inventory
+    Backend->>DB: 13. Retrieve inventory
+    DB-->>Backend: 14. Return inventory
+    Backend-->>Frontend: 15. Display inventory
+
+    Manager->>Frontend: 16. Update stock quantity
+    Frontend->>Backend: 17. Submit stock update
+    Backend->>DB: 18. Update stock
+    Backend->>DB: 19. Check low stock threshold
+
+    alt Stock is below minimum threshold
+        Backend->>DB: 20. Generate low stock alert
+    end
+
+    DB-->>Backend: 21. Stock updated
+    Backend-->>Frontend: 22. Display updated inventory
+
+    %% Customer Inquiry (Override Staff)
+    Manager->>Frontend: 23. Open Customer Inquiries
+    Frontend->>Backend: 24. Request inquiry list
+    Backend->>DB: 25. Retrieve inquiries
+    DB-->>Backend: 26. Return inquiries
+    Backend-->>Frontend: 27. Display inquiry list
+
+    Manager->>Frontend: 28. Respond to inquiry
+    Frontend->>Backend: 29. Submit inquiry response
+    Backend->>DB: 30. Save response
+    DB-->>Backend: 31. Inquiry updated
+    Backend-->>Frontend: 32. Display confirmation
+
+    %% Product Management
+    Manager->>Frontend: 33. Open Product Management
+    Frontend->>Backend: 34. Request product list
+    Backend->>DB: 35. Retrieve products
+    DB-->>Backend: 36. Return products
+    Backend-->>Frontend: 37. Display products
+
+    Manager->>Frontend: 38. Add, edit, or delete product
+    Frontend->>Backend: 39. Submit product information
+    Backend->>DB: 40. Save product changes
+    DB-->>Backend: 41. Product updated
+    Backend-->>Frontend: 42. Display updated product list
+
+    %% User Management
+    Manager->>Frontend: 43. Open User Management
+    Frontend->>Backend: 44. Request user list
+    Backend->>DB: 45. Retrieve users
+    DB-->>Backend: 46. Return user list
+    Backend-->>Frontend: 47. Display users
+
+    Manager->>Frontend: 48. Update user information or role
+    Frontend->>Backend: 49. Submit user changes
+    Backend->>DB: 50. Save user changes
+    DB-->>Backend: 51. User updated
+    Backend-->>Frontend: 52. Display updated users
+
+    %% Promotion Management
+    Manager->>Frontend: 53. Open Promotion Management
+    Frontend->>Backend: 54. Request promotion list
+    Backend->>DB: 55. Retrieve promotions
+    DB-->>Backend: 56. Return promotions
+    Backend-->>Frontend: 57. Display promotions
+
+    Manager->>Frontend: 58. Create, edit, or delete promotion
+    Frontend->>Backend: 59. Submit promotion changes
+    Backend->>DB: 60. Save promotion changes
+    DB-->>Backend: 61. Promotion updated
+    Backend-->>Frontend: 62. Display updated promotions
+
+    %% Sales Dashboard
+    Manager->>Frontend: 63. Open Sales Dashboard
+    Frontend->>Backend: 64. Request sales summary
+    Backend->>DB: 65. Retrieve sales reports
+    DB-->>Backend: 66. Return sales data
+    Backend-->>Frontend: 67. Display sales dashboard
 ```
 
 ### Data Schema (JSON)

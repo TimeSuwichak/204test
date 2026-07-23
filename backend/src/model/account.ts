@@ -399,18 +399,18 @@ content.ROLE_LIST =
 /**
  * การจำกัดเข้าบัญชี: ไม่มีการจำกัดการเข้าถึงใด ๆ
 */
-content.RESTRICTION_NONE = 0;
+content.STATUS_NONE = 0;
 /**
  * การจำกัดเข้าบัญชี: บัญชีถูกระงับโดยระบบหรือผู้ดูแลระบบ
 */
-content.RESTRICTION_SUSPENDED = 1;
+content.STATUS_SUSPENDED = 1;
 /**
  * รากยารการจำกัดวิธีการเข้าถึงบัญชี
 */
-content.RESTRICTION_LIST = 
+content.STATUS_LIST = 
 [
-    content.RESTRICTION_NONE,
-    content.RESTRICTION_SUSPENDED
+    content.STATUS_NONE,
+    content.STATUS_SUSPENDED
 ];
 
 /**
