@@ -8,9 +8,10 @@ import styled, { css } from "styled-components";
 */
 export interface FilterState
 {
-    platforms : string[];
-    gameTypes : string[];
-    price     : { min: number; max: number };
+    platforms     : string[];
+    gameTypes     : string[];
+    price         : { min: number; max: number };
+    onlyFavorites : boolean;
 }
 
 interface Props
@@ -48,9 +49,10 @@ const GAME_TYPES = [
 ];
 
 const DEFAULT: FilterState = {
-    platforms : [],
-    gameTypes : [],
-    price     : { min: 0, max: 5000 },
+    platforms     : [],
+    gameTypes     : [],
+    price         : { min: 0, max: 5000 },
+    onlyFavorites : false,
 };
 
 /*
@@ -77,6 +79,11 @@ const content = function CustomerProductBrowserFilterSidebar (prop: Props)
         commit({ ...state, [field]: next });
     }
 
+    function onToggleFavorite ()
+    {
+        commit({ ...state, onlyFavorites: !state.onlyFavorites });
+    }
+
     function onPrice (which: "min" | "max", raw: string)
     {
         const num = Math.max(0, Number(raw.replace(/[^0-9]/g, "")) || 0);
@@ -91,10 +98,12 @@ const content = function CustomerProductBrowserFilterSidebar (prop: Props)
         if (prop.onReset) prop.onReset();
     }
 
+    // 👈 4. นับจำนวน active filters รวมรายการโปรดด้วย
     const active =
         state.platforms.length
         + state.gameTypes.length
-        + (state.price.min !== DEFAULT.price.min || state.price.max !== DEFAULT.price.max ? 1 : 0);
+        + (state.price.min !== DEFAULT.price.min || state.price.max !== DEFAULT.price.max ? 1 : 0)
+        + (state.onlyFavorites ? 1 : 0);
 
     return (
         <Aside aria-label="ตัวกรองสินค้า">
@@ -108,6 +117,22 @@ const content = function CustomerProductBrowserFilterSidebar (prop: Props)
                     <ResetBtn onClick={onReset} disabled={active === 0}>ล้างทั้งหมด</ResetBtn>
                 </HeaderMeta>
             </Header>
+
+            {/* ---- Favorite Filter ---- */}
+            <Section>
+                <SectionTitle>รายการโปรด</SectionTitle>
+                <List>
+                    <Row onClick={onToggleFavorite} $on={state.onlyFavorites}>
+                        <Check $on={state.onlyFavorites}>
+                            <CheckMark $on={state.onlyFavorites}>✓</CheckMark>
+                        </Check>
+                        <RowLabel style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <span style={{ color: state.onlyFavorites ? "#ff4d4f" : "currentColor" }}></span>
+                            รายการโปรด
+                        </RowLabel>
+                    </Row>
+                </List>
+            </Section>
 
             {/* ---- Platform ---- */}
             <Section>

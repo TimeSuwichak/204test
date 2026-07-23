@@ -201,5 +201,14 @@ export function usePromotion (code: string)
         throwOnError: false
     });
 }
+export const useFavoriteQuery = () => {
+    const auth = useAuth();
+    
+    return useQuery({
+      queryKey: ["account", "favorite", auth.session],
+      queryFn: () => apiAccount.getFavorite(auth.session),
+      enabled: Boolean(auth.session),
+    });
+}
 
 export const Cart = createContext<Cart> (defaultCart ());

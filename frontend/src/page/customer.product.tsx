@@ -11,7 +11,7 @@ import { useAuth } from "#context/common.ts";
 import { useDialog, useToast } from "#context/common.ui.ts";
 import 
 { 
-  useAccountBasic, useAccountBasicOf, useCart, useCartQuery, useProduct, useProductComment, 
+  useAccountBasic, useAccountBasicOf, useCart, useCartQuery, useProduct, useProductComment, useFavoriteQuery,
   useProductCommentList, useProductReviewList 
 } 
 from "#context/customer.ts";
@@ -83,9 +83,14 @@ content.Main = function ProductMainContent ()
   const toast = useToast ();
   const queryBasic = useProduct (Number (id));
   const queryReview = useProductReviewList (Number (id));
+  const queryFavorite = useFavoriteQuery (); // SSSS
   const queryAct = useAccountBasic ();
   const basic = queryBasic.data;
   const review = queryReview.data;
+  const favoriteList = queryFavorite.data; // SSSS
+
+  const favoriteItem = favoriteList?.find ((x) => x.productId === Number (id)); // SSSS
+  const isFavorite = Boolean (favoriteItem); // SSSS
 
   const [menu, setMenu] = useState (1);
   const [dialog] = useDialog ();
@@ -131,22 +136,64 @@ content.Main = function ProductMainContent ()
   /**
    * เพิ่มสินค้านี้ลงในรายการโปรดของผู้ใช้งานระบบ
   */
+  /**
+   * เพิ่มสินค้านี้ลงในรายการโปรดของผู้ใช้งานระบบ
+  */
   const onClickFavorite = (event: MouseEvent) =>
-  {
-    event.preventDefault ();
-    event.stopPropagation ();
-
-    if (queryAct.data !== undefined)
     {
-      return;
+      event.preventDefault ();
+      event.stopPropagation ();
+  
+      if (queryAct.data !== undefined)
+      {
+        const productId = basic ? basic.id : Number (id);
+  
+        // กรณีที่ เป็นรายการโปรดอยู่แล้ว -> ให้ลบออก
+        if (isFavorite && favoriteItem)
+        {
+          void apiAccount.deleteFavorite (auth.session, favoriteItem.favoriteId)
+            .then (() =>
+            {
+              toast.setDuration (5000);
+              toast.setText (`นำ ${basic ? basic.name : "สินค้า"} ออกจากรายการโปรดแล้ว`);
+              toast.setVisible (true);
+              void queryFavorite.refetch (); // รีเฟรชข้อมูลรายการโปรด
+            })
+            .catch (() =>
+            {
+              toast.setDuration (5000);
+              toast.setText ("เกิดข้อผิดพลาดในการนำรายการโปรดออก โปรดลองใหม่อีกครั้ง");
+              toast.setVisible (true);
+            });
+        }
+        // กรณีที่ ยังไม่ได้เป็นรายการโปรด -> ให้เพิ่มใหม่
+        else
+        {
+          void apiAccount.createFavorite (auth.session, {
+            productId: productId
+          })
+            .then (() =>
+            {
+              toast.setDuration (5000);
+              toast.setText (`เพิ่ม ${basic ? basic.name : "สินค้า"} ลงในรายการโปรดเรียบร้อย`);
+              toast.setVisible (true);
+              void queryFavorite.refetch (); // รีเฟรชข้อมูลรายการโปรด
+            })
+            .catch (() =>
+            {
+              toast.setDuration (5000);
+              toast.setText ("เกิดข้อผิดพลาดในการเพิ่มรายการโปรด โปรดลองใหม่อีกครั้ง");
+              toast.setVisible (true);
+            });
+        }
+      }
+      else
+      {
+        toast.setDuration (5000);
+        toast.setText ("คุณจำเป็นต้องลงชื่อเข้าใช้ก่อนจึงจะสามารถจัดการรายการโปรดได้");
+        toast.setVisible (true);
+      }
     }
-    else
-    {
-      toast.setDuration (5000);
-      toast.setText ("คุณจำเป็นต้องลงชื่อเข้าใช้ก่อนจึงจะสามารถเพิ่มรายการโปรดได้");
-      toast.setVisible (true);
-    }
-  }
   /**
    * เปิดหน้าต่างแชร์สินค้า
   */
@@ -261,10 +308,15 @@ content.Main = function ProductMainContent ()
                 <ShoppingCart/>
                 <span>เพิ่มลงในตะกร้า</span>
               </button>
+              {/* SSS */}
               <button onClick={onClickFavorite}>
-                <Heart/>
-                <span>เพิ่มรายการโปรด</span>
-              </button>
+          <Heart 
+            color={isFavorite ? "#ff4d4f" : "currentColor"} 
+            fill={isFavorite ? "#ff4d4f" : "none"} 
+          />
+          <span>{isFavorite ? "นำออกจากรายการโปรด" : "เพิ่มรายการโปรด"}</span> 
+        </button>
+              {/* SSS */}
               <button onClick={onClickShare}>
                 <Share2Icon/>
                 <span>แชร์</span>
