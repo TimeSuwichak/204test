@@ -2,6 +2,7 @@ import react, { useState }          from "react";
 import styled         from "styled-components";
 import cmmNavigation  from "#util/common.navigation.ts";
 import apiStorage     from "#util/api.storage.ts";
+import apiAccount     from "#util/api.account.ts";
 
 import Filter         from "#component/customer.productBrowser.filter.tsx";
 import { type FilterState } from "#component/customer.productBrowser.filter.tsx";
@@ -12,6 +13,7 @@ import type { Dispatch, MouseEvent, SetStateAction } from "react";
 import { RefreshCwOff, ShoppingBasket, ShoppingCart } from "lucide-react";
 import { useAccountBasic, useCart, useCartQuery, useProductList } 
 from "#context/customer.ts";
+import { useAuth } from "#context/common"
 
 /**
  * ส่วนประกอบหน้าต่างเลือกสินค้า
@@ -26,10 +28,16 @@ const content = function ProductBrowser ()
     <content.Cart/>
   </>);
 }
+
 content.List = function ProductBrowserList ({ filter }: { filter: FilterState | undefined; })
 {  
+  const auth = useAuth (); 
   const [serachParam] = useSearchParams ();
   const search = serachParam.get ("search");
+
+  // State เก็บรายการ ID สินค้าที่เป็นรายการโปรด
+  const [favoriteProductIds, setFavoriteProductIds] = useState<number[]>([]);
+
   const queryList = useProductList ({
     search: search ?? "",
     category: filter ? [] : undefined,
@@ -42,6 +50,18 @@ content.List = function ProductBrowserList ({ filter }: { filter: FilterState | 
   const showAlert = showQuery.isLoadingError || showQuery.isFetching;
   const isLoading = showQuery.isLoading;
   const isLoadingError = showQuery.isLoadingError;
+
+  react.useEffect(() => {
+    if (filter?.onlyFavorites && auth.session) {
+      void apiAccount.getFavorite(auth.session)
+        .then((favorites) => {
+          setFavoriteProductIds(favorites.map((fav) => fav.productId));
+        })
+        .catch(() => {
+          setFavoriteProductIds([]);
+        });
+    }
+  }, [filter?.onlyFavorites, auth.session]);
 
   react.useEffect (() =>
   {
@@ -57,6 +77,7 @@ content.List = function ProductBrowserList ({ filter }: { filter: FilterState | 
     void cmmNavigation.toProduct (id);
     return;
   }
+
   /**
    * แสดงผลรายการหลังจากข้อมูลโหลดเรียบร้อยแล้ว
   */
@@ -68,7 +89,20 @@ content.List = function ProductBrowserList ({ filter }: { filter: FilterState | 
     {
       return (<></>);
     }
-    return (query.data.map ((x) =>
+
+    // 👈 กรองสินค้าตามฟิลเตอร์ onlyFavorites
+    const filteredData = query.data.filter((item) => {
+      if (filter?.onlyFavorites) {
+        return favoriteProductIds.includes(item.id);
+      }
+      return true;
+    });
+
+    if (filteredData.length === 0 && filter?.onlyFavorites) {
+      return <p style={{ color: "var(--text-muted)", padding: "16px" }}>ไม่พบรายการสินค้าโปรดของคุณ</p>;
+    }
+
+    return (filteredData.map ((x) =>
     {
       const key = String (x.id);
       const id = x.id;
@@ -86,6 +120,7 @@ content.List = function ProductBrowserList ({ filter }: { filter: FilterState | 
         onClick={onClick}/>
     }));
   }
+
   /**
    * แสดงผลการแจ้งเตือนในขณะที่ระบบกำลังดำเนินการ
   */
@@ -116,6 +151,7 @@ content.List = function ProductBrowserList ({ filter }: { filter: FilterState | 
     </SyledList>
   );
 }
+
 /**
  * ส่วนประกอบแสดงชิ้นสินค้าในรายการสินค้า 
 */
@@ -160,6 +196,7 @@ content.ListItem = function ProductBrowserListItem (prop: PropListItem)
   </Card>
   )
 }
+
 /**
  * ส่วนประกอบแสดงตัวเลือกการค้นหาสินค้า
 */
@@ -175,6 +212,7 @@ content.Filter = function ProductBrowserFilter (
     </StyledFilter>
   );
 }
+
 /**
  * ส่วนประกอบแสดงผลไอคอนตะกร้า
 */
@@ -263,6 +301,7 @@ const SyledList = styled.div`
     margin: 48px 14px 16px 14px;
   }
 `;
+
 const StyleListAlert = styled.div<{ $visible: boolean; }>`
   display: ${prop => prop.$visible ? "flex" : "none"};
   flex-direction: column;
@@ -272,12 +311,14 @@ const StyleListAlert = styled.div<{ $visible: boolean; }>`
   justify-content: center;
   color: var(--text-primary);
 `;
+
 const StyleListContent = styled.div<{ $visible: boolean; }>`
   display: ${prop => prop.$visible ? "flex" : "none"};
   flex-direction: row;
   flex-wrap: wrap;
   gap: 8px;
 `;
+
 const StyledFilter = styled.div`
   position: fixed;
   inset: 64px 144px 16px auto;
@@ -299,6 +340,7 @@ const StyledFilter = styled.div`
     inset: 0px 0px 0px 0px;
   }
 `;
+
 const StyledFilterInner = styled.div`
   position: relative;
   width: 100%;
@@ -331,6 +373,7 @@ const StyledCart = styled.button<{ $visible: boolean; }>`
     right: 32px;
   }
 `;
+
 const StyledCartLabel = styled.label`
   position: absolute;
   inset: auto -16px 0px auto;
@@ -397,11 +440,13 @@ const Placeholder = styled.div`
     justify-content: center;
     color: var(--text-muted);
 `;
+
 const PlaceholderMark = styled.span`
     font-size: 2rem;
     color: var(--text-accent);
     opacity: 0.6;
 `;
+
 const PlaceholderText = styled.span`
     font-size: 0.7rem;
     letter-spacing: 0.24em;
@@ -447,11 +492,13 @@ const PriceGroup = styled.div`
     flex-direction: column;
     gap: 2px;
 `;
+
 const PriceLabel = styled.span`
     font-size: 1.0rem;
     text-transform: uppercase;
     color: var(--text-muted);
 `;
+
 const Price = styled.span`
     font-size: 1.25rem;
     color: var(--text-accent);
