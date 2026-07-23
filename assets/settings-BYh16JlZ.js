@@ -1,0 +1,1 @@
+import{t as e}from"./index-V2cGtSIi.js";import{t}from"./settings-DMuM_l_F.js";var n=e(),r=()=>(0,n.jsx)(t,{visible:!0,transparent:!0});export{r as default};

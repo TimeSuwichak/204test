@@ -1,0 +1,1 @@
+import{r as e,t}from"./react-C1VktWof.js";var n=e(t(),1);function r(){return{name:``,session:``,sessionIssued:new Date(NaN),sessionExpire:new Date(NaN)}}function i(){return{text:0,caption:0,voice:0}}function a(){return(0,n.useContext)(o)}var o=(0,n.createContext)(r()),s=(0,n.createContext)(i());export{a,i,s as n,r,o as t};
