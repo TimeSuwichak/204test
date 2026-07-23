@@ -8,6 +8,7 @@ import {
 } 
 from "lucide-react";
 import orderApi from "../util/api.order";
+import orderAccount from "../util/api.account";
 import productApi from "../util/api.product";
 import type { BasicFetch as RawOrder } from "../util/api.order";
 import type { BasicFetch as ProductFetch } from "../util/api.product";
@@ -181,7 +182,7 @@ export default function CustomerOrder() {
   
         // 1. ดึง Order และ Product List ทั้งหมดแบบ Parallel เพียง 2 requests
         const [rawOrders, rawProducts] = await Promise.all([
-          orderApi.getBasicList(session).catch((err) => {
+          orderAccount.getOrder(session).catch((err) => {
             console.error("Order API Error:", err);
             return [] as RawOrder[];
           }),
