@@ -3,6 +3,9 @@ import { Disc, Plus, Search, Filter, Trash2, X, AlertTriangle, Edit3 } from 'luc
 import productApi from "../util/api.product";
 import type { BasicFetch } from '#util/api.product';
 import { useAuth } from "#context/common.js";
+import { useProductList } from '#context/customer.js';
+
+import apiStorage from "#util/api.storage.ts";
 
 interface GameItem {
   id: string;
@@ -16,35 +19,49 @@ interface GameItem {
 
 export const ManageItemsPage: React.FC = () => {
   // Mock Data รายการสินค้า
-  const [games, setGames] = useState<GameItem[]>([
-    {
-      id: 'GAME-001',
-      title: 'Elden Ring: Shadow of the Erdtree',
-      platform: 'PS5',
-      genre: 'Action RPG',
-      price: 1990,
-      stock: 15,
-      coverUrl: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=300&q=80',
-    },
-    {
-      id: 'GAME-002',
-      title: 'The Legend of Zelda: Tears of the Kingdom',
-      platform: 'Switch',
-      genre: 'Adventure',
-      price: 1790,
-      stock: 3,
-      coverUrl: 'https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?auto=format&fit=crop&w=300&q=80',
-    },
-    {
-      id: 'GAME-003',
-      title: 'Monster Hunter Wilds',
-      platform: 'PS5',
-      genre: 'Action RPG',
-      price: 2290,
-      stock: 25,
-      coverUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=300&q=80',
-    }
-  ]);
+  const productQuery = useProductList ({});
+  const games = !productQuery.data ? [] : productQuery.data.map ((x) =>
+  {
+    const result: GameItem = {
+      id: `GAME-${x.id.toString ().padStart (3, "0")}`,
+      title: x.name,
+      price: x.price,
+      stock: 0,
+      coverUrl: apiStorage.getUrlStream (x.cover),
+      genre: "",
+      platform: "PS5"
+    };
+    return result;
+  });
+  // const [games, setGames] = useState<GameItem[]>([
+  //   {
+  //     id: 'GAME-001',
+  //     title: 'Elden Ring: Shadow of the Erdtree',
+  //     platform: 'PS5',
+  //     genre: 'Action RPG',
+  //     price: 1990,
+  //     stock: 15,
+  //     coverUrl: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=300&q=80',
+  //   },
+  //   {
+  //     id: 'GAME-002',
+  //     title: 'The Legend of Zelda: Tears of the Kingdom',
+  //     platform: 'Switch',
+  //     genre: 'Adventure',
+  //     price: 1790,
+  //     stock: 3,
+  //     coverUrl: 'https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?auto=format&fit=crop&w=300&q=80',
+  //   },
+  //   {
+  //     id: 'GAME-003',
+  //     title: 'Monster Hunter Wilds',
+  //     platform: 'PS5',
+  //     genre: 'Action RPG',
+  //     price: 2290,
+  //     stock: 25,
+  //     coverUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=300&q=80',
+  //   }
+  // ]);
 
   // State สำหรับค้นหาและกรอง
   const [searchQuery, setSearchQuery] = useState('');

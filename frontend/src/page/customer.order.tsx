@@ -1,106 +1,64 @@
-import { useEffect, useState, useMemo } from "react";
+import apiAccount from "#util/api.account";
+import apiProduct from "#util/api.product";
 import { styled } from "styled-components";
 import { useAuth } from "#context/common.js";
-import { 
+import { useEffect, useState, useMemo } from "react";
+import { type BasicFetch as RawOrder } from "#util/api.order";
+import { type BasicFetch as ProductFetch } from "#util/api.product";
+import 
+{ 
   HistoryIcon, BoxIcon, TruckIcon, HashIcon, 
   ChevronDownIcon, ChevronUpIcon, PackageXIcon, CheckCircle2Icon,
   ClockIcon, AlertCircleIcon, Loader2Icon
 } 
 from "lucide-react";
-import orderApi from "../util/api.order";
-import orderAccount from "../util/api.account";
-import productApi from "../util/api.product";
-import type { BasicFetch as RawOrder } from "../util/api.order";
-import type { BasicFetch as ProductFetch } from "../util/api.product";
 
-/* ==========================================================================
-   Interfaces
-   ========================================================================== 
-*/
-interface OrderProduct {
-  productId: number;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-interface OrderItem 
-{
-  id: number;
-  orderDate: Date;
-  deliveryDate: Date | null;
-  status: number;
-  items: OrderProduct[];
-}
-
-interface OrderCardProps 
-{
-  order: OrderItem;
-}
-
-/* ==========================================================================
-   Helpers
-   ========================================================================== 
-*/
-const formatCurrency = (amount: number) => 
-{
-  return new Intl.NumberFormat("th-TH", {
-    style: "currency",
-    currency: "THB",
-    minimumFractionDigits: 2,
-  }).format(amount);
-};
-
-const formatDate = (date: Date | null) => 
-{
-  if (!date) return "อยู่ระหว่างจัดเตรียม";
-  const d = new Date(date);
-  return isNaN(d.getTime()) ? "อยู่ระหว่างจัดเตรียม" : d.toLocaleDateString("th-TH", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-};
-
-const getStatusInfo = (status: number) => 
-{
-  switch (status) {
-    case 1:
-      return { label: "กำลังจัดส่ง", icon: <TruckIcon size={13} />, bg: "#cce5ff", text: "#004085" };
-    case 2:
-      return { label: "จัดส่งสำเร็จแล้ว", icon: <CheckCircle2Icon size={13} />, bg: "#d4edda", text: "#155724" };
-    case 3:
-      return { label: "ล่าช้า", icon: <AlertCircleIcon size={13} />, bg: "#fff3cd", text: "#856404" };
-    case 0:
-    case 4:
-      return { label: "ยกเลิกแล้ว", icon: <PackageXIcon size={13} />, bg: "#f8d7da", text: "#721c24" };
-    default:
-      return { label: "รอดำเนินการ", icon: <ClockIcon size={13} />, bg: "#e2e8f0", text: "#334155" };
-  }
-};
 
 /* ==========================================================================
    Card Component (การ์ดแสดงผลสไตล์เดียวกับ Modal Admin)
    ========================================================================== */
-const OrderCard = ({ order }: OrderCardProps) => {
+const OrderCard = ({ order }: OrderCardProps) => 
+{
   const [isOpen, setIsOpen] = useState(false);
 
   const hasMultipleItems = order.items.length > 1;
   const statusInfo = getStatusInfo(order.status);
 
+  //
   // คำนวณยอดรวมราคาทั้งหมด
-  const totalPrice = useMemo(() => {
-    return order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  }, [order.items]);
+  //
+  const totalPrice = useMemo(() => 
+  {
+    return order.items.reduce(
+      (sum, item) => sum + item.price * item.quantity, 0);
+  }, 
+  [order.items]);
 
+  //
   // สรุปชื่อสินค้า
-  const summaryTitle = useMemo(() => {
-    if (order.items.length === 0) return "ไม่มีรายการสินค้า";
+  //
+  const summaryTitle = useMemo(() => 
+  {
+    if (order.items.length === 0) {
+      return "ไม่มีรายการสินค้า";
+    }
     const firstName = order.items[0].name;
     return hasMultipleItems
       ? `${firstName} และอีก ${String (order.items.length - 1)} รายการ`
       : firstName;
-  }, [order.items, hasMultipleItems]);
+  }, 
+  [order.items, hasMultipleItems]);
+
+  //
+  // ขยายรายการ
+  //
+  const onClickExpand = () =>
+  {
+    if (!hasMultipleItems) {
+      return;
+    }
+    setIsOpen ((prev) => !prev);
+  }
 
   return (
     <StyleReceiptItem>
@@ -119,7 +77,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
 
         {/* Toggle / Main Summary */}
         <StyleSummaryRow
-          onClick={() => hasMultipleItems && setIsOpen((prev) => !prev)}
+          onClick={onClickExpand}
           $isClickable={hasMultipleItems}
         >
           <StyleItemTitle>{summaryTitle}</StyleItemTitle>
@@ -166,28 +124,35 @@ const OrderCard = ({ order }: OrderCardProps) => {
 /* ==========================================================================
    Main Customer Order Page
    ========================================================================== */
-export default function CustomerOrder() {
+export default function CustomerOrder () 
+{
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const auth = useAuth ();
 
-  useEffect(() => {
-    const loadOrders = async () => {
-      try {
+  useEffect(() => 
+  {
+    const loadOrders = async () => 
+    {
+      try 
+      {
         setLoading(true);
         setErrorMsg(null);
         const session = auth.session;
   
         // 1. ดึง Order และ Product List ทั้งหมดแบบ Parallel เพียง 2 requests
-        const [rawOrders, rawProducts] = await Promise.all([
-          orderAccount.getOrder(session).catch((err) => {
-            console.error("Order API Error:", err);
+        const [rawOrders, rawProducts] = await Promise.all(
+        [
+          apiAccount.getOrder(session).catch((e: unknown) => 
+          {
+            console.error("Order API Error:", e);
             return [] as RawOrder[];
           }),
-          productApi.getBasicList(session).catch((err) => {
-            console.error("Product API Error:", err);
+          apiProduct.getBasicList(session).catch((e: unknown) => 
+          {
+            console.error("Product API Error:", e);
             return [] as ProductFetch[];
           }),
         ]);
@@ -199,37 +164,43 @@ export default function CustomerOrder() {
         }
   
         // 3. Map ข้อมูล Order เข้ากับข้อมูลสินค้า
-        const extendedOrders: OrderItem[] = (rawOrders || []).map((ord) => {
-          const itemsWithDetails: OrderProduct[] = (ord.item || []).map((it) => {
+        const extendedOrders: OrderItem[] = rawOrders.map((x) => 
+        {
+          const itemsWithDetails: OrderProduct[] = x.item.map((it) => 
+          {
             const prod = productMap.get(it.productId);
             return {
               productId: it.productId,
-              name: prod ? prod.name : `สินค้า ID: ${it.productId}`,
+              name: prod ? prod.name : `สินค้า ID: ${String (it.productId)}`,
               price: prod ? prod.price : 0,
               quantity: it.quantity,
             };
           });
   
           return {
-            id: ord.orderId,
-            orderDate: new Date(ord.created),
-            deliveryDate: ord.delivered ? new Date(ord.delivered) : null,
-            status: ord.status,
+            id: x.orderId,
+            orderDate: new Date(x.created),
+            deliveryDate: x.delivered ? new Date(x.delivered) : null,
+            status: x.status,
             items: itemsWithDetails,
           };
         });
   
         setOrders(extendedOrders);
-      } catch (err: any) {
-        console.error("Failed to load orders:", err);
-        setErrorMsg(err?.message || "เกิดข้อผิดพลาดในการดึงข้อมูลคำสั่งซื้อ");
-      } finally {
+      } 
+      catch (err: unknown) 
+      {
+        console.error ("Failed to load orders:", err);
+        setErrorMsg ("เกิดข้อผิดพลาดในการดึงข้อมูลคำสั่งซื้อ");
+      } 
+      finally 
+      {
         setLoading(false);
       }
     };
-  
-    void loadOrders();
-  }, [auth.session]);
+    void loadOrders ();
+  }, 
+  [auth.session]);
 
   // แยก Active Orders & Past Orders
   const { activeOrders, pastOrders } = useMemo(() => {
@@ -314,6 +285,53 @@ export default function CustomerOrder() {
     </StyleRoot>
   );
 }
+
+
+/* ==========================================================================
+   Helpers
+   ========================================================================== 
+*/
+const formatCurrency = (amount: number) => 
+  {
+    return new Intl.NumberFormat("th-TH", {
+      style: "currency",
+      currency: "THB",
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+  
+function formatDate (date: Date | null)
+{
+  if (!date) {
+    return "อยู่ระหว่างจัดเตรียม";
+  }
+  const d = new Date(date);
+  return isNaN (d.getTime()) ? "อยู่ระหว่างจัดเตรียม" : 
+    d.toLocaleDateString ("th-TH", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }
+  );
+};
+  
+function getStatusInfo (status: number) 
+{
+  switch (status) 
+  {
+    case 1:
+      return { label: "กำลังจัดส่ง", icon: <TruckIcon size={13} />, bg: "#cce5ff", text: "#004085" };
+    case 2:
+      return { label: "จัดส่งสำเร็จแล้ว", icon: <CheckCircle2Icon size={13} />, bg: "#d4edda", text: "#155724" };
+    case 3:
+      return { label: "ล่าช้า", icon: <AlertCircleIcon size={13} />, bg: "#fff3cd", text: "#856404" };
+    case 0:
+    case 4:
+      return { label: "ยกเลิกแล้ว", icon: <PackageXIcon size={13} />, bg: "#f8d7da", text: "#721c24" };
+    default:
+      return { label: "รอดำเนินการ", icon: <ClockIcon size={13} />, bg: "#e2e8f0", text: "#334155" };
+  }
+};
 
 /* ==========================================================================
    Styled Components (Dark Theme - ตรงกับ Theme Modal Admin ของคุณ)
@@ -566,3 +584,29 @@ const StylePrice = styled.span`
   font-weight: 800;
   color: #3b82f6;
 `;
+
+
+/* ==========================================================================
+   Interfaces
+   ========================================================================== 
+*/
+interface OrderProduct {
+  productId: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+interface OrderItem 
+{
+  id: number;
+  orderDate: Date;
+  deliveryDate: Date | null;
+  status: number;
+  items: OrderProduct[];
+}
+
+interface OrderCardProps 
+{
+  order: OrderItem;
+}
