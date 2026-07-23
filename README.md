@@ -112,9 +112,9 @@
 
 - MySQL: สำหรับการจัดเก็บข้อมูลผู้ใช้, ข้อมูลสินค้า, ข้อมูลชำระเงิน,
   ข้อมูลจัดส่ง, ประวัติ, และรวมไปถึงกิจกรรมระบบ
-- Redis: สำหรับการแคชข้อมูลที่ใช้งานบ่อยเพื่อเพิ่มประสิทธิภาพระบบ
-
+  
 ส่วนออกแบบ (Design Tool)
+
 - Draw.io, Mermaid : ใช้งานสำหรับการเขียนวาดภาพไดอะแกรม 
 Use Cases Diagram, Sequences Diagram
 
@@ -309,3 +309,4 @@ flowchart TD
 
 เอกสารเพิ่มเติม : https://ikla47.github.io/UniversityCSI204/doc/
 
+Wireframe / Prototype : https://www.figma.com/design/4axEENmLrWcVgOkUc0Uxis/Untitled?node-id=0-1&t=HhGGfBS68qEH2CRZ-1
