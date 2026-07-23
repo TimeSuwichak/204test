@@ -71,6 +71,19 @@ content.challengeTotp = async (session: string, input: string)
 
     return result;
 }
+content.create = async (identifier: string, password: string, email: string) =>
+{
+    const endpoint = `${content.NET_URL}/challenge`;
+    const response = await common.postJson (endpoint, 
+    {
+        "Type": content.STEP_CREATE_BASIC,
+        "Identifier": identifier,
+        "Password": password,
+        "Email": email
+    });
+    const reader = await common.toJson (response);
+    const result = content.readChallenge (reader);
+}
 
 content.readSession = (reader: ObjectReader) : Session =>
 {
@@ -299,6 +312,8 @@ content.NET_TIMEOUT = 10000;
  * ลิงค์เต็มของที่อยู่เซิร์ฟเวอร์
 */
 content.NET_URL = `${content.NET_PROTOCOL}://${content.NET_ADDRESS}:${String (content.NET_PORT)}${content.NET_PREFIX}`;
+
+
 /**
  * ขั้นตอนการลงชื่อเข้าใช้: ไม่ทราบ
 */
@@ -322,19 +337,32 @@ content.STEP_CHALLENGE_TOTP = 4;
 /**
  * ขั้นตอนการลงชื่อเข้าใช้: เสร็จสิ้น
 */
-content.STEP_CHALLENGE_COMPLETED = 5;
+content.STEP_CHALLENGE_COMPLETED = 100;
+
+
+/**
+ * ขั้นตอนการสร้างบัญชี: ป้อนข้อมูลเบื้องต้น
+*/
+content.STEP_CREATE_BASIC = 101;
+/**
+ * ขั้นตอนการสร้างบัญชี: เสร็จสิ้น
+*/
+content.STEP_CREATE_COMPLETED = 1000;
+
+
 /**
  * ขั้นตอนการลงชื่อเข้าใช้: บัญชีถูกระงับ
 */
-content.STEP_CHALLENGE_SUSPENDED = 100;
+content.STEP_CHALLENGE_SUSPENDED = 1001;
 /**
  * ขั้นตอนการลงชื่อเข้าใช้: Facebook
 */
-content.STEP_CONNECT_FACEBOOK = 101;
+content.STEP_CONNECT_FACEBOOK = 10001;
 /**
  * ขั้นตอนการลงชื่อเข้าใช้: Facebook
 */
-content.STEP_CONNECT_GOOGLE = 102;
+content.STEP_CONNECT_GOOGLE = 10002;
+
 /**
  * ไม่มีข้อจำกัดใด ๆ ในการใช้งานระบบ
 */

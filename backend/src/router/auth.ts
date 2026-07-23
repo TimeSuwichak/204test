@@ -27,6 +27,9 @@ content.getRouteChallenge = () =>
         limiterId, control.challenge, validation, 
         limiterPwd, control.challengeEnhanced
     );
+    route.post ("/create", 
+        limiterId, control.create
+    );
 
     return route;
 }

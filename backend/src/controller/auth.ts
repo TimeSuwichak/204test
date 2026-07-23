@@ -242,6 +242,51 @@ content.challengeEnhanced = (request: Request, response: Response) =>
     response.status (http.STATUS_BAD_REQUEST);
     response.end ();
 }
+content.create = (request: Request, response: Response) =>
+{
+    let type: number;
+    let identifier: string;
+    let password: string;
+    let email: string;
+    
+    try
+    {
+        const reader = objectReader (request.body);
+
+        type = reader.requireInteger ("Type");
+        identifier = reader.requireString ("Identifier");
+        password = reader.requireString ("Password");
+        email = reader.requireString ("Link");
+    }
+    catch (e: unknown)
+    {
+        log.warn (e);
+
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+        return;
+    }
+
+    if (type === 1)
+    {
+        void model.create (identifier, password, email).then ((x) =>
+        {
+            response.status (http.STATUS_CREATED);
+            response.json ({
+                "Session": x.raw,
+                "SessionIssued": x.issued.getTime (),
+                "SessionExpire": x.expired.getTime (),
+                "Step": x.authStep,
+            });
+            response.end ();
+        });
+    }
+    else
+    {
+        response.status (http.STATUS_BAD_REQUEST);
+        response.end ();
+    }
+}
 
 /**
  * ตรวจสอบการเข้าถึงระบบก่อนที่จะส่งกระบวนการต่อไป

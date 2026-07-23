@@ -194,7 +194,7 @@ content.setupAccountFor = async (
 
     try
     {
-        auth = await modelAuth.getDb (authId);
+        auth = await modelAuth.retriveDb (authId);
         link = auth.link;
     }
     catch
@@ -205,9 +205,9 @@ content.setupAccountFor = async (
                 name: accountName,
                 role: accountRole,
                 icon: "",
-                status: modelAccount.RESTRICTION_NONE,
+                status: modelAccount.STATUS_NONE,
             });
-            await modelAuth.createDb (authId, authPwd, link);
+            await modelAuth.insertDb (authId, authPwd, link);
         }
         catch (e: unknown)
         {
@@ -216,10 +216,10 @@ content.setupAccountFor = async (
             return;
         }
     }
-    const session = await modelAuth.createSession (
+    const session = await modelAuth.newSession (
         new Date (), undefined,
         link, accountRole,
-        modelAccount.RESTRICTION_NONE
+        modelAccount.STATUS_NONE
     );
 
     log.info (`Name: ${accountName}`);
