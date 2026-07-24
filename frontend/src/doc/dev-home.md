@@ -514,7 +514,7 @@ sequenceDiagram
 ```
 2. Staff
 
-```Mermaid
+```mermaid
 sequenceDiagram
     actor Staff
     participant Frontend as React Frontend
@@ -575,7 +575,7 @@ sequenceDiagram
 
 3. Manager
 
-```Mermaid
+```mermaid
 sequenceDiagram
     actor Manager
     participant Frontend as React Frontend
