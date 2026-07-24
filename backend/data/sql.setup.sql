@@ -276,7 +276,6 @@ CREATE TABLE IF NOT EXISTS `project`.`Inquiry`
     `OrderId`       BIGINT NULL COMMENT 'รหัสคำสั่งซื้อ',
     `Type`          INT NOT NULL COMMENT 'ประเภทการสอบถาม' ,
     `Title`         CHAR(255) NOT NULL COMMENT 'เรื่องที่สอบถาม' ,
-    `Text`          VARCHAR(255) NOT NULL COMMENT 'เนื้อหา',
     `Status`        INT NOT NULL COMMENT 'สถานะ' ,
 
     CONSTRAINT PK_Inquiry_InquiryId PRIMARY KEY (`InquiryId`),
@@ -286,6 +285,21 @@ CREATE TABLE IF NOT EXISTS `project`.`Inquiry`
 )
 ENGINE = InnoDB
 COMMENT = 'ข้อมูลการร้องเรียน';
+
+CREATE TABLE IF NOT EXISTS `project`.`InquiryMessage`
+(
+    `MessageId` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'รหัสข้อความ' ,
+    `Sender` BIGINT NOT NULL COMMENT 'รหัสบัญชีผู้ส่ง' ,
+    `Text` VARCHAR(4096) NOT NULL DEFAULT "" COMMENT 'เนื้อหา' ,
+    `Image` CHAR(255) NOT NULL DEFAULT "" COMMENT 'อัพโหลดรูป' ,
+
+    CONSTRAINT PK_InquiryMessage_MessageId PRIMARY KEY (`MessageId`) ,
+    CONSTRAINT FK_InquiryMessage_Sender
+        FOREIGN KEY (`Sender`)
+        REFERENCES Inquiry (`InquiryId`)
+)
+ENGINE = InnoDB
+COMMENT = 'ข้อความในการร้องเรียน';
 
 -- #
 -- # ข้อมูลตะกร้าสินค้าของผู้ใช้

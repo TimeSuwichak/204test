@@ -4,6 +4,7 @@ import sql from "#core/sql.ts";
 
 import { type InputCommand, type InputValue } from "#core/sql.ts";
 import { type ObjectReader } from "#core/object.reader.ts";
+import { type BasicId as AccountId } from "#model/account.ts";
 import { type BasicId as OrderId } from "#model/order.ts";
 
 /**
@@ -238,10 +239,6 @@ export interface BasicFetch
      */
     readonly title: string;
     /**
-     * เนื้อหาการร้องเรียน
-     */
-    readonly text: string;
-    /**
      * สถานะการร้องเรียน
      */
     readonly status: number;
@@ -270,7 +267,7 @@ export interface BasicCreate
     /**
      * รหัสคำสั่งซื้อ (ไม่บังคับ)
      */
-    readonly orderId ?: OrderId | null | undefined;
+    readonly orderId: OrderId | null;
     /**
      * ประเภทการสอบถาม
      */
@@ -289,10 +286,41 @@ export interface BasicCreate
     readonly status: number;
 }
 
+export interface MessageFetch
+{
+    /**
+     * รหัสข้อความ
+    */
+    readonly messageId: MessageId;
+    /**
+    * เนื้อหาการร้องเรียน
+    */
+    readonly text: string;
+}
+export interface MessageCreate
+{
+     /**
+     * รหัสรายการร้องเรียน
+     */
+     inquiryId: BasicId;
+     /**
+      * รหัสบัญชี
+     */
+     sender: AccountId;
+    /**
+     * เนื้อหาการร้องเรียน
+     */
+    readonly text: string;
+}
+
 /**
  * รหัสของชุดรหัสข้อมูล (PRIMARY KEY)
  */
 export type BasicId = number;
+/**
+ * รหัสของชุดรหัสข้อมูล (PRIMARY KEY)
+ */
+export type MessageId = number;
 
 /**
  * ส่งออกตัวแปร

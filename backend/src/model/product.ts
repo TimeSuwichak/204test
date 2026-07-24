@@ -74,11 +74,13 @@ content.getBasicList = async (option ?: BasicFetchOption) =>
     [
         [
             "Name LIKE ?", 
-            option?.search ? `%${option.search}%` : undefined
+            option?.search && option.search.length > 0 ? 
+            `%${option.search}%` : undefined
         ],
         [
             "Description LIKE ?", 
-            option?.search ? `%${option.search}%` : undefined
+            option?.search && option.search.length > 0 ? 
+            `%${option.search}%` : undefined
         ]
     ];
 
@@ -107,6 +109,7 @@ content.getBasicList = async (option ?: BasicFetchOption) =>
         ... whereParamAnd,
         ... whereParamOr
     ];
+
     const query = await sql.select (cmd, param);
     const item: BasicFetch [] = query.map ((x) =>
     {
