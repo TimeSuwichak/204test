@@ -161,13 +161,26 @@ content.updateBasic = async (session: string, data: BasicUpdate)
 {
     const id = String (data.id);
     const endpoint = `${content.NET_URL}/${id}`;
+    const form = new FormData ();
 
-    await common.putJson (session, endpoint, {
+    form.append ("Metadata", JSON.stringify ({
         "Name": data.name,
         "Description": data.description,
         "Price": data.price,
         "PriceCode": data.priceCode,
-    });
+        "Platform": data.platform,
+    }));
+
+    if (data.cover)
+    {
+        form.append ("Cover", data.cover);
+    }
+    if (data.background)
+    {
+        form.append ("Background", data.background);
+    }
+
+    await common.putForm (session, endpoint, form);
 }
 /**
  * ทำการเปลี่ยนข้อมูลหมวดหมู่ของสินค้า
@@ -257,6 +270,10 @@ content.createBasic = async (session: string, data: BasicCreate) :
     if (data.cover)
     {
         form.append ("Cover", data.cover);
+    }
+    if (data.background)
+    {
+        form.append ("Background", data.background);
     }
 
     const response = await common.postForm (session, endpoint, form);
@@ -706,6 +723,14 @@ export interface BasicUpdate
      * แพลตฟอร์ม
     */
     platform ?: number | undefined;
+    /**
+     * พื้นหลังสินค้า
+    */
+    background ?: Blob | File | undefined;
+    /**
+     * ปกสินค้า
+    */
+    cover ?: Blob | File | undefined;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการสร้างข้อมูลพื้นฐานในฐานข้อมูล
