@@ -90,7 +90,7 @@ export default function Stock() {
       if (insufficientProducts.length > 0) {
         alert(
           `ไม่สามารถลดสต็อกได้ เนื่องจากสินค้าคงเหลือไม่พอ (${adjustAmount} ชิ้น):\n\n` +
-            insufficientProducts.join("\n")
+          insufficientProducts.join("\n")
         );
         return;
       }
@@ -261,11 +261,18 @@ export default function Stock() {
                     <td>{product.name}</td>
                     <td>{product.platform}</td>
                     <td>
-                      {(stockCounts[product.id] ?? 0) === 0 ? (
-                        <OutOfStockBadge>Out of Stock</OutOfStockBadge>
-                      ) : (
-                        stockCounts[product.id]
-                      )}
+                      {(() => {
+                        const qty = stockCounts[product.id] ?? 0;
+                        if (qty === 0) {
+                          return <OutOfStockBadge>Out of Stock</OutOfStockBadge>;
+                        }
+                        return (
+                          <StockQuantityWrapper>
+                            <span>{qty}</span>
+                            {qty < 10 && <LowStockBadge>เหลือน้อย</LowStockBadge>}
+                          </StockQuantityWrapper>
+                        );
+                      })()}
                     </td>
                     <td>{product.price}</td>
                   </tr>
@@ -476,5 +483,21 @@ const OutOfStockBadge = styled.span`
   font-size: 0.85rem;
   font-weight: 600;
   border: 1px solid rgba(239, 68, 68, 0.2);
+  display: inline-block;
+`;
+const StockQuantityWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const LowStockBadge = styled.span`
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(245, 158, 11, 0.25);
   display: inline-block;
 `;

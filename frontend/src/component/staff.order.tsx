@@ -30,29 +30,29 @@ export default function Order() {
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
   const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
 
-  const auth = useAuth ();
+  const auth = useAuth();
 
+  // กำหนด mapping ตามเงื่อนไขที่คุณแจ้งไว้
   const getStatusText = (status: number): string => {
     switch (status) {
-      case 1: return "กำลังจัดส่ง";
-      case 2: return "ส่งแล้ว";
-      case 3: return "ล่าช้า";
+      case 1: return "รอดำเนินการ";
+      case 2: return "จัดส่งแล้ว";
       case 0: return "ยกเลิก";
       default: return "กำลังจัดส่ง";
     }
   };
 
   const getStatusNumber = (statusText: string): number => {
-    switch (statusText) {
-      case "กำลังจัดส่ง": return 1;
-      case "ส่งแล้ว": return 2;
-      case "ล่าช้า": return 3;
-      case "ยกเลิก": return 0;
-      default: return 1;
-    }
-  };
+  switch (statusText) {
+    case "รอดำเนินการ": return 1;
+    case "จัดส่งแล้ว": return 2;
+    case "ยกเลิก": return 0;
+    case "กำลังจัดส่ง": return 3;
+    default: return 1;
+  }
+};
 
-  const statusOptions = ["กำลังจัดส่ง", "ส่งแล้ว", "ล่าช้า", "ยกเลิก"];
+  const statusOptions = ["รอดำเนินการ", "กำลังจัดส่ง", "จัดส่งแล้ว", "ยกเลิก"];
   const filterStatusList = ["All", ...statusOptions];
 
   const loadOrders = async () => {
@@ -131,18 +131,18 @@ export default function Order() {
   const getTotalPrice = (items: OrderProduct[]) =>
     items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const handleUpdateStatus = async (orderId: number, newStatusText: string) => {
+  const handleUpdateStatus = async (orderId: number, newStatusNum: number) => {
     try {
       const session = auth.session;
-      const newStatusNum = getStatusNumber(newStatusText);
-      const newDeliveryDate = newStatusNum === 2 ? new Date() : null;
-
+      const now = new Date();
+      const newDeliveryDate = newStatusNum === 2 ? now : null;
+  
       await orderApi.updateBasic(session, {
         orderId: orderId,
         status: newStatusNum,
-        delivered: newDeliveryDate,
+        delivered: newDeliveryDate, 
       });
-
+  
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderId
@@ -150,6 +150,7 @@ export default function Order() {
             : order
         )
       );
+  
     } catch (err: any) {
       console.error("Failed to update status:", err);
       alert(err.message || "เกิดข้อผิดพลาดในการอัปเดตสถานะ");
@@ -158,9 +159,9 @@ export default function Order() {
 
   const getStatusColor = (statusText: string) => {
     switch (statusText) {
-      case "ส่งแล้ว": return { bg: "#d4edda", text: "#155724" };
+      case "จัดส่งแล้ว": return { bg: "#d4edda", text: "#155724" };
       case "กำลังจัดส่ง": return { bg: "#cce5ff", text: "#004085" };
-      case "ล่าช้า": return { bg: "#fff3cd", text: "#856404" };
+      case "รอดำเนินการ": return { bg: "#fff3cd", text: "#856404" };
       case "ยกเลิก": return { bg: "#f8d7da", text: "#721c24" };
       default: return { bg: "#e2e8f0", text: "#334155" };
     }
@@ -311,21 +312,23 @@ export default function Order() {
               </DetailRow>
 
               <StatusEditRow>
-                <span className="label">สถานะ (กดเพื่อแก้ไข):</span>
-                <select
-                  value={getStatusText(activeOrder.status)}
-                  onChange={(e) => handleUpdateStatus(activeOrder.id, e.target.value)}
-                  style={{
-                    backgroundColor: getStatusColor(getStatusText(activeOrder.status)).bg,
-                    color: getStatusColor(getStatusText(activeOrder.status)).text,
-                  }}
-                >
-                  {statusOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
+                <span className="label">สถานะ:</span>
+                <StatusControls>
+                  {activeOrder.status === 1 && (
+                    <ConfirmShipButton
+                      onClick={() => handleUpdateStatus(activeOrder.id, 2)}
+                    >
+                      ยืนยันการจัดส่ง
+                    </ConfirmShipButton>
+                  )}
+
+                  <StatusBadge
+                    bg={getStatusColor(getStatusText(activeOrder.status)).bg}
+                    color={getStatusColor(getStatusText(activeOrder.status)).text}
+                  >
+                    {getStatusText(activeOrder.status)}
+                  </StatusBadge>
+                </StatusControls>
               </StatusEditRow>
             </ModalBody>
 
@@ -611,6 +614,12 @@ const StatusEditRow = styled.div`
     color: #94a3b8;
     font-size: 14px;
   }
+`;
+
+const StatusControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
   select {
     padding: 10px 16px;
@@ -619,6 +628,22 @@ const StatusEditRow = styled.div`
     font-weight: 600;
     cursor: pointer;
     outline: none;
+  }
+`;
+
+const ConfirmShipButton = styled.button`
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #16a34a;
   }
 `;
 
@@ -638,4 +663,4 @@ const CloseModalButton = styled.button`
   &:hover {
     opacity: 0.9;
   }
-`;
+`;  
