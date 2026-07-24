@@ -340,7 +340,7 @@ function formatStatusInfo (status: number)
   switch (status) 
   {
     case 1: return { 
-      label: "กำลังจัดส่ง", icon: <TruckIcon size={13} />, 
+      label: "รอดำเนินการ", icon: <ClockIcon size={13} />, 
       bg: "#cce5ff", text: "#004085" 
     };
     case 2: return { 
