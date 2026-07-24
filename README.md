@@ -10,9 +10,7 @@
 | 67163266 | สิรภพ อ่วมแก้ว | Staff |
 | 67173119 | สุวิจักขณ์ ทัพเจริญ | Manager |
 
-### Persona & Pain Point
-
-Persona ของระบบประกอบด้วยผู้ใช้งานหลัก 3 กลุ่ม ได้แก่ ลูกค้า (Customer), พนักงาน (Staff) และผู้จัดการ (Manager) ซึ่งมีบทบาทและความต้องการแตกต่างกัน ลูกค้าต้องการความสะดวกในการค้นหาและสั่งซื้อสินค้า พนักงานต้องการเครื่องมือที่ช่วยจัดการคำสั่งซื้อและสต็อกสินค้าอย่างมีประสิทธิภาพ ส่วนผู้จัดการต้องการระบบสำหรับบริหารจัดการข้อมูลและติดตามผลการดำเนินงานของร้านค้า โดย Pain Point ร่วมของผู้ใช้งานคือความต้องการระบบที่ใช้งานง่าย ข้อมูลถูกต้อง ลดขั้นตอนการทำงาน ลดข้อผิดพลาด และช่วยให้การดำเนินงานของร้านค้าเป็นไปอย่างรวดเร็วและมีประสิทธิภาพ
+### ([User Personas](Persona.md))
 
 ### 1. หลักการและเหตุผล (Rationale)
 
@@ -311,5 +309,5 @@ flowchart TD
     class DB data;
 ```
 
-เอกสารเพิ่มเติม : https://ikla47.github.io/UniversityCSI204/doc/
-SLA & UAT : https://drive.google.com/drive/folders/1zKe0OWVM0cXK3tDwf6il7DIbk1CdAoQ4?usp=sharing
+- เอกสารเพิ่มเติม : https://ikla47.github.io/UniversityCSI204/doc/
+- SLA & UAT : https://drive.google.com/drive/folders/1zKe0OWVM0cXK3tDwf6il7DIbk1CdAoQ4?usp=sharing
