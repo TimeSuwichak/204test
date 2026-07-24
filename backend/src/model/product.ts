@@ -63,11 +63,11 @@ content.getBasicList = async (option ?: BasicFetchOption) =>
     [
         [
             "Price >= ?",
-            option?.minPrice ? option.minPrice : undefined
+            option?.minPrice ?? undefined
         ],
         [
             "Price <= ?",
-            option?.maxPrice ? option.maxPrice : undefined
+            option?.maxPrice ?? undefined
         ]
     ];
     const whereOr = 
@@ -391,7 +391,7 @@ content.updateComment = (info: CommentUpdate) =>
     .join (", ")
     .concat (" ")
     .concat ("WHERE CommentId = ?");
-    
+
     const value = [
         info.title,
         info.text,
@@ -444,9 +444,10 @@ content.updateReview = (info: ReviewUpdate) =>
  * 
  * @param info ข้อมูลสต็อกของสินค้า
 */
-content.updateStock = (info: StockUpdate) =>
+content.updateStock = async (info: StockUpdate) =>
 {
-    const key = [
+    const key = 
+    [
         (info.quantity !== undefined) ? "Quantity = ?" : undefined,
     ]
     .filter (x => x !== undefined)
@@ -454,19 +455,31 @@ content.updateStock = (info: StockUpdate) =>
     .concat (" ")
     .concat ("WHERE ProductId = ?");
 
-    const value = [
+    const value = 
+    [
         info.quantity,
         info.productId
     ]
     .filter (x => x !== undefined);
 
-    return sql.update (`UPDATE ProductStock SET ${key}`, value).then ((x) =>
+    await sql.update (`UPDATE ProductStock SET ${key}`, value).then ((x) =>
     {
         if (x === 0)
         {
             throw new error.NotFound (`No entry of product stock`);
         }
     });
+    
+    if (info.quantity)
+    {
+        await sql.update (
+            `UPDATE ProductStock SET Status = ?`, 
+            [
+                info.quantity === 0 ? 
+                content.STATUS_OUT_OF_STOCK : content.STATUS_NONE
+            ]
+        );
+    }
 }
 
 
@@ -686,7 +699,8 @@ content.readBasic = (reader: ObjectReader) =>
         priceCode: reader.requireInteger ("PriceCode"),
         platform: reader.requireInteger ("Platform"),
         background: reader.requireString ("Background"),
-        cover: reader.requireString ("Cover")
+        cover: reader.requireString ("Cover"),
+        status: reader.requireInteger ("Status"),
     };
     return result;
 }
@@ -788,6 +802,15 @@ content.PLATFORM_XBOX_SERIES_X = 16;
 content.PLATFORM_XBOX_SERIES_S = 17;
 
 /**
+ * สถานะสินค้า: ไม่มี
+*/
+content.STATUS_NONE = 0;
+/**
+ * สถานะสินค้า: สินค้าหมด 
+*/
+content.STATUS_OUT_OF_STOCK = 1;
+
+/**
  * โครงสร้างข้อมูลที่ได้รับจากการดึงข้อมูลในฐานข้อมูล
 */
 export interface BasicFetch
@@ -824,12 +847,28 @@ export interface BasicFetch
      * รูปปกเกม
     */
     cover: string;
+    /**
+     * สถานะสินค้า
+    */
+    status: number;
 }
 export interface BasicFetchOption
 {
+    /**
+     * คำค้นหาสินค้า
+    */
     search ?: string | undefined;
+    /**
+     * หมวดหมู่ที่ต้องการค้นหา
+    */
     category ?: number [] | undefined;
+    /**
+     * ราคาต่ำสุด
+    */
     minPrice ?: number;
+    /**
+     * ราคาสูงสุด
+    */
     maxPrice ?: number;
 }
 /**
