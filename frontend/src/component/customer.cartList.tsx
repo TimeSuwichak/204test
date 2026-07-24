@@ -139,6 +139,7 @@ function SubItemChild ({ uid, pid}: { uid: number; pid: number; })
   const quantityFind = cart ? cart.find((x) => x.itemId === uid) : undefined;
   const quantity = quantityFind ? quantityFind.quantity : 1;
   const pending = qCart.isLoading;
+  const outOfStock = qProdBasic.data ? qProdBasic.data.status : true;
 
   /**
    * ลดจำนวนสินค้า
@@ -220,7 +221,10 @@ function SubItemChild ({ uid, pid}: { uid: number; pid: number; })
             </StyleTagBadge>
           ))}
         </StyleTagContainer>
-
+        { (outOfStock) ?
+          (<label style={{ color: "#db6060" }}>สินค้าหมด</label>) : 
+          (<></>) 
+        }
         <StyleItemActionsRow>
           <StyleQuantityControl>
             <StyleQtyBtn
