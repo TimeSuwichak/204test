@@ -17,9 +17,8 @@ import
 from "lucide-react";
 
 export default function CustomerCartList (
-  { visible, discount, onContinue, onClose }: 
+  { discount, onContinue, onClose }: 
   { 
-    readonly visible: boolean;
     readonly discount: [string, Dispatch<SetStateAction<string>>];
     readonly onContinue: () => void;
     readonly onClose: () => void;
@@ -47,6 +46,9 @@ export default function CustomerCartList (
     onContinue ();
   };
 
+  const qList = useCartQuery();
+  const qData = qList.data;
+  const canCheckout = qData ? (qData.length > 0) : false;
 
   return (<>
     <StyleHeader>
@@ -67,7 +69,7 @@ export default function CustomerCartList (
       <SubSummary st={discount} />
       <StlCheckout 
         onClick={onClickContinue}
-        disabled={false}>
+        disabled={!canCheckout}>
         <span>สั่งซื้อสินค้า</span>
         <ArrowRightIcon size={18} />
       </StlCheckout>
