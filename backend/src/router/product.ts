@@ -15,7 +15,7 @@ content.getRoute = () =>
     router.get ("/:id", control.getBasic);
     router.put ("/:id", authManager, control.putBasic);
     router.post ("/", authManager, control.postBasic);
-    router.post ("/:id", authManager, control.deleteBasic);
+    router.delete ("/:id", authManager, control.deleteBasic);
    
     return router;
 }

@@ -880,7 +880,8 @@ content.outputGetBasic = (r: Response, x: BasicFetch) =>
         "PriceCode": x.priceCode,
         "Platform": x.platform,
         "Background": x.background,
-        "Cover": x.cover
+        "Cover": x.cover,
+        "Status": x.status
     });
     r.end ();
 }

@@ -400,6 +400,7 @@ content.readBasic = (reader: ObjectReader) : BasicFetch =>
         platform: reader.requireInteger ("Platform"),
         background: reader.requireString ("Background"),
         cover: reader.requireString ("Cover"),
+        status: reader.requireInteger ("Status"),
     };
 }
 content.readBasicList = (reader: ObjectReader) : BasicFetch [] =>
@@ -633,6 +634,15 @@ content.PLATFORM_XBOX_SERIES_X = 16;
 content.PLATFORM_XBOX_SERIES_S = 17;
 
 /**
+ * สถานะสินค้า: ไม่มี
+*/
+content.STATUS_NONE = 0;
+/**
+ * สถานะสินค้า: สินค้าหมด 
+*/
+content.STATUS_OUT_OF_STOCK = 1;
+
+/**
  * รหัสของชุดรหัสข้อมูล (หรือเรียกอีกอย่างว่า PRIMARY KEY)
 */
 export type BasicId = number;
@@ -686,12 +696,28 @@ export interface BasicFetch
      * รูปภาพปกสินค้า
     */
     cover: string;
+    /**
+     * สถานะสินค้า
+    */
+    status: number;
 }
 export interface BasicFetchOption
 {
+    /**
+     * คำค้นหาสินค้า
+    */
     search ?: string | undefined;
+    /**
+     * หมวดหมู่ที่ต้องการค้นหา
+    */
     category ?: number [] | undefined;
+    /**
+     * ราคาต่ำสุด
+    */
     minPrice ?: number;
+    /**
+     * ราคาสูงสุด
+    */
     maxPrice ?: number;
 }
 /**
