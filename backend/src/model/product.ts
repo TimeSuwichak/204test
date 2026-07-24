@@ -107,14 +107,11 @@ content.getBasicList = async (option ?: BasicFetchOption) =>
         ... whereParamAnd,
         ... whereParamOr
     ];
-    console.log (cmd);
-    console.log (param);
-
     const query = await sql.select (cmd, param);
     const item: BasicFetch [] = query.map ((x) =>
     {
         return content.readBasic (objectReader (x));
-    }); 
+    });
     return item;
 }
 /**
@@ -469,14 +466,15 @@ content.updateStock = async (info: StockUpdate) =>
             throw new error.NotFound (`No entry of product stock`);
         }
     });
-    
-    if (info.quantity)
+
+    if (info.quantity !== undefined)
     {
         await sql.update (
-            `UPDATE ProductStock SET Status = ?`, 
+            `UPDATE Product SET Status = ? WHERE Id = ?`, 
             [
                 info.quantity === 0 ? 
-                content.STATUS_OUT_OF_STOCK : content.STATUS_NONE
+                    content.STATUS_OUT_OF_STOCK : content.STATUS_NONE,
+                info.productId
             ]
         );
     }
@@ -496,8 +494,8 @@ content.create = async (info: BasicCreate) : Promise<BasicId> =>
     {
         const id = await transaction.insert (`
             INSERT INTO Product 
-            (Name, Description, Price, PriceCode, Platform, Background, Cover) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            (Name, Description, Price, PriceCode, Platform, Background, Cover, Status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 info.name, 
                 info.description, 
@@ -506,6 +504,7 @@ content.create = async (info: BasicCreate) : Promise<BasicId> =>
                 info.platform,
                 info.background,
                 info.cover,
+                0
             ]
         ) as BasicId;
 
@@ -865,11 +864,11 @@ export interface BasicFetchOption
     /**
      * ราคาต่ำสุด
     */
-    minPrice ?: number;
+    minPrice ?: number | undefined;
     /**
      * ราคาสูงสุด
     */
-    maxPrice ?: number;
+    maxPrice ?: number | undefined;
 }
 /**
  * โครงสร้างข้อมูลที่ใช้ในการเปลี่ยนแปลงข้อมูลในฐานข้อมูล

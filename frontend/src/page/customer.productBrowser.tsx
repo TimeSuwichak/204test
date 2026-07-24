@@ -2,6 +2,7 @@ import react, { useState }          from "react";
 import styled         from "styled-components";
 import cmmNavigation  from "#util/common.navigation.ts";
 import apiStorage     from "#util/api.storage.ts";
+import apiProduct     from "#util/api.product.ts";
 import apiAccount     from "#util/api.account.ts";
 
 import Filter         from "#component/customer.productBrowser.filter.tsx";
@@ -110,6 +111,7 @@ content.List = function ProductBrowserList ({ filter }: { filter: FilterState | 
       const artwork = (x.cover.length > 0) ? 
         apiStorage.getUrlStream (x.cover) : undefined;
       const price = x.price;
+      const status = x.status;
 
       return <content.ListItem 
         key={key}
@@ -117,6 +119,7 @@ content.List = function ProductBrowserList ({ filter }: { filter: FilterState | 
         name={name}
         artwork={artwork}
         price={price}
+        status={status}
         onClick={onClick}/>
     }));
   }
@@ -185,8 +188,20 @@ content.ListItem = function ProductBrowserListItem (prop: PropListItem)
           <ProductName>{prop.name}</ProductName>
           <Footer>
               <PriceGroup>
-                  <PriceLabel>ราคา</PriceLabel>
-                  <Price>{prop.price.toFixed (2)} <span style={{ color: "white" }}>฿</span></Price>
+                  { (prop.status === apiProduct.STATUS_OUT_OF_STOCK) ?
+                    (
+                    <>
+                      <PriceLabel>สินค้าหมด</PriceLabel>
+                    </>
+                    ) : 
+                    (
+                      <>
+                      <PriceLabel>ราคา</PriceLabel>
+                      <Price>{prop.price.toFixed (2)} <span style={{ color: "white" }}>฿</span></Price>
+                      </>
+                    )
+                  }
+                  
               </PriceGroup>
               <AddButton onClick={onClick} aria-label="เพิ่มลงตะกร้า">
                   <ShoppingCart size={16}/>
@@ -266,6 +281,10 @@ interface PropListItem
    * ราคา
   */
   price: number;
+  /**
+   * สถานะสินค้า
+  */
+  status: number;
   /**
    * ทำงานเมื่อผู้ใช้กดเลือกสินค้า
   */

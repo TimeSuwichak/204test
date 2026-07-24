@@ -127,6 +127,9 @@ function ViewMain ()
   const prodFavor = actFavorite ? 
           actFavorite.find ((x) => x.productId === qProdId) : undefined;
 
+  const prodOutOfStck = prodBasic ? 
+    prodBasic.status === apiProduct.STATUS_OUT_OF_STOCK : true;
+
   /**
    * เพิ่มสินค้านี้ลงในตะกร้าของผู้ใช้งานระบบ
   */
@@ -381,7 +384,10 @@ function ViewMain ()
           <StlMainOption>
             <StlMainPrice>
               {/* <StlMainPriceDiscount>99%</StlMainPriceDiscount> */}
-              <span>{prodPrice} ฿</span>
+              { (prodOutOfStck) ? 
+                (<span>สินค้าหมด</span>) : 
+                (<span>{prodPrice} ฿</span>) 
+              }
             </StlMainPrice>
             <StlMainAction>
               <button onClick={onClickAdd}>

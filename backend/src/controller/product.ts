@@ -85,11 +85,19 @@ content.getBasicList = (request: Request, response: Response) =>
 {
     const option: BasicFetchOption =
     {
-        search: request.query ["search"] as string,
-        category: request.query ["category"] ? 
-            (request.query ["category"] as string).split(",").map ((x) => Number (x)) : [],
-        minPrice: request.query ["minPrice"] ? Number (request.query ["minPrice"]) : 0,
-        maxPrice: request.query ["maxPrice"] ? Number (request.query ["maxPrice"]) : 0,
+        search: 
+            request.query ["search"] as string,
+        category: 
+            request.query ["category"] ? 
+            (request.query ["category"] as string)
+                .split(",").
+                map ((x) => Number (x)) : undefined,
+        minPrice: 
+            request.query ["minPrice"] ? 
+            Number (request.query ["minPrice"]) : undefined,
+        maxPrice: 
+            request.query ["maxPrice"] ? 
+            Number (request.query ["maxPrice"]) : undefined,
     };
 
     void model.getBasicList (option).then ((x) =>
@@ -899,7 +907,8 @@ content.outputGetBasicList = (r: Response, x: BasicFetch []) =>
                 "PriceCode": x.priceCode,
                 "Platform": x.platform,
                 "Background": x.background,
-                "Cover": x.cover
+                "Cover": x.cover,
+                "Status": x.status,
             }
         })
     })

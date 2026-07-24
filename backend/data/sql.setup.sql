@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `project`.`Product`
     `Platform`  INT NOT NULL DEFAULT 0 COMMENT 'แพลตฟอร์ม' ,
     `Background` CHAR(255) NOT NULL DEFAULT "" COMMENT 'รูปพื้นหลัง' ,
     `Cover`     CHAR(255) NOT NULL DEFAULT "" COMMENT 'รูปสินค้า' ,
-    `Status`    INT NOT NULL DEFAULT "" COMMENT 'สถานะสินค้า'
+    `Status`    INT NOT NULL DEFAULT 0 COMMENT 'สถานะสินค้า' ,
 
     CONSTRAINT  PK_Product_Id PRIMARY KEY (`Id`),
     CONSTRAINT  UK_Product_Id UNIQUE (`Id`)
@@ -277,7 +277,7 @@ CREATE TABLE IF NOT EXISTS `project`.`Inquiry`
     `Type`          INT NOT NULL COMMENT 'ประเภทการสอบถาม' ,
     `Title`         CHAR(255) NOT NULL COMMENT 'เรื่องที่สอบถาม' ,
     `Text`          VARCHAR(255) NOT NULL COMMENT 'เนื้อหา',
-    `Status`        INT NOT NULL COMMENT 'สถานะ',
+    `Status`        INT NOT NULL COMMENT 'สถานะ' ,
 
     CONSTRAINT PK_Inquiry_InquiryId PRIMARY KEY (`InquiryId`),
     CONSTRAINT FK_Inquiry_OrderId 
